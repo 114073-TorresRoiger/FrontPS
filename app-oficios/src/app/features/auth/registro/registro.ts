@@ -63,7 +63,6 @@ export class Registro {
 
   initializeForms() {
     this.datosBasicosForm = this.fb.group({
-      userName: ['', [Validators.required, Validators.maxLength(100)]],
       password: ['', [Validators.required, Validators.minLength(6)]],
       name: ['', [Validators.required, Validators.maxLength(255)]],
       lastName: ['', [Validators.required, Validators.maxLength(255)]],
@@ -71,7 +70,6 @@ export class Registro {
     });
 
     this.datosAdicionalForm = this.fb.group({
-      provincia: ['', Validators.required],
       departamento: ['', Validators.required],
       ciudad: ['', Validators.required],
       barrio: ['', Validators.required],
@@ -123,6 +121,17 @@ export class Registro {
   isFieldInvalid(form: FormGroup, fieldName: string): boolean {
     const field = form.get(fieldName);
     return !!(field && field.invalid && field.touched);
+  }
+
+  // Método para debug - verificar estado del formulario
+  debugFormState() {
+    console.log('Form valid:', this.datosBasicosForm.valid);
+    console.log('Form errors:', this.datosBasicosForm.errors);
+    console.log('Form values:', this.datosBasicosForm.value);
+    Object.keys(this.datosBasicosForm.controls).forEach(key => {
+      const control = this.datosBasicosForm.get(key);
+      console.log(`${key}: valid=${control?.valid}, errors=`, control?.errors);
+    });
   }
 
   getFieldError(form: FormGroup, fieldName: string): string {

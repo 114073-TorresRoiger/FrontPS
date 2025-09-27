@@ -33,21 +33,21 @@
                 <!-- Paso 1: Datos básicos -->
                 <div *ngIf="currentStep === 1" class="step-content">
                     <div class="form-header">
-                        <h2 class="form-title">Datos básicos</h2>
+                        <h2 class="form-title">Datos de Usuario</h2>
                         <p class="form-subtitle">Completa tu información personal</p>
                     </div>
 
                     <form [formGroup]="datosBasicosForm" class="registro-form">
                         <div class="input-group">
                             <input
-                                type="text"
-                                placeholder="Nombre de usuario*"
+                                type="email"
+                                placeholder="Correo electrónico*"
                                 class="form-input"
-                                formControlName="userName"
-                                [class.error]="isFieldInvalid(datosBasicosForm, 'userName')"
+                                formControlName="mail"
+                                [class.error]="isFieldInvalid(datosBasicosForm, 'mail')"
                             />
-                            <div class="error-message" *ngIf="isFieldInvalid(datosBasicosForm, 'userName')">
-                                {{ getFieldError(datosBasicosForm, 'userName') }}
+                            <div class="error-message" *ngIf="isFieldInvalid(datosBasicosForm, 'mail')">
+                                {{ getFieldError(datosBasicosForm, 'mail') }}
                             </div>
                         </div>
 
@@ -87,19 +87,6 @@
                             />
                             <div class="error-message" *ngIf="isFieldInvalid(datosBasicosForm, 'lastName')">
                                 {{ getFieldError(datosBasicosForm, 'lastName') }}
-                            </div>
-                        </div>
-
-                        <div class="input-group">
-                            <input
-                                type="email"
-                                placeholder="Correo electrónico*"
-                                class="form-input"
-                                formControlName="mail"
-                                [class.error]="isFieldInvalid(datosBasicosForm, 'mail')"
-                            />
-                            <div class="error-message" *ngIf="isFieldInvalid(datosBasicosForm, 'mail')">
-                                {{ getFieldError(datosBasicosForm, 'mail') }}
                             </div>
                         </div>
 
@@ -161,21 +148,6 @@
 
                     <form [formGroup]="datosAdicionalForm" class="registro-form">
                         <div class="input-row">
-                            <div class="input-group">
-                                <select
-                                    class="form-select"
-                                    formControlName="provincia"
-                                    [class.error]="isFieldInvalid(datosAdicionalForm, 'provincia')">
-                                    <option value="">Selecciona una provincia*</option>
-                                    <option *ngFor="let provincia of provincias" [value]="provincia">
-                                        {{ provincia }}
-                                    </option>
-                                </select>
-                                <div class="error-message" *ngIf="isFieldInvalid(datosAdicionalForm, 'provincia')">
-                                    {{ getFieldError(datosAdicionalForm, 'provincia') }}
-                                </div>
-                            </div>
-
                             <div class="input-group">
                                 <select
                                     class="form-select"

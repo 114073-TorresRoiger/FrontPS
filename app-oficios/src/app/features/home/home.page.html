@@ -1,0 +1,245 @@
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="navbar-container">
+    <!-- Chat Button (Left) -->
+    <div class="navbar-left">
+      <button class="btn-chat" (click)="goToChat()">
+        <lucide-angular [img]="MessageCircle" size="20"></lucide-angular>
+        <span>Chats</span>
+      </button>
+    </div>
+
+    <!-- Search Bar (Center) -->
+    <div class="navbar-center">
+      <div class="search-container">
+        <div class="search-input-wrapper">
+          <lucide-angular [img]="Search" size="20" class="search-icon"></lucide-angular>
+          <input
+            type="text"
+            placeholder="Buscar servicio, ubicación o profesional..."
+            class="search-input"
+            [(ngModel)]="searchQuery"
+            (keyup.enter)="onSearch()"
+          >
+        </div>
+        <button class="search-btn" (click)="onSearch()">Buscar</button>
+      </div>
+    </div>
+
+    <!-- Auth Buttons (Right) -->
+    <div class="navbar-right">
+      <button class="btn-signin" (click)="goToSignIn()">
+        <lucide-angular [img]="User" size="18"></lucide-angular>
+        <span>Sign In</span>
+      </button>
+      <button class="btn-signup" (click)="goToSignUp()">
+        <lucide-angular [img]="UserPlus" size="18"></lucide-angular>
+        <span>Sign Up</span>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- Main Content -->
+<div class="home-container">
+  <div class="home-content">
+
+    <!-- Services View -->
+    <div *ngIf="!showProfessionals()">
+      <!-- Hero Section -->
+      <section class="hero-section">
+        <div class="hero-content">
+          <h1 class="hero-title">Encuentra el profesional perfecto</h1>
+          <p class="hero-subtitle">Conecta con expertos locales para todos tus proyectos</p>
+        </div>
+      </section>
+
+      <!-- Services Catalog -->
+      <main class="services-section">
+        <div class="section-header">
+          <h2 class="section-title">Servicios Disponibles</h2>
+          <p class="section-subtitle">Profesionales verificados cerca de ti</p>
+        </div>
+
+        <div class="services-grid">
+          <div
+            *ngFor="let service of services"
+            class="service-card"
+            (click)="viewServiceProfessionals(service)"
+          >
+            <!-- Card Image -->
+            <div class="service-image">
+              <img [src]="service.image" [alt]="service.title" onerror="this.src='assets/logos/logo.png'">
+              <button
+                class="favorite-btn"
+                [class.active]="service.isFavorite"
+                (click)="$event.stopPropagation(); toggleFavorite(service.id)"
+              >
+                <lucide-angular [img]="Heart" size="18"></lucide-angular>
+              </button>
+            </div>
+
+            <!-- Card Content -->
+            <div class="service-content">
+              <div class="service-header">
+                <h3 class="service-title">{{ service.title }}</h3>
+                <div class="service-rating">
+                  <lucide-angular [img]="Star" size="14" class="star-icon"></lucide-angular>
+                  <span class="rating-value">{{ service.averageRating }}</span>
+                  <span class="review-count">({{ service.totalReviews }})</span>
+                </div>
+              </div>
+
+              <p class="service-description">{{ service.description }}</p>
+
+              <div class="service-stats">
+                <div class="stat-item">
+                  <lucide-angular [img]="Users" size="16" class="stat-icon"></lucide-angular>
+                  <span>{{ service.professionalCount }} profesionales</span>
+                </div>
+                <div class="stat-item">
+                  <lucide-angular [img]="DollarSign" size="16" class="stat-icon"></lucide-angular>
+                  <span>${{ service.priceRange.min }} - ${{ service.priceRange.max }}</span>
+                </div>
+              </div>
+
+              <button class="view-professionals-btn">
+                Ver Profesionales
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- Professionals View -->
+    <div *ngIf="showProfessionals()">
+      <!-- Header with Back Button -->
+      <section class="professionals-header">
+        <button class="back-btn" (click)="backToServices()">
+          <lucide-angular [img]="ArrowLeft" size="20"></lucide-angular>
+          <span>Volver a Servicios</span>
+        </button>
+        <div class="service-info">
+          <h1 class="service-title">{{ selectedService()?.title }}</h1>
+          <p class="service-subtitle">{{ selectedService()?.professionalCount }} profesionales disponibles</p>
+        </div>
+      </section>
+
+      <!-- Professionals List -->
+      <main class="professionals-section">
+        <div class="professionals-grid">
+          <div
+            *ngFor="let professional of getCurrentProfessionals()"
+            class="professional-card"
+          >
+            <!-- Professional Image -->
+            <div class="professional-image">
+              <img [src]="professional.image" [alt]="professional.name" onerror="this.src='assets/logos/logo.png'">
+              <div class="verified-badge" *ngIf="professional.verified">
+                <lucide-angular [img]="Award" size="16"></lucide-angular>
+              </div>
+            </div>
+
+            <!-- Professional Content -->
+            <div class="professional-content">
+              <div class="professional-header">
+                <h3 class="professional-name">{{ professional.name }}</h3>
+                <div class="professional-rating">
+                  <lucide-angular [img]="Star" size="14" class="star-icon"></lucide-angular>
+                  <span class="rating-value">{{ professional.rating }}</span>
+                  <span class="review-count">({{ professional.reviewCount }})</span>
+                </div>
+              </div>
+
+              <div class="professional-info">
+                <div class="info-item">
+                  <lucide-angular [img]="MapPin" size="14" class="info-icon"></lucide-angular>
+                  <span>{{ professional.location }}</span>
+                </div>
+                <div class="info-item">
+                  <lucide-angular [img]="Clock" size="14" class="info-icon"></lucide-angular>
+                  <span>{{ professional.availability }}</span>
+                </div>
+              </div>
+
+              <div class="professional-details">
+                <p class="experience">{{ professional.experience }} de experiencia</p>
+                <div class="specialties">
+                  <span class="specialties-label">Especialidades:</span>
+                  <div class="specialties-list">
+                    <span *ngFor="let specialty of professional.specialties" class="specialty-tag">
+                      {{ specialty }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="professional-footer">
+                <div class="professional-price">
+                  <span class="price-label">Desde</span>
+                  <span class="price-value">${{ professional.price }}</span>
+                </div>
+                <button class="contact-professional-btn" (click)="contactProfessional(professional)">
+                  Contactar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="app-footer">
+  <div class="footer-container">
+    <div class="footer-content">
+      <!-- Company Info -->
+      <div class="footer-section">
+        <div class="footer-logo">
+          <img src="assets/logos/logo.png" alt="Logo" class="logo">
+          <h3>OficiosApp</h3>
+        </div>
+        <p>Conectamos profesionales con clientes de manera fácil y segura.</p>
+      </div>
+
+      <!-- Services -->
+      <div class="footer-section">
+        <h4>Servicios</h4>
+        <ul>
+          <li><a href="#">Plomería</a></li>
+          <li><a href="#">Electricidad</a></li>
+          <li><a href="#">Pintura</a></li>
+          <li><a href="#">Carpintería</a></li>
+        </ul>
+      </div>
+
+      <!-- Support -->
+      <div class="footer-section">
+        <h4>Soporte</h4>
+        <ul>
+          <li><a href="#">Centro de Ayuda</a></li>
+          <li><a href="#">Contacto</a></li>
+          <li><a href="#">FAQ</a></li>
+          <li><a href="#">Términos y Condiciones</a></li>
+        </ul>
+      </div>
+
+      <!-- Contact -->
+      <div class="footer-section">
+        <h4>Contacto</h4>
+        <ul>
+          <li>info@oficiosapp.com</li>
+          <li>+54 11 1234-5678</li>
+          <li>Buenos Aires, Argentina</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>&copy; 2025 OficiosApp. Todos los derechos reservados.</p>
+    </div>
+  </div>
+</footer>
