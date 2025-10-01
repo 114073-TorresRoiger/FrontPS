@@ -13,7 +13,7 @@ export class Registro {
 
   // Formularios para cada paso
   datosBasicosForm!: FormGroup;
-  selectedRole: 'cliente' | 'profesional' | null = null;
+  selectedRole: 'cliente' = 'cliente'; // Rol por defecto
   datosAdicionalForm!: FormGroup;
 
   // Datos para los selects
@@ -49,13 +49,7 @@ export class Registro {
     'Departamento 3'
   ];
 
-  oficios = [
-    'Carpintero',
-    'Gasista',
-    'Electricista',
-    'Plomero',
-    'Instalador de aires acondicionados'
-  ];
+
 
   constructor(private fb: FormBuilder) {
     this.initializeForms();
@@ -74,23 +68,13 @@ export class Registro {
       ciudad: ['', Validators.required],
       barrio: ['', Validators.required],
       telefono: ['', Validators.required],
-      direccion: ['', Validators.required],
-      oficio: [''] // Solo para profesionales
+      direccion: ['', Validators.required]
     });
   }
 
   nextStep() {
     if (this.currentStep === 1 && this.datosBasicosForm.valid) {
       this.currentStep = 2;
-    } else if (this.currentStep === 2 && this.selectedRole) {
-      this.currentStep = 3;
-      // Si es profesional, agregar validación al campo oficio
-      if (this.selectedRole === 'profesional') {
-        this.datosAdicionalForm.get('oficio')?.setValidators(Validators.required);
-      } else {
-        this.datosAdicionalForm.get('oficio')?.clearValidators();
-      }
-      this.datosAdicionalForm.get('oficio')?.updateValueAndValidity();
     }
   }
 
@@ -100,15 +84,13 @@ export class Registro {
     }
   }
 
-  selectRole(role: 'cliente' | 'profesional') {
-    this.selectedRole = role;
-  }
+
 
   onSubmit() {
     if (this.datosAdicionalForm.valid) {
       const userData = {
         ...this.datosBasicosForm.value,
-        role: this.selectedRole,
+        role: this.selectedRole, // Siempre será 'cliente'
         ...this.datosAdicionalForm.value
       };
 

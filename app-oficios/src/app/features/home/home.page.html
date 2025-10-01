@@ -26,16 +26,57 @@
       </div>
     </div>
 
-    <!-- Auth Buttons (Right) -->
+    <!-- User Dropdown (Right) -->
     <div class="navbar-right">
-      <button class="btn-signin" (click)="goToSignIn()">
-        <lucide-angular [img]="User" size="18"></lucide-angular>
-        <span>Sign In</span>
-      </button>
-      <button class="btn-signup" (click)="goToSignUp()">
-        <lucide-angular [img]="UserPlus" size="18"></lucide-angular>
-        <span>Sign Up</span>
-      </button>
+      <div class="user-dropdown">
+        <!-- Authenticated User -->
+        <button
+          *ngIf="authService.isAuthenticated()"
+          class="dropdown-btn authenticated"
+          [class.active]="isDropdownOpen()"
+          (click)="toggleDropdown()"
+        >
+          <lucide-angular [img]="User" size="18"></lucide-angular>
+          <span>{{ getUserDisplayName() }}</span>
+          <lucide-angular [img]="ChevronDown" size="16"></lucide-angular>
+        </button>
+
+        <!-- Guest User -->
+        <button
+          *ngIf="!authService.isAuthenticated()"
+          class="dropdown-btn"
+          [class.active]="isDropdownOpen()"
+          (click)="toggleDropdown()"
+        >
+          <lucide-angular [img]="User" size="18"></lucide-angular>
+          <span>Cuenta</span>
+          <lucide-angular [img]="ChevronDown" size="16"></lucide-angular>
+        </button>
+
+        <!-- Authenticated Dropdown Menu -->
+        <div *ngIf="authService.isAuthenticated()" class="dropdown-menu" [class.show]="isDropdownOpen()">
+          <button class="dropdown-item profile" (click)="goToProfile()">
+            <lucide-angular [img]="Settings" size="16"></lucide-angular>
+            <span>Perfil</span>
+          </button>
+          <button class="dropdown-item logout" (click)="logout()">
+            <lucide-angular [img]="LogOut" size="16"></lucide-angular>
+            <span>Cerrar Sesión</span>
+          </button>
+        </div>
+
+        <!-- Guest Dropdown Menu -->
+        <div *ngIf="!authService.isAuthenticated()" class="dropdown-menu" [class.show]="isDropdownOpen()">
+          <button class="dropdown-item signin" (click)="goToSignIn()">
+            <lucide-angular [img]="LogIn" size="16"></lucide-angular>
+            <span>Iniciar Sesión</span>
+          </button>
+          <button class="dropdown-item signup" (click)="goToSignUp()">
+            <lucide-angular [img]="UserPlus" size="16"></lucide-angular>
+            <span>Registrarse</span>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </nav>
@@ -199,7 +240,7 @@
       <!-- Company Info -->
       <div class="footer-section">
         <div class="footer-logo">
-          <img src="assets/logos/logo.png" alt="Logo" class="logo">
+          <img src="assets/logos/logo-blanco.png" alt="Logo" class="logo">
           <h3>OficiosApp</h3>
         </div>
         <p>Conectamos profesionales con clientes de manera fácil y segura.</p>

@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, signal, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, Search, MessageCircle, User, UserPlus, Star, MapPin, Clock, Heart, ArrowLeft, Users, Award, DollarSign } from 'lucide-angular';
+import { LucideAngularModule, Search, MessageCircle, User, UserPlus, Star, MapPin, Clock, Heart, ArrowLeft, Users, Award, DollarSign, ChevronDown, LogIn, LogOut, Settings } from 'lucide-angular';
+import { AuthService } from '../../domain/auth';
 
 @Component({
   selector: 'app-home-page',
@@ -15,6 +16,7 @@ import { LucideAngularModule, Search, MessageCircle, User, UserPlus, Star, MapPi
 export class HomePage {
   // Dependencies
   private readonly router = inject(Router);
+  readonly authService = inject(AuthService);
 
   // Icons
   readonly Search = Search;
@@ -29,6 +31,10 @@ export class HomePage {
   readonly Users = Users;
   readonly Award = Award;
   readonly DollarSign = DollarSign;
+  readonly ChevronDown = ChevronDown;
+  readonly LogIn = LogIn;
+  readonly LogOut = LogOut;
+  readonly Settings = Settings;
 
   // Search functionality
   searchQuery = signal('');
@@ -36,6 +42,7 @@ export class HomePage {
   // View state
   showProfessionals = signal(false);
   selectedService = signal<any>(null);
+  isDropdownOpen = signal(false);
 
   // Mock data for services
   services = [
@@ -241,16 +248,48 @@ export class HomePage {
     // Implementar lógica de contacto
   }
 
+  toggleDropdown() {
+    this.isDropdownOpen.set(!this.isDropdownOpen());
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event) {
+    const target = event.target as HTMLElement;
+    const dropdown = target.closest('.user-dropdown');
+
+    if (!dropdown && this.isDropdownOpen()) {
+      this.isDropdownOpen.set(false);
+    }
+  }
+
   goToChat() {
     console.log('Navigating to chat');
     // Implementar navegación al chat
   }
 
   goToSignIn() {
+    this.isDropdownOpen.set(false);
     this.router.navigate(['/auth/login']);
   }
 
   goToSignUp() {
+    this.isDropdownOpen.set(false);
     this.router.navigate(['/auth/registro']);
+  }
+
+  goToProfile() {
+    this.isDropdownOpen.set(false);
+    console.log('Navigating to profile');
+    // TODO: Implement profile navigation
+    // this.router.navigate(['/profile']);
+  }
+
+  logout() {
+    this.isDropdownOpen.set(false);
+    this.authService.logout();
+  }
+
+  getUserDisplayName(): string {
+    return this.authService.getUserFullName();
   }
 }

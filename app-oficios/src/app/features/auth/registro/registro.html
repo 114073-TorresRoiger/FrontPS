@@ -19,13 +19,8 @@
                         <span class="step-label">Datos básicos</span>
                     </div>
                     <div class="step-divider"></div>
-                    <div class="step" [class.active]="currentStep === 2" [class.completed]="currentStep > 2">
+                    <div class="step" [class.active]="currentStep === 2">
                         <span class="step-number">2</span>
-                        <span class="step-label">Tipo de cuenta</span>
-                    </div>
-                    <div class="step-divider"></div>
-                    <div class="step" [class.active]="currentStep === 3">
-                        <span class="step-number">3</span>
                         <span class="step-label">Información adicional</span>
                     </div>
                 </div>
@@ -96,54 +91,11 @@
                     </form>
                 </div>
 
-                <!-- Paso 2: Selección de rol -->
+                <!-- Paso 2: Información adicional -->
                 <div *ngIf="currentStep === 2" class="step-content">
                     <div class="form-header">
-                        <h2 class="form-title">¿Cómo te quieres registrar?</h2>
-                        <p class="form-subtitle">Selecciona el tipo de cuenta que mejor se adapte a ti</p>
-                    </div>
-
-                    <div class="role-selection">
-                        <div class="role-card"
-                             [class.selected]="selectedRole === 'cliente'"
-                             (click)="selectRole('cliente')">
-                            <div class="role-icon">
-                                <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                                </svg>
-                            </div>
-                            <h3 class="role-title">Cliente</h3>
-                            <p class="role-description">Busco contratar servicios profesionales para mi hogar o negocio</p>
-                        </div>
-
-                        <div class="role-card"
-                             [class.selected]="selectedRole === 'profesional'"
-                             (click)="selectRole('profesional')">
-                            <div class="role-icon">
-                                <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                                </svg>
-                            </div>
-                            <h3 class="role-title">Profesional</h3>
-                            <p class="role-description">Ofrezco mis servicios profesionales y quiero conseguir nuevos clientes</p>
-                        </div>
-                    </div>
-
-                    <div class="form-actions">
-                        <button type="button" class="back-btn" (click)="prevStep()">
-                            Atrás
-                        </button>
-                        <button type="button" class="submit-btn" (click)="nextStep()" [disabled]="!selectedRole">
-                            Continuar
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Paso 3: Información adicional -->
-                <div *ngIf="currentStep === 3" class="step-content">
-                    <div class="form-header">
                         <h2 class="form-title">Información adicional</h2>
-                        <p class="form-subtitle">Completa tu perfil como {{ selectedRole }}</p>
+                        <p class="form-subtitle">Completa tu perfil</p>
                     </div>
 
                     <form [formGroup]="datosAdicionalForm" class="registro-form">
@@ -164,21 +116,7 @@
                             </div>
                         </div>
 
-                        <!-- Campo específico para profesionales -->
-                        <div *ngIf="selectedRole === 'profesional'" class="input-group">
-                            <select
-                                class="form-select"
-                                formControlName="oficio"
-                                [class.error]="isFieldInvalid(datosAdicionalForm, 'oficio')">
-                                <option value="">Selecciona tu oficio*</option>
-                                <option *ngFor="let oficio of oficios" [value]="oficio">
-                                    {{ oficio }}
-                                </option>
-                            </select>
-                            <div class="error-message" *ngIf="isFieldInvalid(datosAdicionalForm, 'oficio')">
-                                {{ getFieldError(datosAdicionalForm, 'oficio') }}
-                            </div>
-                        </div>
+
 
                         <div class="input-row">
                             <div class="input-group">
