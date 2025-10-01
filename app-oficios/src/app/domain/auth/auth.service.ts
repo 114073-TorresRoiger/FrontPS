@@ -73,15 +73,27 @@ export class AuthService {
     return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, credentials, { headers })
       .pipe(
         tap(response => {
+          // Map backend response to User model
+          const user: User = {
+            id: response.idUsuario,
+            name: response.nombre,
+            lastName: response.apellido,
+            email: response.email,
+            documento: response.documento,
+            telefono: response.telefono,
+            nacimiento: response.nacimiento,
+            idDireccion: response.idDireccion
+          };
+
           // Store token and user data
           localStorage.setItem(this.TOKEN_KEY, response.token);
-          localStorage.setItem(this.USER_KEY, JSON.stringify(response.user));
+          localStorage.setItem(this.USER_KEY, JSON.stringify(user));
 
           // Update auth state
           this.updateAuthState({
             isAuthenticated: true,
             token: response.token,
-            user: response.user
+            user: user
           });
         }),
         catchError(error => {

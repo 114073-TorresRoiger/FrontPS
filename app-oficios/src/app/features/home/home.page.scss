@@ -273,6 +273,30 @@
     opacity: 0.9;
     margin-bottom: 0;
   }
+
+  // Personalized welcome message styles
+  .welcome-message {
+    .hero-title {
+      background: linear-gradient(45deg, #fff, #f8f9fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: welcomeGlow 2s ease-in-out;
+    }
+  }
+
+  // Generic welcome uses default hero styles
+}
+
+@keyframes welcomeGlow {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 // Services Section
