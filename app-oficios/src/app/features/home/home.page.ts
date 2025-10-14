@@ -279,9 +279,7 @@ export class HomePage {
 
   goToProfile() {
     this.isDropdownOpen.set(false);
-    console.log('Navigating to profile');
-    // TODO: Implement profile navigation
-    // this.router.navigate(['/profile']);
+    this.router.navigate(['/usuarios/perfil']);
   }
 
   logout() {
@@ -291,5 +289,9 @@ export class HomePage {
 
   getUserDisplayName(): string {
     return this.authService.getUserFullName();
+  }
+
+  isUserAuthenticated(): boolean {
+    return this.authService.isLoggedIn();
   }
 }

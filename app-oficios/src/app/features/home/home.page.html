@@ -31,7 +31,7 @@
       <div class="user-dropdown">
         <!-- Authenticated User -->
         <button
-          *ngIf="authService.isAuthenticated()"
+          *ngIf="isUserAuthenticated()"
           class="dropdown-btn authenticated"
           [class.active]="isDropdownOpen()"
           (click)="toggleDropdown()"
@@ -43,7 +43,7 @@
 
         <!-- Guest User -->
         <button
-          *ngIf="!authService.isAuthenticated()"
+          *ngIf="!isUserAuthenticated()"
           class="dropdown-btn"
           [class.active]="isDropdownOpen()"
           (click)="toggleDropdown()"
@@ -54,7 +54,7 @@
         </button>
 
         <!-- Authenticated Dropdown Menu -->
-        <div *ngIf="authService.isAuthenticated()" class="dropdown-menu" [class.show]="isDropdownOpen()">
+        <div *ngIf="isUserAuthenticated()" class="dropdown-menu" [class.show]="isDropdownOpen()">
           <button class="dropdown-item profile" (click)="goToProfile()">
             <lucide-angular [img]="Settings" size="16"></lucide-angular>
             <span>Perfil</span>
@@ -66,7 +66,7 @@
         </div>
 
         <!-- Guest Dropdown Menu -->
-        <div *ngIf="!authService.isAuthenticated()" class="dropdown-menu" [class.show]="isDropdownOpen()">
+        <div *ngIf="!isUserAuthenticated()" class="dropdown-menu" [class.show]="isDropdownOpen()">
           <button class="dropdown-item signin" (click)="goToSignIn()">
             <lucide-angular [img]="LogIn" size="16"></lucide-angular>
             <span>Iniciar Sesión</span>
@@ -91,13 +91,13 @@
       <section class="hero-section">
         <div class="hero-content">
           <!-- Personalized welcome for authenticated users -->
-          <div *ngIf="authService.isAuthenticated()" class="welcome-message">
+          <div *ngIf="isUserAuthenticated()" class="welcome-message">
             <h1 class="hero-title">¡Hola, {{ authService.getCurrentUser()?.name }}!</h1>
             <p class="hero-subtitle">¿Qué servicio necesitas hoy?</p>
           </div>
 
           <!-- Generic welcome for guests -->
-          <div *ngIf="!authService.isAuthenticated()" class="generic-welcome">
+          <div *ngIf="!isUserAuthenticated()" class="generic-welcome">
             <h1 class="hero-title">Encuentra el profesional perfecto</h1>
             <p class="hero-subtitle">Conecta con expertos locales para todos tus proyectos</p>
           </div>

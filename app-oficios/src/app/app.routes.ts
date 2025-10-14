@@ -14,13 +14,11 @@ export const routes: Routes = [
 		path: 'oficios',
 		loadChildren: () => import('./features/oficios/oficios.routes').then((m) => m.OFICIOS_ROUTES),
 	},
-	// Las siguientes rutas están comentadas en sus respectivos archivos
-	// Descomenta cuando estén implementadas
-	// {
-	// 	path: 'usuarios',
-	// 	loadChildren: () =>
-	// 		import('./features/usuarios/usuarios.routes').then((m) => m.USUARIOS_ROUTES),
-	// },
+	{
+		path: 'usuarios',
+		loadChildren: () =>
+			import('./features/usuarios/usuarios.routes').then((m) => m.USUARIOS_ROUTES),
+	},
 	// {
 	// 	path: 'profesionales',
 	// 	loadChildren: () =>

@@ -1,0 +1,268 @@
+<div class="perfil-container">
+  <div class="perfil-header">
+    <button class="back-btn" (click)="volver()" type="button">
+      <i class="icon-arrow-left"></i>
+      <span>Volver</span>
+    </button>
+    <h1>Mi Perfil</h1>
+    <button
+      class="edit-btn"
+      (click)="toggleEditar()"
+      [class.editing]="isEditing"
+      [disabled]="isLoading"
+      type="button">
+      <i [class]="isEditing ? 'icon-x' : 'icon-edit'"></i>
+      <span>{{ isEditing ? 'Cancelar' : 'Editar' }}</span>
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Cargando perfil...</p>
+  </div>
+
+  <!-- Alert Messages -->
+  <div *ngIf="error" class="alert alert-error">
+    <i class="icon-alert-circle"></i>
+    <span>{{ error }}</span>
+  </div>
+
+  <div *ngIf="success" class="alert alert-success">
+    <i class="icon-check-circle"></i>
+    <span>{{ success }}</span>
+  </div>
+
+  <!-- Profile Form -->
+  <div *ngIf="!isLoading" class="perfil-content">
+    <form [formGroup]="perfilForm" (ngSubmit)="guardarCambios()" class="perfil-form">
+
+      <!-- Información Personal -->
+      <div class="form-section">
+        <h2 class="section-title">Información Personal</h2>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="name">Nombre *</label>
+            <input
+              id="name"
+              type="text"
+              formControlName="name"
+              [class.error]="getFieldError('name')"
+              [readonly]="!isEditing"
+              placeholder="Ingrese su nombre">
+            <div *ngIf="getFieldError('name')" class="field-error">
+              {{ getFieldError('name') }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="lastName">Apellido *</label>
+            <input
+              id="lastName"
+              type="text"
+              formControlName="lastName"
+              [class.error]="getFieldError('lastName')"
+              [readonly]="!isEditing"
+              placeholder="Ingrese su apellido">
+            <div *ngIf="getFieldError('lastName')" class="field-error">
+              {{ getFieldError('lastName') }}
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              formControlName="email"
+              readonly
+              class="readonly-field"
+              placeholder="email@ejemplo.com">
+            <small class="field-note">El email no se puede modificar</small>
+          </div>
+
+          <div class="form-group">
+            <label for="telefono">Teléfono *</label>
+            <input
+              id="telefono"
+              type="tel"
+              formControlName="telefono"
+              [class.error]="getFieldError('telefono')"
+              [readonly]="!isEditing"
+              placeholder="Ej: 3515551234">
+            <div *ngIf="getFieldError('telefono')" class="field-error">
+              {{ getFieldError('telefono') }}
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="tipoDocumento">Tipo de Documento *</label>
+            <select
+              id="tipoDocumento"
+              formControlName="tipoDocumento"
+              [class.error]="getFieldError('tipoDocumento')"
+              [disabled]="!isEditing">
+              <option value="">Seleccione tipo</option>
+              <option value="DNI">DNI</option>
+              <option value="CUIL">CUIL</option>
+              <option value="CUIT">CUIT</option>
+              <option value="LE">LE</option>
+              <option value="LC">LC</option>
+            </select>
+            <div *ngIf="getFieldError('tipoDocumento')" class="field-error">
+              {{ getFieldError('tipoDocumento') }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="documento">Número de Documento *</label>
+            <input
+              id="documento"
+              type="text"
+              formControlName="documento"
+              [class.error]="getFieldError('documento')"
+              [readonly]="!isEditing"
+              placeholder="Ej: 12345678">
+            <div *ngIf="getFieldError('documento')" class="field-error">
+              {{ getFieldError('documento') }}
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="nacimiento">Fecha de Nacimiento *</label>
+            <input
+              id="nacimiento"
+              type="date"
+              formControlName="nacimiento"
+              [class.error]="getFieldError('nacimiento')"
+              [readonly]="!isEditing">
+            <div *ngIf="getFieldError('nacimiento')" class="field-error">
+              {{ getFieldError('nacimiento') }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Domicilio -->
+      <div class="form-section" formGroupName="domicilio">
+        <h2 class="section-title">Domicilio</h2>
+
+        <div class="form-row">
+          <div class="form-group flex-2">
+            <label for="calle">Calle *</label>
+            <input
+              id="calle"
+              type="text"
+              formControlName="calle"
+              [class.error]="getDomicilioFieldError('calle')"
+              [readonly]="!isEditing"
+              placeholder="Nombre de la calle">
+            <div *ngIf="getDomicilioFieldError('calle')" class="field-error">
+              {{ getDomicilioFieldError('calle') }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="numero">Número *</label>
+            <input
+              id="numero"
+              type="text"
+              formControlName="numero"
+              [class.error]="getDomicilioFieldError('numero')"
+              [readonly]="!isEditing"
+              placeholder="123">
+            <div *ngIf="getDomicilioFieldError('numero')" class="field-error">
+              {{ getDomicilioFieldError('numero') }}
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="piso">Piso</label>
+            <input
+              id="piso"
+              type="text"
+              formControlName="piso"
+              [readonly]="!isEditing"
+              placeholder="Ej: 2">
+          </div>
+
+          <div class="form-group">
+            <label for="depto">Departamento</label>
+            <input
+              id="depto"
+              type="text"
+              formControlName="depto"
+              [readonly]="!isEditing"
+              placeholder="Ej: A">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="barrio">Barrio *</label>
+            <input
+              id="barrio"
+              type="text"
+              formControlName="barrio"
+              [class.error]="getDomicilioFieldError('barrio')"
+              [readonly]="!isEditing"
+              placeholder="Nombre del barrio">
+            <div *ngIf="getDomicilioFieldError('barrio')" class="field-error">
+              {{ getDomicilioFieldError('barrio') }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="ciudad">Ciudad *</label>
+            <input
+              id="ciudad"
+              type="text"
+              formControlName="ciudad"
+              [class.error]="getDomicilioFieldError('ciudad')"
+              [readonly]="!isEditing"
+              placeholder="Nombre de la ciudad">
+            <div *ngIf="getDomicilioFieldError('ciudad')" class="field-error">
+              {{ getDomicilioFieldError('ciudad') }}
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="departamento">Departamento *</label>
+            <input
+              id="departamento"
+              type="text"
+              formControlName="departamento"
+              [class.error]="getDomicilioFieldError('departamento')"
+              [readonly]="!isEditing"
+              placeholder="Ej: CAPITAL">
+            <div *ngIf="getDomicilioFieldError('departamento')" class="field-error">
+              {{ getDomicilioFieldError('departamento') }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Botones de Acción -->
+      <div *ngIf="isEditing" class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="toggleEditar()" [disabled]="isLoading">
+          Cancelar
+        </button>
+        <button type="submit" class="btn btn-primary" [disabled]="isLoading || !perfilForm.valid">
+          <span *ngIf="isLoading">Guardando...</span>
+          <span *ngIf="!isLoading">Guardar Cambios</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
