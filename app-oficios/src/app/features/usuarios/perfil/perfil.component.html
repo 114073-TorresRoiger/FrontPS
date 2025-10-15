@@ -33,9 +33,36 @@
     <span>{{ success }}</span>
   </div>
 
-  <!-- Profile Form -->
+  <!-- Profile Content -->
   <div *ngIf="!isLoading" class="perfil-content">
-    <form [formGroup]="perfilForm" (ngSubmit)="guardarCambios()" class="perfil-form">
+    <div class="perfil-layout">
+      <!-- Columna Izquierda - Foto de Usuario -->
+      <div class="perfil-avatar-section">
+        <div class="avatar-container">
+          <div class="avatar-image">
+            <img 
+              [src]="perfilForm.get('avatar')?.value || 'assets/icons/user-placeholder.svg'" 
+              [alt]="(perfilForm.get('name')?.value || 'Usuario') + ' ' + (perfilForm.get('lastName')?.value || '')"
+              (error)="onImageError($event)">
+          </div>
+          <div class="avatar-info">
+            <h3 class="user-name">
+              {{ (perfilForm.get('name')?.value || 'Nombre') + ' ' + (perfilForm.get('lastName')?.value || 'Apellido') }}
+            </h3>
+            <p class="user-email">{{ perfilForm.get('email')?.value || 'email@ejemplo.com' }}</p>
+          </div>
+          <div *ngIf="isEditing" class="avatar-actions">
+            <button type="button" class="btn btn-outline change-photo-btn" (click)="cambiarFoto()">
+              <i class="icon-camera"></i>
+              Cambiar Foto
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Columna Derecha - Formulario -->
+      <div class="perfil-form-section">
+        <form [formGroup]="perfilForm" (ngSubmit)="guardarCambios()" class="perfil-form">
 
       <!-- Información Personal -->
       <div class="form-section">
@@ -263,6 +290,8 @@
           <span *ngIf="!isLoading">Guardar Cambios</span>
         </button>
       </div>
-    </form>
+        </form>
+      </div>
+    </div>
   </div>
 </div>

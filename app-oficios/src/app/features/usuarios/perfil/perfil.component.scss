@@ -151,6 +151,103 @@
   overflow: hidden;
 }
 
+.perfil-layout {
+  display: flex;
+  min-height: 600px;
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+  }
+}
+
+.perfil-avatar-section {
+  flex: 0 0 350px;
+  background: linear-gradient(135deg, $primary-color, $primary-dark);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2rem 2rem 2rem;
+  padding-top: 2.5rem;
+
+  @media (max-width: 1024px) {
+    flex: none;
+    padding: 2rem 1rem;
+    align-items: center;
+  }
+}
+
+.avatar-container {
+  text-align: center;
+  color: white;
+  width: 100%;
+}
+
+.avatar-image {
+  width: 140px;
+  height: 140px;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  overflow: hidden;
+  position: relative;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+}
+
+.avatar-info {
+  margin-bottom: 2.5rem;
+
+  .user-name {
+    font-size: 1.4rem;
+    font-weight: 600;
+    margin: 0 0 0.3rem 0;
+    line-height: 1.2;
+  }
+
+  .user-email {
+    font-size: 0.85rem;
+    opacity: 0.8;
+    margin: 0;
+    word-break: break-word;
+  }
+}
+
+.avatar-actions {
+  .change-photo-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+  }
+}
+
+.perfil-form-section {
+  flex: 1;
+  overflow-y: auto;
+}
+
 .perfil-form {
   padding: 0;
 }

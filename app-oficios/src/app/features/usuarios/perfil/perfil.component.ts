@@ -35,6 +35,7 @@ export class PerfilComponent implements OnInit {
 
   private createForm(): FormGroup {
     return this.formBuilder.group({
+      avatar: [''], // Campo para la foto de usuario
       name: ['', [Validators.required, Validators.minLength(2)]],
       lastName: ['', [Validators.required, Validators.minLength(2)]],
       email: [{ value: '', disabled: true }], // Email no editable
@@ -171,6 +172,35 @@ export class PerfilComponent implements OnInit {
       departamento: 'Departamento'
     };
     return fieldNames[fieldName] || fieldName;
+  }
+
+  cambiarFoto() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (event: any) => {
+      const file = event.target.files[0];
+      if (file) {
+        this.procesarImagen(file);
+      }
+    };
+    input.click();
+  }
+
+  private procesarImagen(file: File) {
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      // Actualizar el formulario con la nueva imagen
+      this.perfilForm.patchValue({
+        avatar: e.target.result
+      });
+    };
+    reader.readAsDataURL(file);
+  }
+
+  onImageError(event: any) {
+    // Si la imagen falla al cargar, usar un placeholder
+    event.target.src = 'assets/icons/user-placeholder.svg';
   }
 
   volver() {
