@@ -290,6 +290,16 @@
     flex: 2;
   }
 
+  &.half-width {
+    flex: 0 0 300px;
+    max-width: 300px;
+    
+    @media (max-width: 768px) {
+      flex: 1;
+      max-width: none;
+    }
+  }
+
   label {
     display: block;
     font-weight: 500;
@@ -364,6 +374,79 @@
     font-size: 0.8rem;
     margin-top: 0.25rem;
     font-style: italic;
+  }
+}
+
+.date-selector {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+
+  &.readonly {
+    opacity: 0.7;
+  }
+
+  &.error {
+    .date-select {
+      border-color: $error-color;
+      box-shadow: 0 0 0 3px rgba($error-color, 0.1);
+    }
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0.75rem;
+    
+    .date-select {
+      width: 100%;
+    }
+  }
+}
+
+.date-select {
+  flex: 1;
+  padding: 0.75rem;
+  border: 2px solid $border-light;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  background: white;
+  color: $text-dark;
+  transition: all 0.3s ease;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+    border-color: $primary-color;
+    box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+  }
+
+  &:hover:not(:disabled) {
+    border-color: $primary-color;
+  }
+
+  &:disabled {
+    background: $background-light;
+    color: $text-light;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+
+  &.day-select {
+    flex: 0 0 80px;
+  }
+
+  &.month-select {
+    flex: 0 0 140px;
+  }
+
+  &.year-select {
+    flex: 0 0 100px;
+  }
+
+  option {
+    padding: 0.5rem;
+    color: $text-dark;
   }
 }
 

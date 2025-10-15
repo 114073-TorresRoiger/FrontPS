@@ -203,6 +203,68 @@ export class PerfilComponent implements OnInit {
     event.target.src = 'assets/icons/user-placeholder.svg';
   }
 
+  // Métodos para el selector de fecha
+  getDays(): number[] {
+    return Array.from({ length: 31 }, (_, i) => i + 1);
+  }
+
+  getYears(): number[] {
+    const currentYear = new Date().getFullYear();
+    const startYear = currentYear - 100; // Desde hace 100 años
+    const endYear = currentYear - 18; // Hasta hace 18 años (mayoría de edad)
+    return Array.from({ length: endYear - startYear + 1 }, (_, i) => endYear - i);
+  }
+
+  getDayFromDate(): string {
+    const date = this.perfilForm.get('nacimiento')?.value;
+    if (date) {
+      const dateObj = new Date(date);
+      return dateObj.getDate().toString();
+    }
+    return '';
+  }
+
+  getMonthFromDate(): string {
+    const date = this.perfilForm.get('nacimiento')?.value;
+    if (date) {
+      const dateObj = new Date(date);
+      return (dateObj.getMonth() + 1).toString();
+    }
+    return '';
+  }
+
+  getYearFromDate(): string {
+    const date = this.perfilForm.get('nacimiento')?.value;
+    if (date) {
+      const dateObj = new Date(date);
+      return dateObj.getFullYear().toString();
+    }
+    return '';
+  }
+
+  updateDateField(type: 'day' | 'month' | 'year', event: any): void {
+    const value = event.target.value;
+    const currentDate = this.perfilForm.get('nacimiento')?.value;
+    
+    let dateObj = currentDate ? new Date(currentDate) : new Date();
+    
+    switch (type) {
+      case 'day':
+        dateObj.setDate(parseInt(value) || 1);
+        break;
+      case 'month':
+        dateObj.setMonth(parseInt(value) - 1 || 0);
+        break;
+      case 'year':
+        dateObj.setFullYear(parseInt(value) || new Date().getFullYear());
+        break;
+    }
+    
+    // Formatear la fecha como YYYY-MM-DD para el formulario
+    const formattedDate = dateObj.toISOString().split('T')[0];
+    this.perfilForm.patchValue({ nacimiento: formattedDate });
+  }
+
   volver() {
     this.router.navigate(['/home']);
   }
