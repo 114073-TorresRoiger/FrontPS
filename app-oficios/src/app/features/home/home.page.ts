@@ -49,7 +49,7 @@ export class HomePage {
     {
       id: 1,
       title: 'Plomería',
-      image: 'assets/services/plomeria.jpg',
+      image: 'assets/services/plomero.jpg',
       description: 'Reparación de cañerías, instalaciones sanitarias y destapaciones',
       professionalCount: 12,
       averageRating: 4.7,
@@ -60,7 +60,7 @@ export class HomePage {
     {
       id: 2,
       title: 'Electricidad',
-      image: 'assets/services/electricidad.jpg',
+      image: 'assets/services/electricista.jpg',
       description: 'Instalaciones eléctricas, reparaciones y mantenimiento',
       professionalCount: 8,
       averageRating: 4.8,
@@ -82,7 +82,7 @@ export class HomePage {
     {
       id: 4,
       title: 'Carpintería',
-      image: 'assets/services/carpinteria.jpg',
+      image: 'assets/services/carpintero.jpg',
       description: 'Muebles a medida, reparaciones y restauración',
       professionalCount: 6,
       averageRating: 4.9,

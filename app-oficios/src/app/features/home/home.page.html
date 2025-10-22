@@ -115,45 +115,18 @@
           <div
             *ngFor="let service of services"
             class="service-card"
-            (click)="viewServiceProfessionals(service)"
           >
-            <!-- Card Image -->
-            <div class="service-image">
+            <!-- Service Icon (Large) -->
+            <div class="service-icon">
               <img [src]="service.image" [alt]="service.title" onerror="this.src='assets/logos/logo.png'">
-              <button
-                class="favorite-btn"
-                [class.active]="service.isFavorite"
-                (click)="$event.stopPropagation(); toggleFavorite(service.id)"
-              >
-                <lucide-angular [img]="Heart" size="18"></lucide-angular>
-              </button>
             </div>
 
             <!-- Card Content -->
             <div class="service-content">
-              <div class="service-header">
-                <h3 class="service-title">{{ service.title }}</h3>
-                <div class="service-rating">
-                  <lucide-angular [img]="Star" size="14" class="star-icon"></lucide-angular>
-                  <span class="rating-value">{{ service.averageRating }}</span>
-                  <span class="review-count">({{ service.totalReviews }})</span>
-                </div>
-              </div>
-
+              <h3 class="service-title">{{ service.title }}</h3>
               <p class="service-description">{{ service.description }}</p>
 
-              <div class="service-stats">
-                <div class="stat-item">
-                  <lucide-angular [img]="Users" size="16" class="stat-icon"></lucide-angular>
-                  <span>{{ service.professionalCount }} profesionales</span>
-                </div>
-                <div class="stat-item">
-                  <lucide-angular [img]="DollarSign" size="16" class="stat-icon"></lucide-angular>
-                  <span>${{ service.priceRange.min }} - ${{ service.priceRange.max }}</span>
-                </div>
-              </div>
-
-              <button class="view-professionals-btn">
+              <button class="view-professionals-btn" (click)="viewServiceProfessionals(service)">
                 Ver Profesionales
               </button>
             </div>
