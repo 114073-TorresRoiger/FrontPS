@@ -1,0 +1,121 @@
+<div class="registro-profesional-container">
+  <div class="registro-content">
+    <!-- Left Side: Form -->
+    <div class="form-section">
+      <div class="form-header">
+        <button class="back-btn" (click)="goBack()">
+          <span>←</span>
+          <span>Volver</span>
+        </button>
+        <h1 class="form-title">Registrarse como Profesional</h1>
+        <p class="form-subtitle">Complete el formulario para comenzar a ofrecer sus servicios</p>
+      </div>
+
+      <!-- Success Message -->
+      <div *ngIf="successMessage()" class="alert alert-success">
+        <span>✓</span>
+        <span>{{ successMessage() }}</span>
+      </div>
+
+      <!-- Error Message -->
+      <div *ngIf="errorMessage()" class="alert alert-error">
+        <span>✕</span>
+        <span>{{ errorMessage() }}</span>
+      </div>
+
+      <form [formGroup]="registroForm" (ngSubmit)="onSubmit()" class="registro-form">
+        <!-- ID Usuario (Hidden) -->
+        <input type="hidden" formControlName="idUsuario">
+
+        <!-- Fecha Desde -->
+        <div class="form-group">
+          <label for="fechaDesde" class="form-label">
+            Fecha de inicio de disponibilidad
+            <span class="required">*</span>
+          </label>
+          <input
+            type="date"
+            id="fechaDesde"
+            formControlName="fechaDesde"
+            class="form-control"
+            [class.invalid]="isFieldInvalid('fechaDesde')"
+          >
+          <span *ngIf="isFieldInvalid('fechaDesde')" class="error-message">
+            {{ getFieldError('fechaDesde') }}
+          </span>
+        </div>
+
+        <!-- Fecha Hasta -->
+        <div class="form-group">
+          <label for="fechaHasta" class="form-label">
+            Fecha de fin de disponibilidad
+            <span class="required">*</span>
+          </label>
+          <input
+            type="date"
+            id="fechaHasta"
+            formControlName="fechaHasta"
+            class="form-control"
+            [class.invalid]="isFieldInvalid('fechaHasta')"
+          >
+          <span *ngIf="isFieldInvalid('fechaHasta')" class="error-message">
+            {{ getFieldError('fechaHasta') }}
+          </span>
+        </div>
+
+        <!-- Oficio -->
+        <div class="form-group">
+          <label for="idOficio" class="form-label">
+            Selecciona tu oficio
+            <span class="required">*</span>
+          </label>
+          <select
+            id="idOficio"
+            formControlName="idOficio"
+            class="form-control"
+            [class.invalid]="isFieldInvalid('idOficio')"
+          >
+            <option value="">-- Seleccione un oficio --</option>
+            <option *ngFor="let oficio of oficios()" [value]="oficio.id">
+              {{ oficio.oficio }}
+            </option>
+          </select>
+          <span *ngIf="isFieldInvalid('idOficio')" class="error-message">
+            {{ getFieldError('idOficio') }}
+          </span>
+        </div>
+
+        <!-- Submit Button -->
+        <button
+          type="submit"
+          class="submit-btn"
+          [disabled]="isLoading()"
+        >
+          <span *ngIf="!isLoading()">Registrarse como Profesional</span>
+          <span *ngIf="isLoading()" class="loading-spinner">
+            <span class="spinner"></span>
+            Procesando...
+          </span>
+        </button>
+      </form>
+    </div>
+
+    <!-- Right Side: Image -->
+    <div class="image-section">
+      <img
+        src="assets/professionals/registro-profesional.png"
+        alt="Registro Profesional"
+        class="registro-image"
+      >
+      <div class="image-overlay">
+        <h2>Únete a nuestra red de profesionales</h2>
+        <ul class="benefits-list">
+          <li>✓ Conecta con clientes potenciales</li>
+          <li>✓ Gestiona tu disponibilidad</li>
+          <li>✓ Recibe pagos seguros</li>
+          <li>✓ Construye tu reputación</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

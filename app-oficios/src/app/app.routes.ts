@@ -19,13 +19,13 @@ export const routes: Routes = [
 		loadChildren: () =>
 			import('./features/usuarios/usuarios.routes').then((m) => m.USUARIOS_ROUTES),
 	},
-	// {
-	// 	path: 'profesionales',
-	// 	loadChildren: () =>
-	// 		import('./features/profesionales/profesionales.routes').then(
-	// 			(m) => m.PROFESIONALES_ROUTES,
-	// 		),
-	// },
+	{
+		path: 'profesionales',
+		loadChildren: () =>
+			import('./features/profesionales/profesionales.routes').then(
+				(m) => m.PROFESIONALES_ROUTES,
+			),
+	},
 	// {
 	// 	path: 'chat',
 	// 	loadChildren: () => import('./features/chat/chat.routes').then((m) => m.CHAT_ROUTES),

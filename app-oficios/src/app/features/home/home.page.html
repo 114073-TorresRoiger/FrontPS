@@ -59,6 +59,10 @@
             <lucide-angular [img]="Settings" size="16"></lucide-angular>
             <span>Perfil</span>
           </button>
+          <button class="dropdown-item register-professional" (click)="goToRegisterProfessional()">
+            <lucide-angular [img]="Briefcase" size="16"></lucide-angular>
+            <span>Registrarse como Profesional</span>
+          </button>
           <button class="dropdown-item logout" (click)="logout()">
             <lucide-angular [img]="LogOut" size="16"></lucide-angular>
             <span>Cerrar Sesión</span>
@@ -111,9 +115,15 @@
           <p class="section-subtitle">Profesionales verificados cerca de ti</p>
         </div>
 
-        <div class="services-grid">
+        <!-- Loading State -->
+        <div *ngIf="isLoadingServices()" class="loading-container">
+          <p>Cargando servicios...</p>
+        </div>
+
+        <!-- Services Grid -->
+        <div *ngIf="!isLoadingServices()" class="services-grid">
           <div
-            *ngFor="let service of services"
+            *ngFor="let service of services()"
             class="service-card"
           >
             <!-- Service Icon (Large) -->

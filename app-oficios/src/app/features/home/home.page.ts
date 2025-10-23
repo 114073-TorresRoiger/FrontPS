@@ -1,9 +1,23 @@
-import { ChangeDetectionStrategy, Component, signal, inject, HostListener } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, inject, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, Search, MessageCircle, User, UserPlus, Star, MapPin, Clock, Heart, ArrowLeft, Users, Award, DollarSign, ChevronDown, LogIn, LogOut, Settings } from 'lucide-angular';
+import { LucideAngularModule, Search, MessageCircle, User, UserPlus, Star, MapPin, Clock, Heart, ArrowLeft, Users, Award, DollarSign, ChevronDown, LogIn, LogOut, Settings, Briefcase } from 'lucide-angular';
 import { AuthService } from '../../domain/auth';
+import { ListOficiosUseCase } from '../../domain/oficios/use-cases/list-oficios.usecase';
+import { Oficio } from '../../domain/oficios/oficio.model';
+
+interface ServiceCard {
+  id: number;
+  title: string;
+  image: string;
+  description: string;
+  professionalCount: number;
+  averageRating: number;
+  totalReviews: number;
+  priceRange: { min: number; max: number };
+  isFavorite: boolean;
+}
 
 @Component({
   selector: 'app-home-page',
@@ -13,10 +27,11 @@ import { AuthService } from '../../domain/auth';
   styleUrl: './home.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class HomePage {
+export class HomePage implements OnInit {
   // Dependencies
   private readonly router = inject(Router);
   readonly authService = inject(AuthService);
+  private readonly listOficiosUseCase = inject(ListOficiosUseCase);
 
   // Icons
   readonly Search = Search;
@@ -35,84 +50,19 @@ export class HomePage {
   readonly LogIn = LogIn;
   readonly LogOut = LogOut;
   readonly Settings = Settings;
+  readonly Briefcase = Briefcase;
 
   // Search functionality
   searchQuery = signal('');
 
   // View state
   showProfessionals = signal(false);
-  selectedService = signal<any>(null);
+  selectedService = signal<ServiceCard | null>(null);
   isDropdownOpen = signal(false);
 
-  // Mock data for services
-  services = [
-    {
-      id: 1,
-      title: 'Plomería',
-      image: 'assets/services/plomero.jpg',
-      description: 'Reparación de cañerías, instalaciones sanitarias y destapaciones',
-      professionalCount: 12,
-      averageRating: 4.7,
-      totalReviews: 456,
-      priceRange: { min: 1200, max: 2500 },
-      isFavorite: false
-    },
-    {
-      id: 2,
-      title: 'Electricidad',
-      image: 'assets/services/electricista.jpg',
-      description: 'Instalaciones eléctricas, reparaciones y mantenimiento',
-      professionalCount: 8,
-      averageRating: 4.8,
-      totalReviews: 324,
-      priceRange: { min: 1000, max: 2000 },
-      isFavorite: true
-    },
-    {
-      id: 3,
-      title: 'Pintura',
-      image: 'assets/services/pintura.jpg',
-      description: 'Pintura interior y exterior, empapelado y decoración',
-      professionalCount: 15,
-      averageRating: 4.6,
-      totalReviews: 678,
-      priceRange: { min: 1500, max: 3000 },
-      isFavorite: false
-    },
-    {
-      id: 4,
-      title: 'Carpintería',
-      image: 'assets/services/carpintero.jpg',
-      description: 'Muebles a medida, reparaciones y restauración',
-      professionalCount: 6,
-      averageRating: 4.9,
-      totalReviews: 234,
-      priceRange: { min: 1800, max: 4000 },
-      isFavorite: false
-    },
-    {
-      id: 5,
-      title: 'Jardinería',
-      image: 'assets/services/jardineria.jpg',
-      description: 'Mantenimiento de jardines, poda y paisajismo',
-      professionalCount: 10,
-      averageRating: 4.5,
-      totalReviews: 345,
-      priceRange: { min: 800, max: 2200 },
-      isFavorite: true
-    },
-    {
-      id: 6,
-      title: 'Limpieza',
-      image: 'assets/services/limpieza.jpg',
-      description: 'Limpieza doméstica profunda y mantenimiento',
-      professionalCount: 20,
-      averageRating: 4.8,
-      totalReviews: 892,
-      priceRange: { min: 600, max: 1500 },
-      isFavorite: false
-    }
-  ];
+  // Services from API
+  services = signal<ServiceCard[]>([]);
+  isLoadingServices = signal(true);
 
   // Mock data for professionals by service
   professionalsByService: { [key: number]: any[] } = {
@@ -215,15 +165,69 @@ export class HomePage {
     ]
   };
 
+  ngOnInit(): void {
+    this.loadServices();
+  }
+
+  private loadServices(): void {
+    this.isLoadingServices.set(true);
+    this.listOficiosUseCase.execute().subscribe({
+      next: (oficios: Oficio[]) => {
+        const serviceCards = oficios.map(oficio => this.mapOficioToServiceCard(oficio));
+        this.services.set(serviceCards);
+        this.isLoadingServices.set(false);
+      },
+      error: (error) => {
+        console.error('Error loading services:', error);
+        this.isLoadingServices.set(false);
+      }
+    });
+  }
+
+  private mapOficioToServiceCard(oficio: Oficio): ServiceCard {
+    // Map service name to image
+    const imageMap: { [key: string]: string } = {
+      'GASISTA': 'assets/services/gasista.jpg',
+      'ELECTRICISTA': 'assets/services/electricista.jpg',
+      'PLOMERO': 'assets/services/plomero.jpg',
+      'CARPINTERO': 'assets/services/carpintero.jpg',
+      'PINTOR': 'assets/services/pintura.jpg',
+      'EMPLEADA DOMESTICA': 'assets/services/empleada-domestica.jpg',
+      'INSTALADOR DE AIRES ACONDICIONADOS': 'assets/services/instalacion-aire-acondicionado.jpg'
+    };
+
+    return {
+      id: oficio.id,
+      title: this.formatOficioName(oficio.oficio),
+      image: imageMap[oficio.oficio] || 'assets/logos/logo.png',
+      description: oficio.descripcion,
+      professionalCount: 0, // This will be populated from another endpoint
+      averageRating: 0,
+      totalReviews: 0,
+      priceRange: { min: 0, max: 0 },
+      isFavorite: false
+    };
+  }
+
+  private formatOficioName(oficio: string): string {
+    // Convert to title case
+    return oficio.toLowerCase()
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
+  }
+
   onSearch() {
     console.log('Searching for:', this.searchQuery());
     // Implementar lógica de búsqueda aquí
   }
 
   toggleFavorite(serviceId: number) {
-    const service = this.services.find(s => s.id === serviceId);
+    const currentServices = this.services();
+    const service = currentServices.find(s => s.id === serviceId);
     if (service) {
       service.isFavorite = !service.isFavorite;
+      this.services.set([...currentServices]); // Trigger change detection
     }
   }
 
@@ -280,6 +284,11 @@ export class HomePage {
   goToProfile() {
     this.isDropdownOpen.set(false);
     this.router.navigate(['/usuarios/perfil']);
+  }
+
+  goToRegisterProfessional() {
+    this.isDropdownOpen.set(false);
+    this.router.navigate(['/profesionales/registro']);
   }
 
   logout() {

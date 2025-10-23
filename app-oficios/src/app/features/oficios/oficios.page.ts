@@ -11,7 +11,7 @@ import { ListOficiosUseCase } from '../../domain/oficios/use-cases/list-oficios.
       <h1>Oficios</h1>
       <ul>
         <li *ngFor="let o of oficios$ | async">
-          <strong>{{ o.nombre | titlecase }}</strong>
+          <strong>{{ o.oficio | titlecase }}</strong>
           <small class="text-muted" *ngIf="o.descripcion"> — {{ o.descripcion }}</small>
         </li>
       </ul>
