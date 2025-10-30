@@ -94,16 +94,53 @@
       <!-- Hero Section -->
       <section class="hero-section">
         <div class="hero-content">
-          <!-- Personalized welcome for authenticated users -->
-          <div *ngIf="isUserAuthenticated()" class="welcome-message">
-            <h1 class="hero-title">¡Hola, {{ authService.getCurrentUser()?.name }}!</h1>
-            <p class="hero-subtitle">¿Qué servicio necesitas hoy?</p>
+          <h1 class="hero-title">Encuentra profesionales locales de confianza</h1>
+          <p class="hero-subtitle">Conecta con profesionales cualificados en tu zona. Obtén presupuestos, lee reseñas y reserva servicios con total tranquilidad.</p>
+        </div>
+      </section>
+
+      <!-- How It Works Section -->
+      <section class="how-it-works-section">
+        <div class="section-header">
+          <h2 class="section-title">¿Cómo funciona?</h2>
+          <p class="section-subtitle">Obtener ayuda profesional para tu hogar o negocio nunca ha sido tan fácil. Sigue estos sencillos pasos para conectar con profesionales de confianza.</p>
+        </div>
+
+        <div class="steps-grid">
+          <div class="step-card">
+            <div class="step-number">1</div>
+            <div class="step-icon">
+              <lucide-angular [img]="Search" size="32"></lucide-angular>
+            </div>
+            <h3 class="step-title">Search & Browse</h3>
+            <p class="step-description">Find qualified professionals in your area by service type, location, and ratings.</p>
           </div>
 
-          <!-- Generic welcome for guests -->
-          <div *ngIf="!isUserAuthenticated()" class="generic-welcome">
-            <h1 class="hero-title">Encuentra el profesional perfecto</h1>
-            <p class="hero-subtitle">Conecta con expertos locales para todos tus proyectos</p>
+          <div class="step-card">
+            <div class="step-number">2</div>
+            <div class="step-icon">
+              <lucide-angular [img]="Users" size="32"></lucide-angular>
+            </div>
+            <h3 class="step-title">Compare & Choose</h3>
+            <p class="step-description">Review profiles, portfolios, and customer reviews to select the right professional.</p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">3</div>
+            <div class="step-icon">
+              <lucide-angular [img]="CalendarCheck" size="32"></lucide-angular>
+            </div>
+            <h3 class="step-title">Book & Schedule</h3>
+            <p class="step-description">Request quotes, schedule appointments, and communicate directly with professionals.</p>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">4</div>
+            <div class="step-icon">
+              <lucide-angular [img]="CheckCircle" size="32"></lucide-angular>
+            </div>
+            <h3 class="step-title">Get It Done</h3>
+            <p class="step-description">Enjoy quality service with our satisfaction guarantee and secure payment protection.</p>
           </div>
         </div>
       </section>
@@ -111,8 +148,8 @@
       <!-- Services Catalog -->
       <main class="services-section">
         <div class="section-header">
-          <h2 class="section-title">Servicios Disponibles</h2>
-          <p class="section-subtitle">Profesionales verificados cerca de ti</p>
+          <h2 class="section-title">Servicios Populares</h2>
+          <p class="section-subtitle">Filtra por categoría para encontrar el profesional que buscas</p>
         </div>
 
         <!-- Loading State -->
@@ -143,6 +180,61 @@
           </div>
         </div>
       </main>
+
+      <!-- Featured Professionals Section -->
+      <section class="featured-professionals-section">
+        <div class="section-header">
+          <h2 class="section-title">Profesionales destacados</h2>
+          <p class="section-subtitle">Conecta con los mejores profesionales de tu zona. Todos nuestros profesionales destacados cuentan con licencia, seguro y excelentes valoraciones de los clientes.</p>
+        </div>
+
+        <div class="professionals-grid">
+          <div *ngFor="let professional of featuredProfessionals()" class="professional-card featured">
+            <!-- Professional Image -->
+            <div class="professional-image">
+              <img [src]="professional.image" [alt]="professional.name" onerror="this.src='assets/logos/logo.png'">
+              <div class="verified-badge">
+                <lucide-angular [img]="Award" size="16"></lucide-angular>
+              </div>
+            </div>
+
+            <!-- Professional Content -->
+            <div class="professional-content">
+              <div class="professional-header">
+                <h3 class="professional-name">{{ professional.name }}</h3>
+                <div class="professional-rating">
+                  <lucide-angular [img]="Star" size="14" class="star-icon"></lucide-angular>
+                  <span class="rating-value">{{ professional.rating }}</span>
+                  <span class="review-count">({{ professional.reviewCount }})</span>
+                </div>
+              </div>
+
+              <p class="professional-service">{{ professional.service }}</p>
+
+              <div class="professional-info">
+                <div class="info-item">
+                  <lucide-angular [img]="MapPin" size="14" class="info-icon"></lucide-angular>
+                  <span>{{ professional.location }}</span>
+                </div>
+                <div class="info-item">
+                  <lucide-angular [img]="Clock" size="14" class="info-icon"></lucide-angular>
+                  <span>{{ professional.experience }}</span>
+                </div>
+              </div>
+
+              <div class="professional-footer">
+                <div class="professional-price">
+                  <span class="price-label">Desde</span>
+                  <span class="price-value">${{ professional.price }}</span>
+                </div>
+                <button class="contact-professional-btn" (click)="contactProfessional(professional)">
+                  Contactar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
 
     <!-- Professionals View -->

@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, signal, inject, HostListener, OnIni
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, Search, MessageCircle, User, UserPlus, Star, MapPin, Clock, Heart, ArrowLeft, Users, Award, DollarSign, ChevronDown, LogIn, LogOut, Settings, Briefcase } from 'lucide-angular';
+import { LucideAngularModule, Search, MessageCircle, User, UserPlus, Star, MapPin, Clock, Heart, ArrowLeft, Users, Award, DollarSign, ChevronDown, LogIn, LogOut, Settings, Briefcase, CalendarCheck, CheckCircle } from 'lucide-angular';
 import { AuthService } from '../../domain/auth';
 import { ListOficiosUseCase } from '../../domain/oficios/use-cases/list-oficios.usecase';
 import { Oficio } from '../../domain/oficios/oficio.model';
@@ -51,6 +51,8 @@ export class HomePage implements OnInit {
   readonly LogOut = LogOut;
   readonly Settings = Settings;
   readonly Briefcase = Briefcase;
+  readonly CalendarCheck = CalendarCheck;
+  readonly CheckCircle = CheckCircle;
 
   // Search functionality
   searchQuery = signal('');
@@ -63,6 +65,58 @@ export class HomePage implements OnInit {
   // Services from API
   services = signal<ServiceCard[]>([]);
   isLoadingServices = signal(true);
+
+  // Featured professionals
+  featuredProfessionals = signal<any[]>([
+    {
+      id: 1,
+      name: 'Carlos Rodríguez',
+      service: 'Plomería',
+      rating: 4.9,
+      reviewCount: 234,
+      price: 1500,
+      location: 'San Miguel, Buenos Aires',
+      experience: '12 años de experiencia',
+      verified: true,
+      image: 'assets/professionals/juan-perez.jpg'
+    },
+    {
+      id: 2,
+      name: 'Ana Martínez',
+      service: 'Electricidad',
+      rating: 4.8,
+      reviewCount: 189,
+      price: 1400,
+      location: 'Villa Ballester, Buenos Aires',
+      experience: '9 años de experiencia',
+      verified: true,
+      image: 'assets/professionals/roberto-silva.jpg'
+    },
+    {
+      id: 3,
+      name: 'Luis Fernández',
+      service: 'Carpintería',
+      rating: 5.0,
+      reviewCount: 156,
+      price: 2000,
+      location: 'San Martín, Buenos Aires',
+      experience: '15 años de experiencia',
+      verified: true,
+      image: 'assets/professionals/miguel-torres.jpg'
+    },
+    {
+      id: 4,
+      name: 'Patricia López',
+      service: 'Pintura',
+      rating: 4.7,
+      reviewCount: 142,
+      price: 1200,
+      location: 'José C. Paz, Buenos Aires',
+      experience: '8 años de experiencia',
+      verified: true,
+      image: 'assets/professionals/juan-perez.jpg'
+    }
+  ]);
 
   // Mock data for professionals by service
   professionalsByService: { [key: number]: any[] } = {

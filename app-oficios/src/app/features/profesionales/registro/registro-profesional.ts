@@ -1,6 +1,6 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { Router } from '@angular/router';
 import { RegisterProfesionalUseCase } from '../../../domain/profesionales/use-cases/register-profesional.usecase';
 import { ListOficiosUseCase } from '../../../domain/oficios/use-cases/list-oficios.usecase';
@@ -27,6 +27,8 @@ export class RegistroProfesional implements OnInit {
   isLoading = signal(false);
   errorMessage = signal<string | null>(null);
   successMessage = signal<string | null>(null);
+  newEspecialidad = signal('');
+  stillWorking = signal(true); // Controla si aún ejerce el oficio
 
   ngOnInit(): void {
     this.initForm();
@@ -39,9 +41,27 @@ export class RegistroProfesional implements OnInit {
     this.registroForm = this.fb.group({
       idUsuario: [currentUser?.id || null, [Validators.required]],
       fechaDesde: ['', [Validators.required]],
-      fechaHasta: ['', [Validators.required]],
-      idOficio: ['', [Validators.required]]
-    });
+      fechaHasta: [null],
+      idOficio: ['', [Validators.required]],
+      precioMin: ['', [Validators.required, Validators.min(0)]],
+      precioMax: ['', [Validators.required, Validators.min(0)]],
+      especialidades: this.fb.array([], [Validators.required])
+    }, { validators: this.priceRangeValidator });
+  }
+
+  // Validador personalizado para verificar que precioMax > precioMin
+  private priceRangeValidator(group: FormGroup): { [key: string]: boolean } | null {
+    const min = group.get('precioMin')?.value;
+    const max = group.get('precioMax')?.value;
+
+    if (min && max && Number(max) <= Number(min)) {
+      return { invalidPriceRange: true };
+    }
+    return null;
+  }
+
+  get especialidades(): FormArray {
+    return this.registroForm.get('especialidades') as FormArray;
   }
 
   private loadOficios(): void {
@@ -56,10 +76,56 @@ export class RegistroProfesional implements OnInit {
     });
   }
 
+  onStillWorkingChange(event: Event): void {
+    const checkbox = event.target as HTMLInputElement;
+    this.stillWorking.set(checkbox.checked);
+
+    if (checkbox.checked) {
+      this.registroForm.patchValue({ fechaHasta: null });
+      this.registroForm.get('fechaHasta')?.clearValidators();
+    } else {
+      this.registroForm.get('fechaHasta')?.setValidators([Validators.required]);
+    }
+    this.registroForm.get('fechaHasta')?.updateValueAndValidity();
+  }
+
+  addEspecialidad(): void {
+    const especialidad = this.newEspecialidad().trim();
+
+    if (!especialidad) {
+      return;
+    }
+
+    // Verificar que no exista ya
+    const exists = this.especialidades.controls.some(
+      control => control.value.toLowerCase() === especialidad.toLowerCase()
+    );
+
+    if (exists) {
+      this.errorMessage.set('Esta especialidad ya fue agregada');
+      setTimeout(() => this.errorMessage.set(null), 3000);
+      return;
+    }
+
+    this.especialidades.push(this.fb.control(especialidad));
+    this.newEspecialidad.set('');
+  }
+
+  removeEspecialidad(index: number): void {
+    this.especialidades.removeAt(index);
+  }
+
   onSubmit(): void {
     if (this.registroForm.invalid) {
       this.markFormGroupTouched(this.registroForm);
-      this.errorMessage.set('Por favor, complete todos los campos requeridos');
+
+      if (this.registroForm.hasError('invalidPriceRange')) {
+        this.errorMessage.set('El precio máximo debe ser mayor al precio mínimo');
+      } else if (this.especialidades.length === 0) {
+        this.errorMessage.set('Debe agregar al menos una especialidad');
+      } else {
+        this.errorMessage.set('Por favor, complete todos los campos requeridos');
+      }
       return;
     }
 
@@ -67,7 +133,16 @@ export class RegistroProfesional implements OnInit {
     this.errorMessage.set(null);
     this.successMessage.set(null);
 
-    const request: ProfesionalRequest = this.registroForm.value;
+    const formValue = this.registroForm.value;
+    const request: ProfesionalRequest = {
+      idUsuario: formValue.idUsuario,
+      fechaDesde: formValue.fechaDesde,
+      fechaHasta: formValue.fechaHasta,
+      idOficio: Number(formValue.idOficio),
+      precioMin: Number(formValue.precioMin),
+      precioMax: Number(formValue.precioMax),
+      especialidades: formValue.especialidades
+    };
 
     this.registerUseCase.execute(request).subscribe({
       next: (response) => {
@@ -92,6 +167,10 @@ export class RegistroProfesional implements OnInit {
     Object.keys(formGroup.controls).forEach(key => {
       const control = formGroup.get(key);
       control?.markAsTouched();
+
+      if (control instanceof FormArray) {
+        control.controls.forEach(c => c.markAsTouched());
+      }
     });
   }
 
@@ -105,6 +184,10 @@ export class RegistroProfesional implements OnInit {
 
     if (field?.hasError('required')) {
       return 'Este campo es requerido';
+    }
+
+    if (field?.hasError('min')) {
+      return 'El valor debe ser mayor o igual a 0';
     }
 
     return '';
