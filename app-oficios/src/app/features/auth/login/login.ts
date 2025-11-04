@@ -4,11 +4,12 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
 import { Router, RouterModule } from '@angular/router';
 import { LucideAngularModule, Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-angular';
 import { AuthService, LoginRequest } from '../../../domain/auth';
+import { RoleSelectionModalComponent } from '../../../shared/components/role-selection-modal/role-selection-modal.component';
 
 
 @Component({
   selector: 'app-login',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule, RouterModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule, RouterModule, RoleSelectionModalComponent],
   templateUrl: './login.html',
   styleUrl: './login.scss'
 })
@@ -22,6 +23,7 @@ export class Login {
   showPassword = signal(false);
   isLoading = signal(false);
   loginError = signal<string | null>(null);
+  showRoleModal = signal(false);
   loginForm: FormGroup;
 
   private readonly router = inject(Router);
@@ -53,8 +55,15 @@ export class Login {
         next: (response) => {
           console.log('Login successful:', response);
           this.isLoading.set(false);
-          // Navigate to home page
-          this.router.navigate(['/']);
+
+          // Check if user has idProfesional
+          if (response.idProfesional !== null && response.idProfesional !== undefined) {
+            // Show role selection modal
+            this.showRoleModal.set(true);
+          } else {
+            // Navigate directly to home page as client
+            this.router.navigate(['/']);
+          }
         },
         error: (error) => {
           console.error('Login failed:', error);
@@ -70,6 +79,18 @@ export class Login {
           }
         }
       });
+    }
+  }
+
+  onRoleSelected(role: 'cliente' | 'profesional') {
+    this.showRoleModal.set(false);
+
+    if (role === 'profesional') {
+      // Navigate to professional dashboard
+      this.router.navigate(['/profesionales/dashboard']);
+    } else {
+      // Navigate to home page
+      this.router.navigate(['/']);
     }
   }
 }

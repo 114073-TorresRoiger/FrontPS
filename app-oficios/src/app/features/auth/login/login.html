@@ -90,3 +90,9 @@
             </div>
         </div>
     </div>
+
+<!-- Role Selection Modal -->
+<app-role-selection-modal
+  *ngIf="showRoleModal()"
+  (roleSelected)="onRoleSelected($event)">
+</app-role-selection-modal>

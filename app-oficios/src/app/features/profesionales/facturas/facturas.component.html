@@ -1,0 +1,48 @@
+<div class="facturas-container">
+  <header class="page-header">
+    <button class="back-btn" (click)="goBack()">
+      <lucide-angular [img]="ArrowLeft" size="20"></lucide-angular>
+      <span>Volver al Dashboard</span>
+    </button>
+    <h1>Facturas Generadas</h1>
+  </header>
+
+  <div class="facturas-content">
+    <div class="facturas-list">
+      <div *ngFor="let factura of facturas" class="factura-card">
+        <div class="factura-icon">
+          <lucide-angular [img]="FileText" size="24"></lucide-angular>
+        </div>
+
+        <div class="factura-info">
+          <h3>{{ factura.numero }}</h3>
+          <p class="cliente">{{ factura.cliente }}</p>
+          <div class="fecha">
+            <lucide-angular [img]="Calendar" size="14"></lucide-angular>
+            <span>{{ factura.fecha }}</span>
+          </div>
+        </div>
+
+        <div class="factura-monto">
+          <span class="label">Monto</span>
+          <span class="value">\${{ factura.monto }}</span>
+        </div>
+
+        <div class="factura-estado">
+          <span class="estado-badge" [ngClass]="getEstadoClass(factura.estado)">
+            {{ factura.estado }}
+          </span>
+        </div>
+
+        <div class="factura-actions">
+          <button class="action-btn" (click)="verFactura(factura)" title="Ver factura">
+            <lucide-angular [img]="Eye" size="18"></lucide-angular>
+          </button>
+          <button class="action-btn" (click)="descargarFactura(factura)" title="Descargar">
+            <lucide-angular [img]="Download" size="18"></lucide-angular>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

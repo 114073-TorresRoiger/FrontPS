@@ -1,0 +1,73 @@
+<div class="resenas-container">
+  <header class="page-header">
+    <button class="back-btn" (click)="goBack()">
+      <lucide-angular [img]="ArrowLeft" size="20"></lucide-angular>
+      <span>Volver al Dashboard</span>
+    </button>
+    <h1>Reseñas de Clientes</h1>
+  </header>
+
+  <!-- Resumen de calificaciones -->
+  <div class="rating-summary">
+        <div class="rating-overview">
+      <div class="rating-score">
+        <span class="score-value">{{ promedioCalificacion }}</span>
+        <div class="stars">
+          <lucide-angular
+            *ngFor="let filled of getStarsArrayFromRating(promedioCalificacion)"
+            [img]="Star"
+            size="24"
+            class="star-icon filled">
+          </lucide-angular>
+        </div>
+        <p class="total-reviews">{{ totalResenas }} reseñas</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista de reseñas -->
+  <div class="resenas-content">
+    <div class="resenas-list">
+      <div *ngFor="let resena of resenas" class="resena-card">
+        <div class="resena-header">
+          <div class="cliente-info">
+            <div class="avatar">
+              <lucide-angular [img]="User" size="20"></lucide-angular>
+            </div>
+            <div class="info">
+              <h3>{{ resena.cliente }}</h3>
+              <p class="servicio">{{ resena.servicio }}</p>
+            </div>
+          </div>
+
+          <div class="rating-date">
+            <div class="stars">
+              <lucide-angular
+                *ngFor="let filled of getStarsArray(resena.calificacion)"
+                [img]="Star"
+                size="16"
+                class="star-icon"
+                [class.filled]="filled">
+              </lucide-angular>
+            </div>
+            <div class="fecha">
+              <lucide-angular [img]="Calendar" size="14"></lucide-angular>
+              <span>{{ resena.fecha }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="resena-body">
+          <p class="comentario">{{ resena.comentario }}</p>
+        </div>
+
+        <div class="resena-footer">
+          <button class="helpful-btn">
+            <lucide-angular [img]="ThumbsUp" size="16"></lucide-angular>
+            <span>Útil</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

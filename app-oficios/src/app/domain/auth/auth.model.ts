@@ -13,6 +13,7 @@ export interface AuthResponse {
   telefono: string | null;
   nacimiento: string | null;
   idDireccion: number | null;
+  idProfesional: number | null;
 }
 
 export interface User {
@@ -24,6 +25,7 @@ export interface User {
   telefono: string | null;
   nacimiento: string | null;
   idDireccion: number | null;
+  idProfesional: number | null;
   role?: string;
 }
 

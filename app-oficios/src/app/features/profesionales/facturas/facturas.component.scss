@@ -1,0 +1,186 @@
+.facturas-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  min-height: 100vh;
+  background: #f8f9fa;
+}
+
+.page-header {
+  margin-bottom: 2rem;
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    color: #374151;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 1.5rem;
+
+    &:hover {
+      background: #f9fafb;
+      border-color: #d1d5db;
+    }
+  }
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1a1a1a;
+  }
+}
+
+.facturas-content {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
+
+.facturas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.factura-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto auto;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  align-items: center;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: #3b82f6;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+  }
+
+  .factura-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .factura-info {
+    h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 0.25rem;
+    }
+
+    .cliente {
+      color: #6b7280;
+      font-size: 0.875rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .fecha {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      color: #9ca3af;
+      font-size: 0.875rem;
+    }
+  }
+
+  .factura-monto {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+
+    .label {
+      font-size: 0.75rem;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+  }
+
+  .factura-estado {
+    .estado-badge {
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+
+      &.estado-pagada {
+        background: #d1fae5;
+        color: #065f46;
+      }
+
+      &.estado-pendiente {
+        background: #fef3c7;
+        color: #92400e;
+      }
+
+      &.estado-vencida {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+    }
+  }
+
+  .factura-actions {
+    display: flex;
+    gap: 0.5rem;
+
+    .action-btn {
+      width: 36px;
+      height: 36px;
+      border: 1px solid #e5e7eb;
+      background: white;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #6b7280;
+      transition: all 0.2s;
+
+      &:hover {
+        background: #f9fafb;
+        border-color: #3b82f6;
+        color: #3b82f6;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .facturas-container {
+    padding: 1rem;
+  }
+
+  .factura-card {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+
+    .factura-monto,
+    .factura-estado {
+      align-self: start;
+    }
+  }
+}

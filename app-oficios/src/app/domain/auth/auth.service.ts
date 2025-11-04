@@ -82,7 +82,8 @@ export class AuthService {
             documento: response.documento,
             telefono: response.telefono,
             nacimiento: response.nacimiento,
-            idDireccion: response.idDireccion
+            idDireccion: response.idDireccion,
+            idProfesional: response.idProfesional
           };
 
           // Store token and user data

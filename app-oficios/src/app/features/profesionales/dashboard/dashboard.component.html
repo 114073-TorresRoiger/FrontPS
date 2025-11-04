@@ -1,0 +1,87 @@
+<div class="dashboard-container">
+  <!-- Header -->
+  <header class="dashboard-header">
+    <button class="back-btn" (click)="goBack()">
+      <lucide-angular [img]="ArrowLeft" size="20"></lucide-angular>
+      <span>Volver al Inicio</span>
+    </button>
+    <div class="header-content">
+      <h1>Dashboard Profesional</h1>
+      <p class="welcome-text">Bienvenido, <strong>{{ userName() }}</strong></p>
+    </div>
+  </header>
+
+  <!-- Metrics Grid -->
+  <section class="metrics-section">
+    <h2 class="section-title">Resumen de Métricas</h2>
+    <div class="metrics-grid">
+      <div *ngFor="let metric of metrics()" class="metric-card">
+        <div class="metric-icon">
+          <lucide-angular [img]="metric.icon" size="24"></lucide-angular>
+        </div>
+        <div class="metric-content">
+          <p class="metric-title">{{ metric.title }}</p>
+          <h3 class="metric-value">{{ metric.value }}</h3>
+          <div class="metric-change" [class.positive]="metric.trend === 'up'" [class.negative]="metric.trend === 'down'">
+            <lucide-angular [img]="TrendingUp" size="14"></lucide-angular>
+            <span>{{ metric.change }} vs mes anterior</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Actions -->
+  <section class="actions-section">
+    <h2 class="section-title">Acciones Rápidas</h2>
+    <div class="actions-grid">
+      <div class="action-card" (click)="goToInvoices()">
+        <div class="action-icon invoices">
+          <lucide-angular [img]="FileText" size="32"></lucide-angular>
+        </div>
+        <h3>Facturas</h3>
+        <p>Ver y gestionar tus facturas generadas</p>
+      </div>
+
+      <div class="action-card" (click)="goToReviews()">
+        <div class="action-icon reviews">
+          <lucide-angular [img]="Star" size="32"></lucide-angular>
+        </div>
+        <h3>Reseñas</h3>
+        <p>Consultar valoraciones y comentarios de clientes</p>
+      </div>
+
+      <div class="action-card" (click)="goToMessages()">
+        <div class="action-icon messages">
+          <lucide-angular [img]="MessageSquare" size="32"></lucide-angular>
+        </div>
+        <h3>Mensajería</h3>
+        <p>Chat con clientes y gestión de conversaciones</p>
+      </div>
+
+      <div class="action-card" (click)="goToPaymentMethods()">
+        <div class="action-icon payments">
+          <lucide-angular [img]="CreditCard" size="32"></lucide-angular>
+        </div>
+        <h3>Métodos de Pago</h3>
+        <p>Agregar y gestionar formas de cobro</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Recent Activity -->
+  <section class="activity-section">
+    <h2 class="section-title">Actividad Reciente</h2>
+    <div class="activity-list">
+      <div *ngFor="let activity of recentActivities()" class="activity-item">
+        <div class="activity-icon">
+          <lucide-angular [img]="activity.icon" size="20"></lucide-angular>
+        </div>
+        <div class="activity-content">
+          <p class="activity-description">{{ activity.description }}</p>
+          <span class="activity-time">{{ activity.time }}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
