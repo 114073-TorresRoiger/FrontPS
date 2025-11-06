@@ -105,6 +105,42 @@ export class AuthService {
   }
 
   /**
+   * Forgot password - request recovery code
+   */
+  forgotPassword(email: string): Observable<any> {
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json'
+    });
+
+    return this.http.post<any>(`${this.apiUrl}/auth/forgot-password`, { email }, { headers })
+      .pipe(
+        catchError(error => {
+          console.error('Forgot password error:', error);
+          return throwError(() => error);
+        })
+      );
+  }
+
+  /**
+   * Reset password with code
+   */
+  resetPassword(email: string, codigo: string, nuevaPassword: string): Observable<any> {
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json'
+    });
+
+    return this.http.post<any>(`${this.apiUrl}/auth/reset-password`,
+      { email, codigo, nuevaPassword },
+      { headers }
+    ).pipe(
+      catchError(error => {
+        console.error('Reset password error:', error);
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
    * Logout user
    */
   logout(): void {
