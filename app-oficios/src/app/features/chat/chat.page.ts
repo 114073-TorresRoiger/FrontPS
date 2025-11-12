@@ -1,13 +1,7 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import {
-  StreamChatModule,
-  StreamAutocompleteTextareaModule,
-  ChatClientService,
-  ChannelService,
-  StreamI18nService,
-} from 'stream-chat-angular';
 import { StreamChatService } from './services/stream-chat.service';
 import { AuthService } from '../../domain/auth/auth.service';
 
@@ -16,10 +10,8 @@ import { AuthService } from '../../domain/auth/auth.service';
   standalone: true,
   imports: [
     CommonModule,
-    StreamChatModule,
-    StreamAutocompleteTextareaModule,
+    FormsModule,
   ],
-  providers: [ChatClientService, ChannelService, StreamI18nService],
   template: `
     <div class="chat-container">
       <!-- Loading State -->
@@ -55,23 +47,76 @@ import { AuthService } from '../../domain/auth/auth.service';
                 ➕ Nueva Consulta
               </button>
             </div>
-
-            <!-- Stream Chat Channel List -->
-            <stream-channel-list></stream-channel-list>
           </div>
 
           <!-- Main Chat Area -->
           <div class="chat-main">
-            <stream-channel>
-              <!-- Message List -->
-              <stream-message-list></stream-message-list>
+            <div *ngIf="!activeChannel" class="no-chat-selected">
+              <div class="no-chat-content">
+                <span class="chat-icon">💬</span>
+                <h3>Selecciona una conversación</h3>
+                <p>Elige un profesional para comenzar a chatear</p>
+              </div>
+            </div>
+
+            <div *ngIf="activeChannel" class="active-chat">
+              <!-- Chat Header -->
+              <div class="chat-header">
+                <div class="header-info">
+                  <h3>{{ activeChannel.name }}</h3>
+                  <span class="status-online">● En línea</span>
+                </div>
+              </div>
+
+              <!-- Messages Area -->
+              <div class="messages-container">
+                <div *ngIf="loadingMessages" class="loading-messages">
+                  <div class="spinner"></div>
+                  <p>Cargando mensajes...</p>
+                </div>
+
+                <div *ngIf="!loadingMessages && messages.length === 0" class="no-messages">
+                  <p>👋 ¡Inicia la conversación!</p>
+                </div>
+
+                <div *ngIf="!loadingMessages && messages.length > 0" class="messages-list">
+                  <div 
+                    *ngFor="let message of messages" 
+                    class="message-item"
+                    [class.own-message]="message.user?.id === userId"
+                  >
+                    <div class="message-avatar">
+                      {{ message.user?.name?.charAt(0) || '?' }}
+                    </div>
+                    <div class="message-content">
+                      <div class="message-header">
+                        <span class="message-author">{{ message.user?.name || 'Usuario' }}</span>
+                        <span class="message-time">{{ formatMessageTime(message.created_at) }}</span>
+                      </div>
+                      <div class="message-text">{{ message.text }}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
               <!-- Message Input -->
-              <stream-message-input></stream-message-input>
-
-              <!-- Thread (respuestas) -->
-              <stream-thread name="thread"></stream-thread>
-            </stream-channel>
+              <div class="message-input-container">
+                <input
+                  type="text"
+                  [(ngModel)]="newMessage"
+                  (keyup.enter)="sendMessage()"
+                  placeholder="Escribe un mensaje..."
+                  class="message-input"
+                />
+                <button 
+                  (click)="sendMessage()" 
+                  [disabled]="!newMessage.trim()"
+                  class="btn-send"
+                >
+                  Enviar
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -96,19 +141,23 @@ import { AuthService } from '../../domain/auth/auth.service';
                 class="professional-card"
                 (click)="selectProfessional(prof)"
               >
-                <div class="professional-avatar">
-                  {{ prof.name.charAt(0) }}
+                <div class="professional-avatar" [style.background-image]="prof.imagenUrl ? 'url(' + prof.imagenUrl + ')' : 'none'">
+                  <span *ngIf="!prof.imagenUrl">{{ prof.name.charAt(0) }}</span>
                 </div>
                 <div class="professional-info">
                   <h3>{{ prof.name }}</h3>
-                  <p>{{ prof.specialty }}</p>
+                  <p class="specialty">{{ prof.specialty }}</p>
+                  <span class="status-badge" [class.accepted]="prof.estado === 'ACEPTADA'">
+                    {{ prof.estado === 'ACEPTADA' ? '✓ Solicitud Aceptada' : '⏱ Pendiente' }}
+                  </span>
                 </div>
-                <span class="chat-arrow">→</span>
+                <span class="chat-arrow">💬</span>
               </div>
             </div>
 
             <div *ngIf="!loadingProfessionals && professionals.length === 0" class="empty-state">
-              <p>No hay profesionales disponibles</p>
+              <p>📋 No has enviado solicitudes aún</p>
+              <small>Envía solicitudes a profesionales para poder iniciar conversaciones</small>
             </div>
           </div>
 
@@ -125,7 +174,6 @@ export class ChatPage implements OnInit, OnDestroy {
   private streamChatService = inject(StreamChatService);
   private authService = inject(AuthService);
   private router = inject(Router);
-  private chatClientService = inject(ChatClientService);
 
   isConnecting = true;
   connectionError: string | null = null;
@@ -133,6 +181,10 @@ export class ChatPage implements OnInit, OnDestroy {
   showProfessionalModal = false;
   loadingProfessionals = false;
   professionals: any[] = [];
+  activeChannel: any = null;
+  messages: any[] = [];
+  newMessage: string = '';
+  loadingMessages = false;
 
   async ngOnInit(): Promise<void> {
     await this.initializeChat();
@@ -158,10 +210,7 @@ export class ChatPage implements OnInit, OnDestroy {
       console.log('🔍 Inicializando chat para usuario:', this.userId);
 
       // Inicializar el cliente de Stream Chat
-      const chatClient = await this.streamChatService.initializeChat(this.userId, userName);
-      
-      // Pasar el cliente a ChatClientService
-      this.chatClientService.chatClient = chatClient;
+      await this.streamChatService.initializeChat(this.userId, userName);
 
       this.isConnecting = false;
       console.log('✅ Chat inicializado correctamente');
@@ -202,11 +251,73 @@ export class ChatPage implements OnInit, OnDestroy {
 
       console.log('✅ Canal creado:', channel);
 
+      // Configurar canal activo
+      this.activeChannel = {
+        channel: channel,
+        name: professional.name
+      };
+
+      // Cargar mensajes
+      await this.loadMessages();
+
       this.closeProfessionalModal();
     } catch (error) {
       console.error('❌ Error creando conversación:', error);
       alert('Error al crear la conversación. Por favor, intenta de nuevo.');
     }
+  }
+
+  async loadMessages(): Promise<void> {
+    if (!this.activeChannel) return;
+
+    try {
+      this.loadingMessages = true;
+      const state = await this.activeChannel.channel.watch();
+      this.messages = state.messages || [];
+      
+      // Escuchar nuevos mensajes
+      this.activeChannel.channel.on('message.new', (event: any) => {
+        this.messages.push(event.message);
+      });
+
+      this.loadingMessages = false;
+    } catch (error) {
+      console.error('❌ Error cargando mensajes:', error);
+      this.loadingMessages = false;
+    }
+  }
+
+  async sendMessage(): Promise<void> {
+    if (!this.newMessage.trim() || !this.activeChannel) return;
+
+    try {
+      await this.activeChannel.channel.sendMessage({
+        text: this.newMessage.trim()
+      });
+
+      this.newMessage = '';
+    } catch (error) {
+      console.error('❌ Error enviando mensaje:', error);
+      alert('Error al enviar el mensaje');
+    }
+  }
+
+  formatMessageTime(date: Date | string): string {
+    const messageDate = new Date(date);
+    const now = new Date();
+    const diffMs = now.getTime() - messageDate.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+
+    if (diffMins < 1) return 'Ahora';
+    if (diffMins < 60) return `${diffMins}m`;
+    
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours}h`;
+    
+    return messageDate.toLocaleDateString('es-ES', { 
+      day: 'numeric', 
+      month: 'short' 
+    });
   }
 
   goToHome(): void {

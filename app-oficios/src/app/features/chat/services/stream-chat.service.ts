@@ -1,8 +1,9 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { StreamChat, Channel } from 'stream-chat';
 import { environment } from '../../../../environments/environment';
+import { SolicitudRepository } from '../../../domain/solicitudes/solicitud.repository';
 
 @Injectable({
   providedIn: 'root'
@@ -10,8 +11,8 @@ import { environment } from '../../../../environments/environment';
 export class StreamChatService {
   private chatClient!: StreamChat;
   private currentUserId: string = '';
-
-  constructor(private http: HttpClient) {}
+  private http = inject(HttpClient);
+  private solicitudRepository = inject(SolicitudRepository);
 
   async initializeChat(userId: string, userName: string): Promise<StreamChat> {
     try {
@@ -80,9 +81,22 @@ export class StreamChatService {
 
   async getProfessionals(): Promise<any[]> {
     try {
-      return await firstValueFrom(
-        this.http.get<any[]>(`${environment.apiUrl}/api/v1/chat/professionals/available`)
+      // Obtener solicitudes del usuario actual
+      const solicitudes = await firstValueFrom(
+        this.solicitudRepository.getSolicitudesByUsuario(parseInt(this.currentUserId))
       );
+
+      console.log('✅ Solicitudes del usuario:', solicitudes);
+
+      // Mapear solicitudes a formato de profesionales
+      return solicitudes.map(solicitud => ({
+        id: solicitud.idProfesional.toString(),
+        name: `${solicitud.nombreProfesional} ${solicitud.apellidoProfesional}`,
+        specialty: solicitud.especialidad || 'Sin especialidad',
+        imagenUrl: solicitud.imagenUrl,
+        solicitudId: solicitud.idSolicitud,
+        estado: solicitud.estado
+      }));
     } catch (error) {
       console.error('❌ Error al obtener profesionales:', error);
       return [];
