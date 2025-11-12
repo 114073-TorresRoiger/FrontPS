@@ -24,7 +24,7 @@
           
           <div class="professional-info">
             <h3>{{ getProfessionalName(solicitud) }}</h3>
-            <div class="professional-specialty">{{ solicitud.especialidad }}</div>
+            <div class="professional-specialty" *ngIf="solicitud.especialidad">{{ solicitud.especialidad }}</div>
             <div class="solicitud-status" [class]="'status-' + solicitud.estado.toLowerCase()">
               Estado: {{ solicitud.estado }}
             </div>

@@ -69,6 +69,7 @@ export class ChatPage implements OnInit, OnDestroy {
 
     this.streamChatService.currentUserId$.subscribe((userId) => {
       this.currentUserId = userId;
+      console.log('🔍 currentUserId actualizado:', this.currentUserId);
     });
   }
 
@@ -117,6 +118,7 @@ export class ChatPage implements OnInit, OnDestroy {
    * Abrir modal de selección de profesional
    */
   onNewChatRequested(): void {
+    console.log('🔍 Abriendo modal con userId:', this.currentUserId);
     this.professionalModal?.open();
   }
 

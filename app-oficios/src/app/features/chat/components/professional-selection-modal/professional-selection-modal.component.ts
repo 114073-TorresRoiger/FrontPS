@@ -6,7 +6,7 @@ import { SolicitudConProfesional } from '../../../../domain/solicitudes/solicitu
 interface ProfessionalForChat {
   id: string;
   name: string;
-  specialty: string;
+  specialty?: string;
   imageUrl?: string;
 }
 
@@ -34,24 +34,31 @@ export class ProfessionalSelectionModalComponent implements OnInit {
 
   async loadProfessionalsFromSolicitudes(): Promise<void> {
     if (!this.userId) {
-      console.error('No hay userId disponible');
+      console.error('❌ No hay userId disponible');
       return;
     }
 
     this.isLoading = true;
+    console.log('🔍 Cargando solicitudes para usuario:', this.userId);
+    
     try {
       this.solicitudRepository.getSolicitudesByUsuario(Number(this.userId)).subscribe({
         next: (solicitudes) => {
+          console.log('✅ Solicitudes cargadas:', solicitudes);
           this.solicitudes = solicitudes;
           this.isLoading = false;
+          
+          if (solicitudes.length === 0) {
+            console.log('ℹ️ No se encontraron solicitudes para este usuario');
+          }
         },
         error: (error) => {
-          console.error('Error cargando solicitudes:', error);
+          console.error('❌ Error cargando solicitudes:', error);
           this.isLoading = false;
         },
       });
     } catch (error) {
-      console.error('Error:', error);
+      console.error('❌ Exception:', error);
       this.isLoading = false;
     }
   }
@@ -60,9 +67,10 @@ export class ProfessionalSelectionModalComponent implements OnInit {
     const professional: ProfessionalForChat = {
       id: solicitud.idProfesional.toString(),
       name: `${solicitud.nombreProfesional} ${solicitud.apellidoProfesional}`,
-      specialty: solicitud.especialidad,
+      specialty: solicitud.especialidad || 'Profesional',
       imageUrl: solicitud.imagenUrl,
     };
+    console.log('👤 Profesional seleccionado:', professional);
     this.professionalSelected.emit(professional);
     this.close();
   }

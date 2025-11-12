@@ -20,7 +20,7 @@ export interface SolicitudConProfesional {
   idProfesional: number;
   nombreProfesional: string;
   apellidoProfesional: string;
-  especialidad: string;
+  especialidad?: string; // Opcional porque puede no venir del backend
   fechaSolicitud: string;
   estado: string;
   imagenUrl?: string;
