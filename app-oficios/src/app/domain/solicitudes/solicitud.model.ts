@@ -14,3 +14,14 @@ export interface SolicitudResponse {
   direccion: string;
   observacion: string;
 }
+
+export interface SolicitudConProfesional {
+  idSolicitud: number;
+  idProfesional: number;
+  nombreProfesional: string;
+  apellidoProfesional: string;
+  especialidad: string;
+  fechaSolicitud: string;
+  estado: string;
+  imagenUrl?: string;
+}

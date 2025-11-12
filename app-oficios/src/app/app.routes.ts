@@ -26,13 +26,13 @@ export const routes: Routes = [
 				(m) => m.PROFESIONALES_ROUTES,
 			),
 	},
-	// {
-	// 	path: 'chat',
-	// 	loadChildren: () => import('./features/chat/chat.routes').then((m) => m.CHAT_ROUTES),
-	// },
-	// {
-	// 	path: 'pagos',
-	// 	loadChildren: () => import('./features/pagos/pagos.routes').then((m) => m.PAGOS_ROUTES),
-	// },
+	{
+		path: 'chat',
+		loadChildren: () => import('./features/chat/chat.routes').then((m) => m.CHAT_ROUTES),
+	},
+	{
+		path: 'pagos',
+		loadChildren: () => import('./features/pagos/pagos.routes').then((m) => m.PAGOS_ROUTES),
+	},
 	{ path: '**', redirectTo: 'auth' },
 ];

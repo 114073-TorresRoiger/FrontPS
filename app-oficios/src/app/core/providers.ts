@@ -7,10 +7,24 @@ import { ProfesionalRepository } from '../domain/profesionales/profesional.repos
 import { ProfesionalHttpRepository } from '../data/profesionales/profesional.http.repository';
 import { SolicitudRepository } from '../domain/solicitudes/solicitud.repository';
 import { SolicitudHttpRepository } from '../data/solicitudes/solicitud.http.repository';
+import { ChatRepository } from '../domain/chat/chat.repository';
+import { ChatHttpRepository } from '../data/chat/chat.http.repository';
+
+// Use Cases
+import { InitializeChatUseCase } from '../domain/chat/use-cases/initialize-chat.usecase';
+import { CreateChannelUseCase } from '../domain/chat/use-cases/create-channel.usecase';
+import { SendMessageUseCase } from '../domain/chat/use-cases/send-message.usecase';
+import { GetUserConversationsUseCase } from '../domain/chat/use-cases/get-user-conversations.usecase';
 
 export const CORE_PROVIDERS: Provider[] = [
   { provide: OficioRepository, useClass: OficioHttpRepository },
   { provide: UsuarioRepository, useClass: UsuarioHttpRepository },
   { provide: ProfesionalRepository, useClass: ProfesionalHttpRepository },
   { provide: SolicitudRepository, useClass: SolicitudHttpRepository },
+  { provide: ChatRepository, useClass: ChatHttpRepository },
+  // Chat Use Cases
+  InitializeChatUseCase,
+  CreateChannelUseCase,
+  SendMessageUseCase,
+  GetUserConversationsUseCase,
 ];

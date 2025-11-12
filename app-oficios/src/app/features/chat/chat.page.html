@@ -1,0 +1,44 @@
+<!-- Loading/Error Screen -->
+<div class="loading-screen" *ngIf="isConnecting || connectionError">
+  <div class="loading-box">
+    <div *ngIf="isConnecting" class="loading-content">
+      <div class="spinner"></div>
+      <h2>💬 Conectando al Chat</h2>
+      <p>Estamos configurando tu chat, espera un momento...</p>
+    </div>
+
+    <div *ngIf="connectionError" class="error-content">
+      <h2>⚠️ Error de Conexión</h2>
+      <p>{{ connectionError }}</p>
+      <button class="btn-back" (click)="logout()">Volver al Inicio</button>
+    </div>
+  </div>
+</div>
+
+<!-- Chat Screen -->
+<div class="chat-screen" *ngIf="!isConnecting && !connectionError">
+  <div class="chat-layout">
+    <!-- Sidebar with Channel List -->
+    <div class="sidebar">
+      <div class="sidebar-header">
+        <button class="btn-logout" (click)="logout()">Salir</button>
+      </div>
+      
+      <app-chat-channel-list
+        (channelSelected)="onChannelSelected($event)"
+        (newChatRequested)="onNewChatRequested()"
+      ></app-chat-channel-list>
+    </div>
+
+    <!-- Chat Area -->
+    <div class="chat-area">
+      <app-chat-channel [channel]="selectedChannel"></app-chat-channel>
+    </div>
+  </div>
+</div>
+
+<!-- Professional Selection Modal -->
+<app-professional-selection-modal
+  [userId]="currentUserId"
+  (professionalSelected)="onProfessionalSelected($event)"
+></app-professional-selection-modal>
