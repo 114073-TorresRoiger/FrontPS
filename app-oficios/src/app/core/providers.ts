@@ -5,9 +5,12 @@ import { UsuarioRepository } from '../domain/usuario/usuario.repository';
 import { UsuarioHttpRepository } from '../data/usuario/usuario.http.repository';
 import { ProfesionalRepository } from '../domain/profesionales/profesional.repository';
 import { ProfesionalHttpRepository } from '../data/profesionales/profesional.http.repository';
+import { SolicitudRepository } from '../domain/solicitudes/solicitud.repository';
+import { SolicitudHttpRepository } from '../data/solicitudes/solicitud.http.repository';
 
 export const CORE_PROVIDERS: Provider[] = [
   { provide: OficioRepository, useClass: OficioHttpRepository },
   { provide: UsuarioRepository, useClass: UsuarioHttpRepository },
   { provide: ProfesionalRepository, useClass: ProfesionalHttpRepository },
+  { provide: SolicitudRepository, useClass: SolicitudHttpRepository },
 ];

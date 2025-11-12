@@ -70,7 +70,7 @@ export class AuthService {
       'Content-Type': 'application/json'
     });
 
-    return this.http.post<AuthResponse>(`${this.apiUrl}/auth/login`, credentials, { headers })
+    return this.http.post<AuthResponse>(`${this.apiUrl}/api/v1/auth/login`, credentials, { headers })
       .pipe(
         tap(response => {
           // Map backend response to User model
@@ -112,7 +112,7 @@ export class AuthService {
       'Content-Type': 'application/json'
     });
 
-    return this.http.post<any>(`${this.apiUrl}/auth/forgot-password`, { email }, { headers })
+    return this.http.post<any>(`${this.apiUrl}/api/v1/password/forgot-password`, { email }, { headers })
       .pipe(
         catchError(error => {
           console.error('Forgot password error:', error);
@@ -129,7 +129,7 @@ export class AuthService {
       'Content-Type': 'application/json'
     });
 
-    return this.http.post<any>(`${this.apiUrl}/auth/reset-password`,
+    return this.http.post<any>(`${this.apiUrl}/api/v1/password/reset-password`,
       { email, codigo, nuevaPassword },
       { headers }
     ).pipe(

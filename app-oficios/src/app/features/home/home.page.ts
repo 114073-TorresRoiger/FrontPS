@@ -1,15 +1,20 @@
 import { ChangeDetectionStrategy, Component, signal, inject, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, Search, MessageCircle, User, UserPlus, Star, MapPin, Clock, Heart, ArrowLeft, Users, Award, DollarSign, ChevronDown, LogIn, LogOut, Settings, Briefcase, CalendarCheck, CheckCircle } from 'lucide-angular';
+import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { LucideAngularModule, Search, MessageCircle, User, UserPlus, Star, MapPin, Clock, Heart, ArrowLeft, Users, Award, DollarSign, ChevronDown, LogIn, LogOut, Settings, Briefcase, CalendarCheck, CheckCircle, X, Send } from 'lucide-angular';
 import { AuthService } from '../../domain/auth';
 import { ListOficiosUseCase } from '../../domain/oficios/use-cases/list-oficios.usecase';
 import { Oficio } from '../../domain/oficios/oficio.model';
+import { GetProfesionalesByOficioUseCase } from '../../domain/profesionales/use-cases/get-profesionales-by-oficio.usecase';
+import { PerfilProfesional } from '../../domain/profesionales/models/perfil-profesional.model';
+import { EnviarSolicitudUseCase } from '../../domain/solicitudes/use-cases/enviar-solicitud.usecase';
+import { SolicitudRequest } from '../../domain/solicitudes/solicitud.model';
 
 interface ServiceCard {
   id: number;
   title: string;
+  oficioOriginal: string; // Original oficio name from API (uppercase)
   image: string;
   description: string;
   professionalCount: number;
@@ -22,7 +27,7 @@ interface ServiceCard {
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideAngularModule, FormsModule],
+  imports: [CommonModule, RouterModule, LucideAngularModule, FormsModule, ReactiveFormsModule],
   templateUrl: './home.page.html',
   styleUrl: './home.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -30,8 +35,11 @@ interface ServiceCard {
 export class HomePage implements OnInit {
   // Dependencies
   private readonly router = inject(Router);
+  private readonly fb = inject(FormBuilder);
   readonly authService = inject(AuthService);
   private readonly listOficiosUseCase = inject(ListOficiosUseCase);
+  private readonly getProfesionalesByOficioUseCase = inject(GetProfesionalesByOficioUseCase);
+  private readonly enviarSolicitudUseCase = inject(EnviarSolicitudUseCase);
 
   // Icons
   readonly Search = Search;
@@ -44,6 +52,8 @@ export class HomePage implements OnInit {
   readonly Heart = Heart;
   readonly ArrowLeft = ArrowLeft;
   readonly Users = Users;
+  readonly X = X;
+  readonly Send = Send;
   readonly Award = Award;
   readonly DollarSign = DollarSign;
   readonly ChevronDown = ChevronDown;
@@ -65,6 +75,19 @@ export class HomePage implements OnInit {
   // Services from API
   services = signal<ServiceCard[]>([]);
   isLoadingServices = signal(true);
+
+  // Professionals from API
+  currentProfessionals = signal<PerfilProfesional[]>([]);
+  isLoadingProfessionals = signal(false);
+  noProfessionalsFound = signal(false);
+
+  // Modal de solicitud
+  showSolicitudModal = signal(false);
+  selectedProfessional = signal<PerfilProfesional | null>(null);
+  solicitudForm!: FormGroup;
+  isSendingSolicitud = signal(false);
+  solicitudSuccess = signal(false);
+  solicitudError = signal<string | null>(null);
 
   // Featured professionals
   featuredProfessionals = signal<any[]>([
@@ -221,6 +244,19 @@ export class HomePage implements OnInit {
 
   ngOnInit(): void {
     this.loadServices();
+    this.initSolicitudForm();
+  }
+
+  private initSolicitudForm(): void {
+    // Get tomorrow's date as minimum
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const minDate = tomorrow.toISOString().split('T')[0];
+
+    this.solicitudForm = this.fb.group({
+      fechaservicio: [minDate, Validators.required],
+      observacion: ['', [Validators.required, Validators.minLength(10)]]
+    });
   }
 
   private loadServices(): void {
@@ -253,6 +289,7 @@ export class HomePage implements OnInit {
     return {
       id: oficio.id,
       title: this.formatOficioName(oficio.oficio),
+      oficioOriginal: oficio.oficio, // Store original uppercase name for API calls
       image: imageMap[oficio.oficio] || 'assets/logos/logo.png',
       description: oficio.descripcion,
       professionalCount: 0, // This will be populated from another endpoint
@@ -285,9 +322,42 @@ export class HomePage implements OnInit {
     }
   }
 
-  viewServiceProfessionals(service: any) {
+  viewServiceProfessionals(service: ServiceCard) {
     this.selectedService.set(service);
     this.showProfessionals.set(true);
+    this.loadProfessionalsByOficio(service.oficioOriginal);
+  }
+
+  private loadProfessionalsByOficio(oficio: string): void {
+    this.isLoadingProfessionals.set(true);
+    this.noProfessionalsFound.set(false);
+
+    // Use the original oficio name from the API (already in correct format)
+    this.getProfesionalesByOficioUseCase.execute(oficio).subscribe({
+      next: (profesionales: PerfilProfesional[]) => {
+        this.currentProfessionals.set(profesionales);
+        this.noProfessionalsFound.set(profesionales.length === 0);
+        this.isLoadingProfessionals.set(false);
+
+        // Update service card with professional count
+        const currentServices = this.services();
+        const selectedService = this.selectedService();
+        if (selectedService) {
+          const service = currentServices.find(s => s.id === selectedService.id);
+          if (service) {
+            service.professionalCount = profesionales.length;
+            this.services.set([...currentServices]);
+            this.selectedService.set({...selectedService, professionalCount: profesionales.length});
+          }
+        }
+      },
+      error: (error) => {
+        console.error('Error loading professionals:', error);
+        this.currentProfessionals.set([]);
+        this.noProfessionalsFound.set(true);
+        this.isLoadingProfessionals.set(false);
+      }
+    });
   }
 
   backToServices() {
@@ -296,14 +366,84 @@ export class HomePage implements OnInit {
   }
 
   getCurrentProfessionals() {
-    const selectedService = this.selectedService();
-    if (!selectedService) return [];
-    return this.professionalsByService[selectedService.id] || [];
+    return this.currentProfessionals();
   }
 
-  contactProfessional(professional: any) {
-    console.log('Contacting professional:', professional.name);
-    // Implementar lógica de contacto
+  // Helper method to map PerfilProfesional to display format
+  getProfessionalDisplayName(professional: PerfilProfesional): string {
+    return `${professional.nombre} ${professional.apellido}`;
+  }
+
+  contactProfessional(professional: PerfilProfesional) {
+    // Check if user is authenticated
+    if (!this.authService.isLoggedIn()) {
+      alert('Debes iniciar sesión para contactar a un profesional');
+      this.router.navigate(['/auth/login']);
+      return;
+    }
+
+    this.selectedProfessional.set(professional);
+    this.solicitudSuccess.set(false);
+    this.solicitudError.set(null);
+    this.solicitudForm.reset({
+      fechaservicio: this.getMinDate(),
+      observacion: ''
+    });
+    this.showSolicitudModal.set(true);
+  }
+
+  getMinDate(): string {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow.toISOString().split('T')[0];
+  }
+
+  closeSolicitudModal() {
+    this.showSolicitudModal.set(false);
+    this.selectedProfessional.set(null);
+    this.solicitudForm.reset();
+  }
+
+  enviarSolicitud() {
+    if (this.solicitudForm.invalid || !this.selectedProfessional()) {
+      return;
+    }
+
+    const currentUser = this.authService.currentUser();
+    if (!currentUser || !currentUser.id) {
+      this.solicitudError.set('No se pudo obtener la información del usuario');
+      return;
+    }
+
+    this.isSendingSolicitud.set(true);
+    this.solicitudError.set(null);
+
+    const solicitud: SolicitudRequest = {
+      idUsuario: currentUser.id,
+      idProfesional: this.getProfessionalId(this.selectedProfessional()!),
+      fechasolicitud: new Date().toISOString(),
+      fechaservicio: new Date(this.solicitudForm.value.fechaservicio).toISOString(),
+      observacion: this.solicitudForm.value.observacion
+    };
+
+    this.enviarSolicitudUseCase.execute(solicitud).subscribe({
+      next: () => {
+        this.isSendingSolicitud.set(false);
+        this.solicitudSuccess.set(true);
+        setTimeout(() => {
+          this.closeSolicitudModal();
+        }, 2000);
+      },
+      error: (error) => {
+        console.error('Error enviando solicitud:', error);
+        this.isSendingSolicitud.set(false);
+        this.solicitudError.set('Error al enviar la solicitud. Por favor, intenta nuevamente.');
+      }
+    });
+  }
+
+  private getProfessionalId(professional: PerfilProfesional): number {
+    return professional.idProfesional;
   }
 
   toggleDropdown() {
