@@ -43,9 +43,49 @@ import { AuthService } from '../../domain/auth/auth.service';
             </div>
 
             <div class="new-chat-section">
-              <button class="btn-new-chat" (click)="openProfessionalModal()">
+              <button 
+                class="btn-new-chat" 
+                (click)="openProfessionalModal()"
+                *ngIf="!isProfessional"
+              >
                 ➕ Nueva Consulta
               </button>
+              <div *ngIf="isProfessional" class="professional-info">
+                <p>💼 Modo Profesional</p>
+                <small>Tus clientes pueden iniciar conversaciones contigo</small>
+              </div>
+            </div>
+
+            <!-- Lista de Conversaciones -->
+            <div class="channels-section">
+              <div *ngIf="loadingChannels" class="loading-channels">
+                <div class="spinner"></div>
+                <p>Cargando conversaciones...</p>
+              </div>
+
+              <div *ngIf="!loadingChannels && channels.length === 0" class="no-channels">
+                <p>No hay conversaciones aún</p>
+              </div>
+
+              <div *ngIf="!loadingChannels && channels.length > 0" class="channels-list">
+                <div 
+                  *ngFor="let channel of channels"
+                  class="channel-item"
+                  [class.active]="activeChannel?.channel?.id === channel.id"
+                  (click)="selectChannel(channel)"
+                >
+                  <div class="channel-avatar">
+                    {{ getChannelName(channel).charAt(0) }}
+                  </div>
+                  <div class="channel-info">
+                    <h4>{{ getChannelName(channel) }}</h4>
+                    <p class="last-message">{{ getLastMessage(channel) }}</p>
+                  </div>
+                  <div *ngIf="channel.state?.unreadCount > 0" class="unread-badge">
+                    {{ channel.state.unreadCount }}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -157,7 +197,7 @@ import { AuthService } from '../../domain/auth/auth.service';
 
             <div *ngIf="!loadingProfessionals && professionals.length === 0" class="empty-state">
               <p>📋 No has enviado solicitudes aún</p>
-              <small>Envía solicitudes a profesionales para poder iniciar conversaciones</small>
+              <small>Envía solicitudes a profesionales desde la página principal para poder iniciar conversaciones</small>
             </div>
           </div>
 
@@ -185,6 +225,9 @@ export class ChatPage implements OnInit, OnDestroy {
   messages: any[] = [];
   newMessage: string = '';
   loadingMessages = false;
+  channels: any[] = [];
+  loadingChannels = false;
+  isProfessional = false;
 
   async ngOnInit(): Promise<void> {
     await this.initializeChat();
@@ -207,10 +250,16 @@ export class ChatPage implements OnInit, OnDestroy {
       this.userId = user.id.toString();
       const userName = (user as any).nombreCompleto || (user as any).nombre || 'Usuario';
       
-      console.log('🔍 Inicializando chat para usuario:', this.userId);
+      // Detectar si es profesional
+      this.isProfessional = !!(user as any).idProfesional;
+      
+      console.log('🔍 Inicializando chat para usuario:', this.userId, 'Es profesional:', this.isProfessional);
 
       // Inicializar el cliente de Stream Chat
       await this.streamChatService.initializeChat(this.userId, userName);
+
+      // Cargar conversaciones existentes
+      await this.loadChannels();
 
       this.isConnecting = false;
       console.log('✅ Chat inicializado correctamente');
@@ -219,6 +268,72 @@ export class ChatPage implements OnInit, OnDestroy {
       this.connectionError = 'Error al conectar al chat. Por favor, intenta de nuevo.';
       this.isConnecting = false;
     }
+  }
+
+  async loadChannels(): Promise<void> {
+    try {
+      this.loadingChannels = true;
+      const chatClient = this.streamChatService.getChatClient();
+      
+      console.log('🔍 Buscando canales para userId:', this.userId);
+      console.log('🔍 Usuario conectado en Stream:', chatClient.userID);
+      
+      // Obtener canales del usuario
+      const filter = { 
+        type: 'messaging',
+        members: { $in: [chatClient.userID || this.userId] }
+      };
+      
+      console.log('🔍 Filtro de canales:', JSON.stringify(filter));
+      
+      const sort = [{ last_message_at: -1 as const }];
+      
+      const channels = await chatClient.queryChannels(filter, sort, {
+        watch: true,
+        state: true
+      });
+
+      this.channels = channels;
+      this.loadingChannels = false;
+      
+      console.log('✅ Canales cargados:', this.channels.length);
+      if (this.channels.length > 0) {
+        console.log('📋 Canales encontrados:', this.channels.map(c => ({
+          id: c.id,
+          members: Object.keys(c.state.members),
+          lastMessage: c.state.last_message_at
+        })));
+      }
+    } catch (error) {
+      console.error('❌ Error cargando canales:', error);
+      this.loadingChannels = false;
+    }
+  }
+
+  selectChannel(channel: any): void {
+    this.activeChannel = {
+      channel: channel,
+      name: this.getChannelName(channel)
+    };
+    this.loadMessages();
+  }
+
+  getChannelName(channel: any): string {
+    if (!channel) return 'Chat';
+    
+    // Obtener el nombre del otro miembro (no el usuario actual)
+    const members = Object.values(channel.state?.members || {}) as any[];
+    const otherMember = members.find((m: any) => m.user?.id !== this.userId);
+    
+    return otherMember?.user?.name || channel.data?.name || 'Chat';
+  }
+
+  getLastMessage(channel: any): string {
+    const messages = channel.state?.messages || [];
+    if (messages.length === 0) return 'Sin mensajes';
+    
+    const lastMessage = messages[messages.length - 1];
+    return lastMessage.text || 'Mensaje';
   }
 
   async openProfessionalModal(): Promise<void> {
@@ -259,6 +374,9 @@ export class ChatPage implements OnInit, OnDestroy {
 
       // Cargar mensajes
       await this.loadMessages();
+
+      // Recargar lista de canales
+      await this.loadChannels();
 
       this.closeProfessionalModal();
     } catch (error) {

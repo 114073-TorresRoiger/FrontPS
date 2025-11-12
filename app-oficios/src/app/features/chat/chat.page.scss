@@ -147,12 +147,30 @@
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 95, 255, 0.4);
   }
+}
 
-  &:active {
-    transform: translateY(0);
+.professional-info {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 16px 20px;
+  border-radius: 8px;
+  text-align: center;
+
+  p {
+    margin: 0 0 6px 0;
+    color: white;
+    font-weight: 700;
+    font-size: 15px;
+  }
+
+  small {
+    display: block;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 12px;
+    line-height: 1.4;
   }
 }
 
+/* Chat Layout */
 .chat-main {
   flex: 1;
   display: flex;
@@ -418,6 +436,106 @@
     color: #9ca3af;
     font-size: 14px;
   }
+}
+
+.channels-section {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.loading-channels {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  gap: 12px;
+
+  p {
+    color: #72767e;
+    font-size: 14px;
+  }
+}
+
+.no-channels {
+  text-align: center;
+  padding: 40px 20px;
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+.channels-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.channel-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  cursor: pointer;
+  border-bottom: 1px solid #e1e8ed;
+  transition: background 0.2s;
+  position: relative;
+
+  &:hover {
+    background: #f5f7fb;
+  }
+
+  &.active {
+    background: #e5f2ff;
+    border-left: 3px solid #005fff;
+  }
+}
+
+.channel-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.channel-info {
+  flex: 1;
+  min-width: 0;
+
+  h4 {
+    margin: 0 0 4px 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1c1e21;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .last-message {
+    margin: 0;
+    font-size: 13px;
+    color: #72767e;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.unread-badge {
+  background: #005fff;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 12px;
+  min-width: 20px;
+  text-align: center;
 }
 
 /* Modal */

@@ -97,8 +97,15 @@ export class StreamChatService {
         solicitudId: solicitud.idSolicitud,
         estado: solicitud.estado
       }));
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Error al obtener profesionales:', error);
+      
+      // Si es error 403, probablemente es un profesional
+      if (error?.status === 403) {
+        console.log('⚠️ Usuario sin permisos para ver solicitudes (probablemente es profesional)');
+        return [];
+      }
+      
       return [];
     }
   }
