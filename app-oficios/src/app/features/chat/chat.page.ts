@@ -81,8 +81,8 @@ import { AuthService } from '../../domain/auth/auth.service';
                     <h4>{{ getChannelName(channel) }}</h4>
                     <p class="last-message">{{ getLastMessage(channel) }}</p>
                   </div>
-                  <div *ngIf="channel.state?.unreadCount > 0" class="unread-badge">
-                    {{ channel.state.unreadCount }}
+                  <div *ngIf="getUnreadCount(channel) > 0" class="unread-badge">
+                    {{ getUnreadCount(channel) }}
                   </div>
                 </div>
               </div>
@@ -132,6 +132,14 @@ import { AuthService } from '../../domain/auth/auth.service';
                       <div class="message-header">
                         <span class="message-author">{{ message.user?.name || 'Usuario' }}</span>
                         <span class="message-time">{{ formatMessageTime(message.created_at) }}</span>
+                        <button 
+                          *ngIf="message.user?.id === userId"
+                          class="btn-delete-message"
+                          (click)="deleteMessage(message)"
+                          title="Eliminar mensaje"
+                        >
+                          🗑️
+                        </button>
                       </div>
                       <div class="message-text">{{ message.text }}</div>
                     </div>
@@ -247,13 +255,21 @@ export class ChatPage implements OnInit, OnDestroy {
         return;
       }
 
-      this.userId = user.id.toString();
-      const userName = (user as any).nombreCompleto || (user as any).nombre || 'Usuario';
-      
       // Detectar si es profesional
       this.isProfessional = !!(user as any).idProfesional;
       
-      console.log('🔍 Inicializando chat para usuario:', this.userId, 'Es profesional:', this.isProfessional);
+      // Si es profesional, usar idProfesional para Stream Chat
+      // Si es usuario normal, usar id de usuario
+      this.userId = this.isProfessional 
+        ? (user as any).idProfesional.toString()
+        : user.id.toString();
+      
+      // Construir nombre completo desde el objeto User
+      const userName = user.name && user.lastName 
+        ? `${user.name} ${user.lastName}` 
+        : user.name || 'Usuario';
+      
+      console.log('🔍 Inicializando chat para usuario:', this.userId, 'Es profesional:', this.isProfessional, 'Nombre:', userName);
 
       // Inicializar el cliente de Stream Chat
       await this.streamChatService.initializeChat(this.userId, userName);
@@ -310,12 +326,20 @@ export class ChatPage implements OnInit, OnDestroy {
     }
   }
 
-  selectChannel(channel: any): void {
+  async selectChannel(channel: any): Promise<void> {
     this.activeChannel = {
       channel: channel,
       name: this.getChannelName(channel)
     };
-    this.loadMessages();
+    await this.loadMessages();
+    
+    // Marcar mensajes como leídos
+    try {
+      await channel.markRead();
+      console.log('✅ Mensajes marcados como leídos');
+    } catch (error) {
+      console.error('❌ Error marcando mensajes como leídos:', error);
+    }
   }
 
   getChannelName(channel: any): string {
@@ -334,6 +358,10 @@ export class ChatPage implements OnInit, OnDestroy {
     
     const lastMessage = messages[messages.length - 1];
     return lastMessage.text || 'Mensaje';
+  }
+
+  getUnreadCount(channel: any): number {
+    return channel.state?.unreadCount || channel.countUnread?.() || 0;
   }
 
   async openProfessionalModal(): Promise<void> {
@@ -396,6 +424,10 @@ export class ChatPage implements OnInit, OnDestroy {
       // Escuchar nuevos mensajes
       this.activeChannel.channel.on('message.new', (event: any) => {
         this.messages.push(event.message);
+        // Marcar como leído automáticamente si estoy en este canal
+        if (this.activeChannel?.channel?.id === event.channel_id) {
+          this.activeChannel.channel.markRead().catch(console.error);
+        }
       });
 
       this.loadingMessages = false;
@@ -408,15 +440,45 @@ export class ChatPage implements OnInit, OnDestroy {
   async sendMessage(): Promise<void> {
     if (!this.newMessage.trim() || !this.activeChannel) return;
 
+    console.log('📤 Enviando mensaje:', {
+      text: this.newMessage.trim(),
+      channel: this.activeChannel.channel.id,
+      members: Object.keys(this.activeChannel.channel.state.members)
+    });
+
     try {
-      await this.activeChannel.channel.sendMessage({
+      const result = await this.activeChannel.channel.sendMessage({
         text: this.newMessage.trim()
       });
+
+      console.log('✅ Mensaje enviado:', result);
 
       this.newMessage = '';
     } catch (error) {
       console.error('❌ Error enviando mensaje:', error);
       alert('Error al enviar el mensaje');
+    }
+  }
+
+  async deleteMessage(message: any): Promise<void> {
+    if (!confirm('¿Estás seguro de que quieres eliminar este mensaje?')) {
+      return;
+    }
+
+    try {
+      console.log('🗑️ Eliminando mensaje:', message.id);
+      
+      // Usar el cliente de Stream Chat para eliminar el mensaje
+      const chatClient = this.streamChatService.getChatClient();
+      await chatClient.deleteMessage(message.id);
+      
+      // Actualizar la lista de mensajes
+      this.messages = this.messages.filter(m => m.id !== message.id);
+      
+      console.log('✅ Mensaje eliminado');
+    } catch (error) {
+      console.error('❌ Error eliminando mensaje:', error);
+      alert('Error al eliminar el mensaje');
     }
   }
 

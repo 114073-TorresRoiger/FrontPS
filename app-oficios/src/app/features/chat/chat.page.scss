@@ -361,6 +361,7 @@
   align-items: center;
   gap: 8px;
   margin-bottom: 6px;
+  position: relative;
 }
 
 .message-author {
@@ -372,6 +373,31 @@
 .message-time {
   font-size: 11px;
   color: #72767e;
+}
+
+.btn-delete-message {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  padding: 4px 8px;
+  border-radius: 4px;
+
+  &:hover {
+    background: rgba(239, 68, 68, 0.1);
+    opacity: 1 !important;
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.message-item:hover .btn-delete-message {
+  opacity: 0.6;
 }
 
 .message-text {

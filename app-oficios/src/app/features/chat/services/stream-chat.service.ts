@@ -16,25 +16,28 @@ export class StreamChatService {
 
   async initializeChat(userId: string, userName: string): Promise<StreamChat> {
     try {
-      // 1. Obtener API Key y Token desde tu backend
+      // 1. Obtener API Key, Token y nombre completo desde tu backend
       const initData = await firstValueFrom(
         this.http.get<any>(`${environment.apiUrl}/api/v1/chat/init?userId=${userId}`)
       );
 
+      console.log('📥 Datos de inicialización:', initData);
+
       // 2. Crear instancia de Stream Chat
       this.chatClient = StreamChat.getInstance(initData.apiKey);
 
-      // 3. Conectar usuario
+      // 3. Conectar usuario con el nombre completo del backend
+      const fullName = initData.fullName || userName;
       await this.chatClient.connectUser(
         {
           id: userId,
-          name: userName,
+          name: fullName,
         },
         initData.token
       );
 
       this.currentUserId = userId;
-      console.log('✅ Chat inicializado correctamente');
+      console.log('✅ Chat inicializado correctamente con nombre:', fullName);
       
       return this.chatClient;
     } catch (error) {
@@ -56,6 +59,8 @@ export class StreamChatService {
     professionalId: string
   ): Promise<Channel> {
     try {
+      console.log('📤 Creando conversación:', { userId, professionalId });
+      
       // Llamar a tu endpoint para crear la conversación
       const response = await firstValueFrom(
         this.http.post<any>(`${environment.apiUrl}/api/v1/chat/conversations/with-professional`, {
@@ -64,6 +69,10 @@ export class StreamChatService {
         })
       );
 
+      console.log('📥 Respuesta del backend:', response);
+      console.log('📋 channelType:', response.channelType);
+      console.log('📋 channelId:', response.channelId);
+
       // Obtener el canal creado
       const channel = this.chatClient.channel(
         response.channelType,
@@ -71,6 +80,12 @@ export class StreamChatService {
       );
 
       await channel.watch();
+      
+      console.log('✅ Canal creado y watching:', {
+        id: channel.id,
+        type: channel.type,
+        members: Object.keys(channel.state.members)
+      });
       
       return channel;
     } catch (error) {
