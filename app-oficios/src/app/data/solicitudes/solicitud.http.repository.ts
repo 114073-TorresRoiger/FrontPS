@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { SolicitudRepository } from '../../domain/solicitudes/solicitud.repository';
-import { SolicitudRequest, SolicitudResponse } from '../../domain/solicitudes/solicitud.model';
+import { SolicitudRequest, SolicitudResponse, SolicitudConProfesional } from '../../domain/solicitudes/solicitud.model';
 import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -21,5 +21,9 @@ export class SolicitudHttpRepository implements SolicitudRepository {
 
   getSolicitud(idProfesional: number, estado: string): Observable<SolicitudResponse> {
     return this.http.get<SolicitudResponse>(`${this.baseUrl}/solicitud/${idProfesional}/${estado}`);
+  }
+
+  getSolicitudesByUsuario(idUsuario: number): Observable<SolicitudConProfesional[]> {
+    return this.http.get<SolicitudConProfesional[]>(`${this.baseUrl}/usuario/${idUsuario}`);
   }
 }
