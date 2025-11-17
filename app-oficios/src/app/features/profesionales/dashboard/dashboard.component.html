@@ -31,6 +31,71 @@
     </div>
   </section>
 
+  <!-- Solicitudes Pendientes -->
+  <section class="solicitudes-section" *ngIf="solicitudesPendientes().length > 0 || isLoadingSolicitudes()">
+    <div class="section-header">
+      <h2 class="section-title">
+        <lucide-angular [img]="AlertCircle" size="24"></lucide-angular>
+        Solicitudes Pendientes
+      </h2>
+      <span class="badge-count">{{ solicitudesPendientes().length }}</span>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoadingSolicitudes()" class="loading-container">
+      <p>Cargando solicitudes...</p>
+    </div>
+
+    <!-- Solicitudes List -->
+    <div *ngIf="!isLoadingSolicitudes()" class="solicitudes-grid">
+      <div *ngFor="let solicitud of solicitudesPendientes()" class="solicitud-card">
+        <div class="solicitud-header">
+          <div class="client-info">
+            <lucide-angular [img]="Users" size="20"></lucide-angular>
+            <h3>{{ solicitud.nombreUsuario }}</h3>
+          </div>
+          <span class="time-badge">{{ formatTime(solicitud.fechasolicitud) }}</span>
+        </div>
+
+        <div class="solicitud-body">
+          <div class="info-row">
+            <lucide-angular [img]="Calendar" size="16"></lucide-angular>
+            <span><strong>Fecha de servicio:</strong> {{ formatDate(solicitud.fechaservicio) }}</span>
+          </div>
+
+          <div class="info-row" *ngIf="solicitud.direccion">
+            <lucide-angular [img]="FileText" size="16"></lucide-angular>
+            <span><strong>Dirección:</strong> {{ solicitud.direccion }}</span>
+          </div>
+
+          <div class="observaciones">
+            <strong>Observaciones:</strong>
+            <p>{{ solicitud.observacion }}</p>
+          </div>
+        </div>
+
+        <div class="solicitud-actions">
+          <button
+            class="btn btn-reject"
+            (click)="responderSolicitud(solicitud.idSolicitud, false)"
+            [disabled]="respondingToSolicitud() === solicitud.idSolicitud"
+          >
+            <lucide-angular [img]="XIcon" size="18"></lucide-angular>
+            <span>Rechazar</span>
+          </button>
+          <button
+            class="btn btn-accept"
+            (click)="responderSolicitud(solicitud.idSolicitud, true)"
+            [disabled]="respondingToSolicitud() === solicitud.idSolicitud"
+          >
+            <lucide-angular [img]="Check" size="18"></lucide-angular>
+            <span>{{ respondingToSolicitud() === solicitud.idSolicitud ? 'Procesando...' : 'Aceptar' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- Quick Actions -->
   <section class="actions-section">
     <h2 class="section-title">Acciones Rápidas</h2>

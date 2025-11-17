@@ -202,6 +202,11 @@
           background: rgba($primary-color, 0.1);
         }
 
+        &.dashboard:hover {
+          background: rgba($primary-color, 0.1);
+          color: $primary-color;
+        }
+
         &.register-professional:hover {
           background: rgba($accent-color, 0.1);
           color: $accent-color;

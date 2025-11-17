@@ -485,6 +485,11 @@ export class HomePage implements OnInit {
     this.router.navigate(['/profesionales/registro']);
   }
 
+  goToDashboard() {
+    this.isDropdownOpen.set(false);
+    this.router.navigate(['/profesionales/dashboard']);
+  }
+
   logout() {
     this.isDropdownOpen.set(false);
     this.authService.logout();
@@ -496,5 +501,10 @@ export class HomePage implements OnInit {
 
   isUserAuthenticated(): boolean {
     return this.authService.isLoggedIn();
+  }
+
+  isProfessional(): boolean {
+    const user = this.authService.getCurrentUser();
+    return user?.idProfesional != null;
   }
 }

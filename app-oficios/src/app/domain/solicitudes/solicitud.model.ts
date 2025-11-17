@@ -7,6 +7,7 @@ export interface SolicitudRequest {
 }
 
 export interface SolicitudResponse {
+  idSolicitud: number;
   nombreUsuario: string;
   nombreProfesional: string;
   fechasolicitud: string;
