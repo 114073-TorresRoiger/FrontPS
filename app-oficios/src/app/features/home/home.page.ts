@@ -462,7 +462,7 @@ export class HomePage implements OnInit {
 
   goToChat() {
     console.log('Navigating to chat');
-    // Implementar navegación al chat
+    this.router.navigate(['/chat']);
   }
 
   goToSignIn() {

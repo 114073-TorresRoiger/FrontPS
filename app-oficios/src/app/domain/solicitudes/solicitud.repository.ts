@@ -1,8 +1,9 @@
 import { Observable } from 'rxjs';
-import { SolicitudRequest, SolicitudResponse } from './solicitud.model';
+import { SolicitudRequest, SolicitudResponse, SolicitudConProfesional } from './solicitud.model';
 
 export abstract class SolicitudRepository {
   abstract enviarSolicitud(solicitud: SolicitudRequest): Observable<any>;
   abstract responderSolicitud(idSolicitud: number, aceptada: boolean): Observable<any>;
   abstract getSolicitud(idProfesional: number, estado: string): Observable<SolicitudResponse | null>;
+  abstract getSolicitudesByUsuario(idUsuario: number): Observable<SolicitudConProfesional[]>;
 }

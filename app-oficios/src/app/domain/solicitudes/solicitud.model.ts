@@ -15,3 +15,14 @@ export interface SolicitudResponse {
   direccion: string;
   observacion: string;
 }
+
+export interface SolicitudConProfesional {
+  idSolicitud: number;
+  idProfesional: number;
+  nombreProfesional: string;
+  apellidoProfesional: string;
+  especialidad?: string; // Opcional porque puede no venir del backend
+  fechaSolicitud: string;
+  estado: string;
+  imagenUrl?: string;
+}

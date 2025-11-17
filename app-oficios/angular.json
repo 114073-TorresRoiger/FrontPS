@@ -35,8 +35,14 @@
               }
             ],
             "styles": [
-              "src/styles.scss"
-            ]
+              "src/styles.scss",
+              "node_modules/stream-chat-angular/src/assets/styles/css/index.css"
+            ],
+            "stylePreprocessorOptions": {
+              "includePaths": [
+                "node_modules/stream-chat-angular/src/assets/styles/scss"
+              ]
+            }
           },
           "configurations": {
             "production": {

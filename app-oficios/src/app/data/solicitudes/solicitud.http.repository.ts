@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable, catchError, map, of } from 'rxjs';
 import { SolicitudRepository } from '../../domain/solicitudes/solicitud.repository';
-import { SolicitudRequest, SolicitudResponse } from '../../domain/solicitudes/solicitud.model';
+import { SolicitudRequest, SolicitudResponse, SolicitudConProfesional } from '../../domain/solicitudes/solicitud.model';
 import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -39,5 +39,9 @@ export class SolicitudHttpRepository implements SolicitudRepository {
         return of(null);
       })
     );
+  }
+
+  getSolicitudesByUsuario(idUsuario: number): Observable<SolicitudConProfesional[]> {
+    return this.http.get<SolicitudConProfesional[]>(`${this.baseUrl}/usuario/${idUsuario}`);
   }
 }
