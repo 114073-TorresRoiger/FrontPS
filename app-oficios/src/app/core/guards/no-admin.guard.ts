@@ -15,7 +15,7 @@ export const noAdminGuard: CanActivateFn = (route, state) => {
   }
 
   // Check if user is ADMINISTRADOR
-  if (currentUser && currentUser.roles.includes('ADMINISTRADOR')) {
+  if (currentUser && Array.isArray(currentUser.roles) && currentUser.roles.includes('ADMINISTRADOR')) {
     // Redirect admin to admin panel
     router.navigate(['/admin']);
     return false;

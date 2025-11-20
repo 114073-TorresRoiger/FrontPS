@@ -38,6 +38,10 @@ export class Registro implements OnInit {
   isLoadingTiposDoc = false;
   isSubmitting = false;
 
+  aceptaTerminos = false;
+  intentadoRegistrar = false;
+  mostrarTerminos = false;
+
   constructor() {
     this.initializeForms();
   }
@@ -55,7 +59,8 @@ export class Registro implements OnInit {
       documento: ['', [Validators.required]],
       idTipoDoc: ['', [Validators.required]],
       telefono: ['', [Validators.required]],
-      nacimiento: ['', [Validators.required]]
+      nacimiento: ['', [Validators.required]],
+      aceptaTerminos: [false, [Validators.requiredTrue]]
     });
 
     this.datosAdicionalForm = this.fb.group({
@@ -184,9 +189,11 @@ export class Registro implements OnInit {
     }
   }
 
-
-
-  onSubmit() {
+  onSubmit(): void {
+    this.intentadoRegistrar = true;
+    if (!this.datosBasicosForm.get('aceptaTerminos')?.value) {
+      return;
+    }
     if (this.datosBasicosForm.valid && this.datosAdicionalForm.valid) {
       this.isSubmitting = true;
 
@@ -237,6 +244,15 @@ export class Registro implements OnInit {
         }
       });
     }
+  }
+
+  abrirTerminos(event: Event): void {
+    event.preventDefault();
+    this.mostrarTerminos = true;
+  }
+
+  cerrarTerminos(): void {
+    this.mostrarTerminos = false;
   }
 
   // Métodos auxiliares para validación

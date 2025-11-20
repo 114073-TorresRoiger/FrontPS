@@ -38,5 +38,10 @@ export const routes: Routes = [
 		path: 'admin',
 		loadChildren: () => import('./features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
 	},
+	{
+		path: 'terminos-condiciones',
+		loadComponent: () =>
+			import('./features/terminos/terminos-condiciones.page').then((m) => m.TerminosCondicionesPage),
+	},
 	{ path: '**', redirectTo: 'auth' },
 ];
