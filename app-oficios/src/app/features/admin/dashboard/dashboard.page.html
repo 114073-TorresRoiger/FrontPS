@@ -1,0 +1,248 @@
+<div class="dashboard-container">
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div class="header-content">
+      <div class="header-text">
+        <h1>Panel de Administración</h1>
+        <p class="subtitle">Gestión de usuarios, profesionales y oficios</p>
+      </div>
+      <button class="logout-btn" (click)="logout()" title="Cerrar sesión">
+        <lucide-angular [img]="LogOut" [size]="20"></lucide-angular>
+        <span>Cerrar sesión</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Estadísticas Cards -->
+  <section class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon users">
+        <lucide-angular [img]="Users" [size]="32"></lucide-angular>
+      </div>
+      <div class="stat-content">
+        <h3 class="stat-value">{{ totalUsuarios() }}</h3>
+        <p class="stat-label">Usuarios Registrados</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon professionals">
+        <lucide-angular [img]="Briefcase" [size]="32"></lucide-angular>
+      </div>
+      <div class="stat-content">
+        <h3 class="stat-value">{{ totalProfesionales() }}</h3>
+        <p class="stat-label">Profesionales Activos</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon oficios">
+        <lucide-angular [img]="Package" [size]="32"></lucide-angular>
+      </div>
+      <div class="stat-content">
+        <h3 class="stat-value">{{ totalOficios() }}</h3>
+        <p class="stat-label">Oficios Totales</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon active">
+        <lucide-angular [img]="TrendingUp" [size]="32"></lucide-angular>
+      </div>
+      <div class="stat-content">
+        <h3 class="stat-value">{{ totalOficiosActivos() }}</h3>
+        <p class="stat-label">Oficios Activos</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Grid -->
+  <div class="content-grid">
+    <!-- Usuarios Section -->
+    <section class="content-card">
+      <div class="card-header">
+        <h2>Usuarios Registrados</h2>
+      </div>
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Fecha Registro</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let usuario of usuarios()">
+              <td>{{ usuario.id }}</td>
+              <td>{{ usuario.nombre }}</td>
+              <td>{{ usuario.email }}</td>
+              <td>{{ usuario.fechaRegistro }}</td>
+              <td>
+                <span class="badge" [class.active]="usuario.estado === 'activo'" [class.inactive]="usuario.estado === 'inactivo'">
+                  {{ usuario.estado }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Profesionales Section -->
+    <section class="content-card">
+      <div class="card-header">
+        <h2>Profesionales Registrados</h2>
+      </div>
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Oficio</th>
+              <th>Calificación</th>
+              <th>Servicios</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let profesional of profesionales()">
+              <td>{{ profesional.id }}</td>
+              <td>{{ profesional.nombre }}</td>
+              <td>{{ profesional.oficio }}</td>
+              <td>⭐ {{ profesional.calificacion }}</td>
+              <td>{{ profesional.serviciosCompletados }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- Oficios Grid -->
+  <div class="oficios-grid">
+    <!-- Oficios Más Demandados -->
+    <section class="content-card">
+      <div class="card-header">
+        <h2>Oficios Más Demandados</h2>
+      </div>
+      <div class="demanda-list">
+        <div *ngFor="let item of oficiosMasDemandados()" class="demanda-item">
+          <div class="demanda-info">
+            <span class="demanda-nombre">{{ item.nombre }}</span>
+            <span class="demanda-cantidad">{{ item.cantidad }} solicitudes</span>
+          </div>
+          <div class="demanda-bar">
+            <div class="demanda-progress" [style.width.%]="(item.cantidad / oficiosMasDemandados()[0].cantidad) * 100"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Gestión de Oficios -->
+    <section class="content-card">
+      <div class="card-header">
+        <h2>Gestión de Oficios</h2>
+        <button class="btn-primary" (click)="abrirModalNuevoOficio()">
+          <lucide-angular [img]="Plus" [size]="20"></lucide-angular>
+          Agregar Oficio
+        </button>
+      </div>
+      <div class="oficios-list">
+        <div *ngFor="let oficio of oficios()" class="oficio-item">
+          <div class="oficio-info">
+            <h4>{{ oficio.nombre }}</h4>
+            <p>{{ oficio.descripcion }}</p>
+            <div class="oficio-stats">
+              <span>{{ oficio.profesionales }} profesionales</span>
+              <span>{{ oficio.demanda }} solicitudes</span>
+            </div>
+          </div>
+          <div class="oficio-actions">
+            <button
+              class="btn-icon"
+              [class.active]="oficio.activo"
+              (click)="toggleEstadoOficio(oficio)"
+              [title]="oficio.activo ? 'Desactivar' : 'Activar'">
+              {{ oficio.activo ? '✓' : '✗' }}
+            </button>
+            <button class="btn-icon edit" (click)="abrirModalEditarOficio(oficio)">
+              <lucide-angular [img]="Edit" [size]="18"></lucide-angular>
+            </button>
+            <button class="btn-icon delete" (click)="eliminarOficio(oficio.id)">
+              <lucide-angular [img]="Trash2" [size]="18"></lucide-angular>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- Modal Agregar Oficio -->
+<div class="modal-overlay" *ngIf="showAddOficioModal()" (click)="cerrarModalNuevoOficio()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Agregar Nuevo Oficio</h3>
+      <button class="btn-close" (click)="cerrarModalNuevoOficio()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="nombreOficio">Nombre del Oficio</label>
+        <input
+          type="text"
+          id="nombreOficio"
+          class="form-input"
+          [(ngModel)]="nuevoOficio.nombre"
+          placeholder="Ej: Plomería">
+      </div>
+      <div class="form-group">
+        <label for="descripcionOficio">Descripción</label>
+        <textarea
+          id="descripcionOficio"
+          class="form-input"
+          [(ngModel)]="nuevoOficio.descripcion"
+          placeholder="Descripción del oficio"
+          rows="4"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cerrarModalNuevoOficio()">Cancelar</button>
+      <button class="btn-primary" (click)="agregarOficio()">Agregar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Editar Oficio -->
+<div class="modal-overlay" *ngIf="showEditOficioModal()" (click)="cerrarModalEditarOficio()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Editar Oficio</h3>
+      <button class="btn-close" (click)="cerrarModalEditarOficio()">×</button>
+    </div>
+    <div class="modal-body" *ngIf="selectedOficio()">
+      <div class="form-group">
+        <label for="editNombreOficio">Nombre del Oficio</label>
+        <input
+          type="text"
+          id="editNombreOficio"
+          class="form-input"
+          [(ngModel)]="selectedOficio()!.nombre">
+      </div>
+      <div class="form-group">
+        <label for="editDescripcionOficio">Descripción</label>
+        <textarea
+          id="editDescripcionOficio"
+          class="form-input"
+          [(ngModel)]="selectedOficio()!.descripcion"
+          rows="4"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cerrarModalEditarOficio()">Cancelar</button>
+      <button class="btn-primary" (click)="actualizarOficio()">Guardar Cambios</button>
+    </div>
+  </div>
+</div>

@@ -6,4 +6,5 @@ export abstract class SolicitudRepository {
   abstract responderSolicitud(idSolicitud: number, aceptada: boolean): Observable<any>;
   abstract getSolicitud(idProfesional: number, estado: string): Observable<SolicitudResponse | null>;
   abstract getSolicitudesByUsuario(idUsuario: number): Observable<SolicitudConProfesional[]>;
+  abstract verificarSolicitudPendiente(idUsuario: number, idProfesional: number): Observable<boolean>;
 }

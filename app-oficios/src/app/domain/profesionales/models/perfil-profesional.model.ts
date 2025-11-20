@@ -1,3 +1,9 @@
+export interface DisponibilidadHorario {
+  diaSemana: string;
+  horaInicio: string;
+  horaFin: string;
+}
+
 export interface PerfilProfesional {
   idProfesional: number;
   nombre: string;
@@ -5,6 +11,6 @@ export interface PerfilProfesional {
   oficio: string;
   telefono: string;
   rangoPrecio: string;
-  disponibilidad: string;
+  disponibilidad: DisponibilidadHorario[];
   especialidades: string[];
 }

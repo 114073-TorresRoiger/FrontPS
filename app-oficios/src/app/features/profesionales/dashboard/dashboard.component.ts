@@ -16,7 +16,8 @@ import { LucideAngularModule,
   CheckCircle,
   AlertCircle,
   X as XIcon,
-  Check
+  Check,
+  LogOut
 } from 'lucide-angular';
 import { AuthService } from '../../../domain/auth';
 import { GetSolicitudesUseCase } from '../../../domain/solicitudes/use-cases/get-solicitudes.usecase';
@@ -58,6 +59,7 @@ export class ProfessionalDashboardComponent implements OnInit {
   readonly TrendingUp = TrendingUp;
   readonly DollarSign = DollarSign;
   readonly Users = Users;
+  readonly LogOut = LogOut;
   readonly Star = Star;
   readonly FileText = FileText;
   readonly MessageSquare = MessageSquare;
@@ -274,5 +276,9 @@ export class ProfessionalDashboardComponent implements OnInit {
 
   goBack() {
     this.router.navigate(['/']);
+  }
+
+  logout() {
+    this.authService.logout();
   }
 }

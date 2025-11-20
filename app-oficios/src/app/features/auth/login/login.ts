@@ -56,12 +56,23 @@ export class Login {
           console.log('Login successful:', response);
           this.isLoading.set(false);
 
-          // Check if user has idProfesional
-          if (response.idProfesional !== null && response.idProfesional !== undefined) {
+          // Check if user is ADMINISTRADOR
+          if (response.roles.includes('ADMINISTRADOR')) {
+            // Navigate to admin dashboard
+            this.router.navigate(['/admin']);
+          }
+          // Check if user has both CLIENTE and PROFESIONAL roles
+          else if (response.roles.includes('CLIENTE') && response.roles.includes('PROFESIONAL')) {
             // Show role selection modal
             this.showRoleModal.set(true);
-          } else {
-            // Navigate directly to home page as client
+          }
+          // Check if user is only PROFESIONAL
+          else if (response.roles.includes('PROFESIONAL')) {
+            // Navigate to professional dashboard
+            this.router.navigate(['/profesionales/dashboard']);
+          }
+          // Default to home page for CLIENTE
+          else {
             this.router.navigate(['/']);
           }
         },

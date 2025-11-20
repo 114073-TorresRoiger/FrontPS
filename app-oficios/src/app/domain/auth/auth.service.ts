@@ -83,7 +83,8 @@ export class AuthService {
             telefono: response.telefono,
             nacimiento: response.nacimiento,
             idDireccion: response.idDireccion,
-            idProfesional: response.idProfesional
+            idProfesional: response.idProfesional,
+            roles: response.roles
           };
 
           // Store token and user data
@@ -189,5 +190,35 @@ export class AuthService {
   getUserFullName(): string {
     const user = this.getCurrentUser();
     return user ? `${user.name} ${user.lastName}` : '';
+  }
+
+  /**
+   * Get tipos de documentos
+   */
+  getTiposDocumento(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/api/v1/usuario/tipos-documento`)
+      .pipe(
+        catchError(error => {
+          console.error('Error getting tipos documento:', error);
+          return throwError(() => error);
+        })
+      );
+  }
+
+  /**
+   * Register new usuario
+   */
+  registerUsuario(usuarioData: any): Observable<AuthResponse> {
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json'
+    });
+
+    return this.http.post<AuthResponse>(`${this.apiUrl}/api/v1/registro/usuario`, usuarioData, { headers })
+      .pipe(
+        catchError(error => {
+          console.error('Register usuario error:', error);
+          return throwError(() => error);
+        })
+      );
   }
 }

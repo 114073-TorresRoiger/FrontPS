@@ -14,6 +14,7 @@ export interface AuthResponse {
   nacimiento: string | null;
   idDireccion: number | null;
   idProfesional: number | null;
+  roles: string[];
 }
 
 export interface User {
@@ -26,11 +27,17 @@ export interface User {
   nacimiento: string | null;
   idDireccion: number | null;
   idProfesional: number | null;
-  role?: string;
+  roles: string[];
 }
 
 export interface AuthState {
   isAuthenticated: boolean;
   token: string | null;
   user: User | null;
+}
+
+export interface TipoDocumento {
+  id: number;
+  tipo: string;
+  descripcion?: string;
 }

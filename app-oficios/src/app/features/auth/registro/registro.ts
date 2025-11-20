@@ -1,58 +1,49 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { Router, RouterModule } from '@angular/router';
+import { AuthService } from '../../../domain/auth/auth.service';
+import { DomicilioService } from '../../../domain/domicilio/domicilio.service';
+import { Departamento, Ciudad, Barrio } from '../../../domain/domicilio/domicilio.model';
+import { TipoDocumento } from '../../../domain/auth/auth.model';
 
 @Component({
   selector: 'app-registro',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule],
   templateUrl: './registro.html',
   styleUrl: './registro.scss'
 })
-export class Registro {
+export class Registro implements OnInit {
+  private readonly fb = inject(FormBuilder);
+  private readonly authService = inject(AuthService);
+  private readonly domicilioService = inject(DomicilioService);
+  private readonly router = inject(Router);
+
   currentStep = 1;
 
   // Formularios para cada paso
   datosBasicosForm!: FormGroup;
-  selectedRole: 'cliente' = 'cliente'; // Rol por defecto
   datosAdicionalForm!: FormGroup;
 
-  // Datos para los selects
-  provincias = [
-    'Buenos Aires',
-    'Catamarca',
-    'Chaco',
-    'Chubut',
-    'Córdoba',
-    'Corrientes',
-    'Entre Ríos',
-    'Formosa',
-    'Jujuy',
-    'La Pampa',
-    'La Rioja',
-    'Mendoza',
-    'Misiones',
-    'Neuquén',
-    'Río Negro',
-    'Salta',
-    'San Juan',
-    'San Luis',
-    'Santa Cruz',
-    'Santa Fe',
-    'Santiago del Estero',
-    'Tierra del Fuego',
-    'Tucumán'
-  ];
+  // Datos para los selects (cargados dinámicamente)
+  departamentos: Departamento[] = [];
+  ciudades: Ciudad[] = [];
+  barrios: Barrio[] = [];
+  tiposDocumento: TipoDocumento[] = [];
 
-  departamentos = [
-    'Departamento 1',
-    'Departamento 2',
-    'Departamento 3'
-  ];
+  // Loading states
+  isLoadingDepartamentos = false;
+  isLoadingCiudades = false;
+  isLoadingBarrios = false;
+  isLoadingTiposDoc = false;
+  isSubmitting = false;
 
-
-
-  constructor(private fb: FormBuilder) {
+  constructor() {
     this.initializeForms();
+  }
+
+  ngOnInit(): void {
+    this.loadInitialData();
   }
 
   initializeForms() {
@@ -60,15 +51,124 @@ export class Registro {
       password: ['', [Validators.required, Validators.minLength(6)]],
       name: ['', [Validators.required, Validators.maxLength(255)]],
       lastName: ['', [Validators.required, Validators.maxLength(255)]],
-      mail: ['', [Validators.required, Validators.email, Validators.maxLength(150)]]
+      mail: ['', [Validators.required, Validators.email, Validators.maxLength(150)]],
+      documento: ['', [Validators.required]],
+      idTipoDoc: ['', [Validators.required]],
+      telefono: ['', [Validators.required]],
+      nacimiento: ['', [Validators.required]]
     });
 
     this.datosAdicionalForm = this.fb.group({
-      departamento: ['', Validators.required],
-      ciudad: ['', Validators.required],
-      barrio: ['', Validators.required],
-      telefono: ['', Validators.required],
-      direccion: ['', Validators.required]
+      idDepartamento: ['', Validators.required],
+      idCiudad: ['', Validators.required],
+      idBarrio: ['', Validators.required],
+      calle: ['', [Validators.required, Validators.maxLength(255)]],
+      numero: ['', [Validators.required]],
+      piso: [''],
+      depto: [''],
+      observaciones: ['']
+    });
+  }
+
+  /**
+   * Cargar datos iniciales desde el backend
+   */
+  loadInitialData(): void {
+    this.loadDepartamentos();
+    this.loadTiposDocumento();
+  }
+
+  /**
+   * Cargar departamentos
+   */
+  loadDepartamentos(): void {
+    this.isLoadingDepartamentos = true;
+    this.domicilioService.getAllDepartamentos().subscribe({
+      next: (data) => {
+        this.departamentos = data;
+        this.isLoadingDepartamentos = false;
+      },
+      error: (error) => {
+        console.error('Error cargando departamentos:', error);
+        this.isLoadingDepartamentos = false;
+      }
+    });
+  }
+
+  /**
+   * Cargar ciudades cuando se selecciona un departamento
+   */
+  onDepartamentoChange(departamentoId: number): void {
+    if (!departamentoId) {
+      this.ciudades = [];
+      this.barrios = [];
+      this.datosAdicionalForm.patchValue({
+        idCiudad: '',
+        idBarrio: ''
+      });
+      return;
+    }
+
+    this.isLoadingCiudades = true;
+    this.domicilioService.getCiudadesByDepartamento(departamentoId).subscribe({
+      next: (data) => {
+        this.ciudades = data;
+        this.barrios = [];
+        this.isLoadingCiudades = false;
+        this.datosAdicionalForm.patchValue({
+          idCiudad: '',
+          idBarrio: ''
+        });
+      },
+      error: (error) => {
+        console.error('Error cargando ciudades:', error);
+        this.isLoadingCiudades = false;
+      }
+    });
+  }
+
+  /**
+   * Cargar barrios cuando se selecciona una ciudad
+   */
+  onCiudadChange(ciudadId: number): void {
+    if (!ciudadId) {
+      this.barrios = [];
+      this.datosAdicionalForm.patchValue({
+        idBarrio: ''
+      });
+      return;
+    }
+
+    this.isLoadingBarrios = true;
+    this.domicilioService.getBarriosByCiudad(ciudadId).subscribe({
+      next: (data) => {
+        this.barrios = data;
+        this.isLoadingBarrios = false;
+        this.datosAdicionalForm.patchValue({
+          idBarrio: ''
+        });
+      },
+      error: (error) => {
+        console.error('Error cargando barrios:', error);
+        this.isLoadingBarrios = false;
+      }
+    });
+  }
+
+  /**
+   * Cargar tipos de documento
+   */
+  loadTiposDocumento(): void {
+    this.isLoadingTiposDoc = true;
+    this.authService.getTiposDocumento().subscribe({
+      next: (data) => {
+        this.tiposDocumento = data;
+        this.isLoadingTiposDoc = false;
+      },
+      error: (error) => {
+        console.error('Error cargando tipos documento:', error);
+        this.isLoadingTiposDoc = false;
+      }
     });
   }
 
@@ -87,15 +187,55 @@ export class Registro {
 
 
   onSubmit() {
-    if (this.datosAdicionalForm.valid) {
-      const userData = {
-        ...this.datosBasicosForm.value,
-        role: this.selectedRole, // Siempre será 'cliente'
-        ...this.datosAdicionalForm.value
+    if (this.datosBasicosForm.valid && this.datosAdicionalForm.valid) {
+      this.isSubmitting = true;
+
+      // Construir el objeto UsuarioRequest según la estructura del backend
+      const deptoValue = this.datosAdicionalForm.get('depto')?.value;
+      const pisoValue = this.datosAdicionalForm.get('piso')?.value;
+      const observacionesValue = this.datosAdicionalForm.get('observaciones')?.value;
+
+      const usuarioRequest: any = {
+        password: this.datosBasicosForm.get('password')?.value,
+        name: this.datosBasicosForm.get('name')?.value,
+        lastName: this.datosBasicosForm.get('lastName')?.value,
+        mail: this.datosBasicosForm.get('mail')?.value,
+        documento: this.datosBasicosForm.get('documento')?.value,
+        telefono: this.datosBasicosForm.get('telefono')?.value,
+        nacimiento: this.datosBasicosForm.get('nacimiento')?.value,
+        idBarrio: parseInt(this.datosAdicionalForm.get('idBarrio')?.value),
+        idTipoDoc: parseInt(this.datosBasicosForm.get('idTipoDoc')?.value),
+        calle: this.datosAdicionalForm.get('calle')?.value,
+        numero: this.datosAdicionalForm.get('numero')?.value
       };
 
-      console.log('Datos del usuario:', userData);
-      alert('¡Registro exitoso! (Este es solo un demo)');
+      // Solo agregar campos opcionales si tienen valor
+      if (deptoValue && deptoValue.trim()) {
+        usuarioRequest.depto = deptoValue;
+      }
+      if (pisoValue && pisoValue.trim()) {
+        usuarioRequest.piso = pisoValue;
+      }
+      if (observacionesValue && observacionesValue.trim()) {
+        usuarioRequest.observaciones = observacionesValue;
+      }
+
+      console.log('Datos del usuario a enviar:', usuarioRequest);
+
+      // Llamar al servicio de registro
+      this.authService.registerUsuario(usuarioRequest).subscribe({
+        next: (response) => {
+          console.log('Registro exitoso:', response);
+          alert('¡Registro exitoso! Por favor verifica tu correo electrónico para confirmar tu cuenta.');
+          this.router.navigate(['/auth/login']);
+          this.isSubmitting = false;
+        },
+        error: (error) => {
+          console.error('Error en el registro:', error);
+          alert('Error en el registro: ' + (error.error?.message || 'Por favor intenta nuevamente'));
+          this.isSubmitting = false;
+        }
+      });
     }
   }
 

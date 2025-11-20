@@ -34,5 +34,9 @@ export const routes: Routes = [
 		path: 'pagos',
 		loadChildren: () => import('./features/pagos/pagos.routes').then((m) => m.PAGOS_ROUTES),
 	},
+	{
+		path: 'admin',
+		loadChildren: () => import('./features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
+	},
 	{ path: '**', redirectTo: 'auth' },
 ];

@@ -44,4 +44,18 @@ export class SolicitudHttpRepository implements SolicitudRepository {
   getSolicitudesByUsuario(idUsuario: number): Observable<SolicitudConProfesional[]> {
     return this.http.get<SolicitudConProfesional[]>(`${this.baseUrl}/usuario/${idUsuario}`);
   }
+
+  verificarSolicitudPendiente(idUsuario: number, idProfesional: number): Observable<boolean> {
+    const params = new HttpParams()
+      .set('idUsuario', idUsuario.toString())
+      .set('idProfesional', idProfesional.toString());
+
+    return this.http.get<{ tieneSolicitudPendiente: boolean }>(
+      `${this.baseUrl}/verificar-pendiente`,
+      { params }
+    ).pipe(
+      map(response => response.tieneSolicitudPendiente),
+      catchError(() => of(false))
+    );
+  }
 }

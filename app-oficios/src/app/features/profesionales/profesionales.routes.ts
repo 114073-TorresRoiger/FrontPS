@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { profesionalGuard } from '../../core/guards/profesional.guard';
+import { noAdminGuard } from '../../core/guards/no-admin.guard';
 
 export const PROFESIONALES_ROUTES: Routes = [
   {
@@ -9,21 +10,21 @@ export const PROFESIONALES_ROUTES: Routes = [
   {
     path: 'dashboard',
     loadComponent: () => import('./dashboard').then(m => m.ProfessionalDashboardComponent),
-    canActivate: [profesionalGuard]
+    canActivate: [noAdminGuard, profesionalGuard]
   },
   {
     path: 'facturas',
     loadComponent: () => import('./facturas').then(m => m.FacturasComponent),
-    canActivate: [profesionalGuard]
+    canActivate: [noAdminGuard, profesionalGuard]
   },
   {
     path: 'resenas',
     loadComponent: () => import('./resenas').then(m => m.ResenasComponent),
-    canActivate: [profesionalGuard]
+    canActivate: [noAdminGuard, profesionalGuard]
   },
   {
     path: 'metodos-pago',
     loadComponent: () => import('./metodos-pago').then(m => m.MetodosPagoComponent),
-    canActivate: [profesionalGuard]
+    canActivate: [noAdminGuard, profesionalGuard]
   }
 ];

@@ -9,7 +9,9 @@ import { Oficio } from '../../domain/oficios/oficio.model';
 import { GetProfesionalesByOficioUseCase } from '../../domain/profesionales/use-cases/get-profesionales-by-oficio.usecase';
 import { PerfilProfesional } from '../../domain/profesionales/models/perfil-profesional.model';
 import { EnviarSolicitudUseCase } from '../../domain/solicitudes/use-cases/enviar-solicitud.usecase';
+import { VerificarSolicitudPendienteUseCase } from '../../domain/solicitudes/use-cases/verificar-solicitud-pendiente.usecase';
 import { SolicitudRequest } from '../../domain/solicitudes/solicitud.model';
+import { ProfessionalCardComponent } from './professional-card/professional-card.component';
 
 interface ServiceCard {
   id: number;
@@ -27,7 +29,7 @@ interface ServiceCard {
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideAngularModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, RouterModule, LucideAngularModule, FormsModule, ReactiveFormsModule, ProfessionalCardComponent],
   templateUrl: './home.page.html',
   styleUrl: './home.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -40,6 +42,7 @@ export class HomePage implements OnInit {
   private readonly listOficiosUseCase = inject(ListOficiosUseCase);
   private readonly getProfesionalesByOficioUseCase = inject(GetProfesionalesByOficioUseCase);
   private readonly enviarSolicitudUseCase = inject(EnviarSolicitudUseCase);
+  private readonly verificarSolicitudPendienteUseCase = inject(VerificarSolicitudPendienteUseCase);
 
   // Icons
   readonly Search = Search;
@@ -83,6 +86,7 @@ export class HomePage implements OnInit {
 
   // Modal de solicitud
   showSolicitudModal = signal(false);
+  showPendingSolicitudWarning = signal(false);
   selectedProfessional = signal<PerfilProfesional | null>(null);
   solicitudForm!: FormGroup;
   isSendingSolicitud = signal(false);
@@ -142,105 +146,105 @@ export class HomePage implements OnInit {
   ]);
 
   // Mock data for professionals by service
-  professionalsByService: { [key: number]: any[] } = {
-    1: [ // Plomería
-      {
-        id: 101,
-        name: 'Juan Pérez',
-        rating: 4.8,
-        reviewCount: 127,
-        price: 1500,
-        location: 'San Miguel, Buenos Aires',
-        experience: '8 años',
-        availability: 'Disponible hoy',
-        specialties: ['Destapaciones', 'Instalaciones', 'Reparaciones'],
-        verified: true,
-        image: 'assets/professionals/juan-perez.jpg'
-      },
-      {
-        id: 102,
-        name: 'Roberto Silva',
-        rating: 4.6,
-        reviewCount: 89,
-        price: 1200,
-        location: 'Villa Ballester, Buenos Aires',
-        experience: '5 años',
-        availability: 'Disponible mañana',
-        specialties: ['Cañerías', 'Cloacas', 'Gas'],
-        verified: true,
-        image: 'assets/professionals/roberto-silva.jpg'
-      },
-      {
-        id: 103,
-        name: 'Miguel Torres',
-        rating: 4.9,
-        reviewCount: 156,
-        price: 1800,
-        location: 'San Martín, Buenos Aires',
-        experience: '12 años',
-        availability: 'Disponible esta semana',
-        specialties: ['Calefones', 'Calderas', 'Emergencias'],
-        verified: true,
-        image: 'assets/professionals/miguel-torres.jpg'
-      }
-    ],
-    2: [ // Electricidad
-      {
-        id: 201,
-        name: 'María González',
-        rating: 4.9,
-        reviewCount: 203,
-        price: 1400,
-        location: 'Villa Ballester, Buenos Aires',
-        experience: '10 años',
-        availability: 'Disponible hoy',
-        specialties: ['Instalaciones', 'Tableros', 'Iluminación'],
-        verified: true,
-        image: 'assets/professionals/maria-gonzalez.jpg'
-      },
-      {
-        id: 202,
-        name: 'Carlos Mendez',
-        rating: 4.7,
-        reviewCount: 121,
-        price: 1600,
-        location: 'San Isidro, Buenos Aires',
-        experience: '7 años',
-        availability: 'Disponible mañana',
-        specialties: ['Domótica', 'Portones', 'Mantenimiento'],
-        verified: true,
-        image: 'assets/professionals/carlos-mendez.jpg'
-      }
-    ],
-    3: [ // Pintura
-      {
-        id: 301,
-        name: 'Carlos Rodríguez',
-        rating: 4.7,
-        reviewCount: 245,
-        price: 2000,
-        location: 'San Martín, Buenos Aires',
-        experience: '15 años',
-        availability: 'Disponible esta semana',
-        specialties: ['Pintura exterior', 'Decorativa', 'Empapelado'],
-        verified: true,
-        image: 'assets/professionals/carlos-rodriguez.jpg'
-      },
-      {
-        id: 302,
-        name: 'Ana Morales',
-        rating: 4.8,
-        reviewCount: 189,
-        price: 1800,
-        location: 'Munro, Buenos Aires',
-        experience: '9 años',
-        availability: 'Disponible hoy',
-        specialties: ['Pintura interior', 'Restauración', 'Texturas'],
-        verified: true,
-        image: 'assets/professionals/ana-morales.jpg'
-      }
-    ]
-  };
+  // professionalsByService: { [key: number]: any[] } = {
+  //   1: [ // Plomería
+  //     {
+  //       id: 101,
+  //       name: 'Juan Pérez',
+  //       rating: 4.8,
+  //       reviewCount: 127,
+  //       price: 1500,
+  //       location: 'San Miguel, Buenos Aires',
+  //       experience: '8 años',
+  //       availability: 'Disponible hoy',
+  //       specialties: ['Destapaciones', 'Instalaciones', 'Reparaciones'],
+  //       verified: true,
+  //       image: 'assets/professionals/juan-perez.jpg'
+  //     },
+  //     {
+  //       id: 102,
+  //       name: 'Roberto Silva',
+  //       rating: 4.6,
+  //       reviewCount: 89,
+  //       price: 1200,
+  //       location: 'Villa Ballester, Buenos Aires',
+  //       experience: '5 años',
+  //       availability: 'Disponible mañana',
+  //       specialties: ['Cañerías', 'Cloacas', 'Gas'],
+  //       verified: true,
+  //       image: 'assets/professionals/roberto-silva.jpg'
+  //     },
+  //     {
+  //       id: 103,
+  //       name: 'Miguel Torres',
+  //       rating: 4.9,
+  //       reviewCount: 156,
+  //       price: 1800,
+  //       location: 'San Martín, Buenos Aires',
+  //       experience: '12 años',
+  //       availability: 'Disponible esta semana',
+  //       specialties: ['Calefones', 'Calderas', 'Emergencias'],
+  //       verified: true,
+  //       image: 'assets/professionals/miguel-torres.jpg'
+  //     }
+  //   ],
+  //   2: [ // Electricidad
+  //     {
+  //       id: 201,
+  //       name: 'María González',
+  //       rating: 4.9,
+  //       reviewCount: 203,
+  //       price: 1400,
+  //       location: 'Villa Ballester, Buenos Aires',
+  //       experience: '10 años',
+  //       availability: 'Disponible hoy',
+  //       specialties: ['Instalaciones', 'Tableros', 'Iluminación'],
+  //       verified: true,
+  //       image: 'assets/professionals/maria-gonzalez.jpg'
+  //     },
+  //     {
+  //       id: 202,
+  //       name: 'Carlos Mendez',
+  //       rating: 4.7,
+  //       reviewCount: 121,
+  //       price: 1600,
+  //       location: 'San Isidro, Buenos Aires',
+  //       experience: '7 años',
+  //       availability: 'Disponible mañana',
+  //       specialties: ['Domótica', 'Portones', 'Mantenimiento'],
+  //       verified: true,
+  //       image: 'assets/professionals/carlos-mendez.jpg'
+  //     }
+  //   ],
+  //   3: [ // Pintura
+  //     {
+  //       id: 301,
+  //       name: 'Carlos Rodríguez',
+  //       rating: 4.7,
+  //       reviewCount: 245,
+  //       price: 2000,
+  //       location: 'San Martín, Buenos Aires',
+  //       experience: '15 años',
+  //       availability: 'Disponible esta semana',
+  //       specialties: ['Pintura exterior', 'Decorativa', 'Empapelado'],
+  //       verified: true,
+  //       image: 'assets/professionals/carlos-rodriguez.jpg'
+  //     },
+  //     {
+  //       id: 302,
+  //       name: 'Ana Morales',
+  //       rating: 4.8,
+  //       reviewCount: 189,
+  //       price: 1800,
+  //       location: 'Munro, Buenos Aires',
+  //       experience: '9 años',
+  //       availability: 'Disponible hoy',
+  //       specialties: ['Pintura interior', 'Restauración', 'Texturas'],
+  //       verified: true,
+  //       image: 'assets/professionals/ana-morales.jpg'
+  //     }
+  //   ]
+  // };
 
   ngOnInit(): void {
     this.loadServices();
@@ -382,14 +386,37 @@ export class HomePage implements OnInit {
       return;
     }
 
-    this.selectedProfessional.set(professional);
-    this.solicitudSuccess.set(false);
-    this.solicitudError.set(null);
-    this.solicitudForm.reset({
-      fechaservicio: this.getMinDate(),
-      observacion: ''
+    // Get current user ID
+    const currentUser = this.authService.currentUser();
+    if (!currentUser?.id) {
+      alert('Error al obtener la información del usuario');
+      return;
+    }
+
+    // Verify if there's already a pending solicitud
+    this.verificarSolicitudPendienteUseCase.execute(currentUser.id, professional.idProfesional).subscribe({
+      next: (tienePendiente) => {
+        if (tienePendiente) {
+          this.selectedProfessional.set(professional);
+          this.showPendingSolicitudWarning.set(true);
+          return;
+        }
+
+        // No pending solicitud, proceed to open modal
+        this.selectedProfessional.set(professional);
+        this.solicitudSuccess.set(false);
+        this.solicitudError.set(null);
+        this.solicitudForm.reset({
+          fechaservicio: this.getMinDate(),
+          observacion: ''
+        });
+        this.showSolicitudModal.set(true);
+      },
+      error: (error) => {
+        console.error('Error al verificar solicitud pendiente:', error);
+        alert('Error al verificar solicitudes. Por favor intenta nuevamente.');
+      }
     });
-    this.showSolicitudModal.set(true);
   }
 
   getMinDate(): string {
@@ -402,6 +429,11 @@ export class HomePage implements OnInit {
     this.showSolicitudModal.set(false);
     this.selectedProfessional.set(null);
     this.solicitudForm.reset();
+  }
+
+  closePendingWarningModal() {
+    this.showPendingSolicitudWarning.set(false);
+    this.selectedProfessional.set(null);
   }
 
   enviarSolicitud() {

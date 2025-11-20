@@ -272,66 +272,16 @@
             Actualmente no hay profesionales registrados para el servicio de <strong>{{ selectedService()?.title }}</strong>.
             Te invitamos a revisar otros servicios o volver más tarde.
           </p>
-          <button class="back-to-services-btn" (click)="backToServices()">
-            <lucide-angular [img]="ArrowLeft" size="20"></lucide-angular>
-            <span>Ver otros servicios</span>
-          </button>
         </div>
 
         <!-- Professionals Grid -->
         <div *ngIf="!isLoadingProfessionals() && !noProfessionalsFound()" class="professionals-grid">
-          <div
+          <app-professional-card
             *ngFor="let professional of getCurrentProfessionals()"
-            class="professional-card"
+            [professional]="professional"
+            (contact)="contactProfessional($event)"
           >
-            <!-- Professional Image -->
-            <div class="professional-image">
-              <img src="assets/logos/logo.png" [alt]="getProfessionalDisplayName(professional)" onerror="this.src='assets/logos/logo.png'">
-            </div>
-
-            <!-- Professional Content -->
-            <div class="professional-content">
-              <div class="professional-header">
-                <h3 class="professional-name">{{ getProfessionalDisplayName(professional) }}</h3>
-              </div>
-
-              <div class="professional-info">
-                <div class="info-item">
-                  <lucide-angular [img]="MapPin" size="14" class="info-icon"></lucide-angular>
-                  <span>{{ professional.oficio }}</span>
-                </div>
-                <div class="info-item">
-                  <lucide-angular [img]="Clock" size="14" class="info-icon"></lucide-angular>
-                  <span>{{ professional.disponibilidad }}</span>
-                </div>
-              </div>
-
-              <div class="professional-details">
-                <div class="info-item">
-                  <lucide-angular [img]="DollarSign" size="14" class="info-icon"></lucide-angular>
-                  <span>{{ professional.rangoPrecio }}</span>
-                </div>
-                <div class="specialties" *ngIf="professional.especialidades && professional.especialidades.length > 0">
-                  <span class="specialties-label">Especialidades:</span>
-                  <div class="specialties-list">
-                    <span *ngFor="let specialty of professional.especialidades" class="specialty-tag">
-                      {{ specialty }}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="professional-footer">
-                <div class="professional-contact">
-                  <lucide-angular [img]="User" size="14" class="info-icon"></lucide-angular>
-                  <span>{{ professional.telefono }}</span>
-                </div>
-                <button class="contact-professional-btn" (click)="contactProfessional(professional)">
-                  Contactar
-                </button>
-              </div>
-            </div>
-          </div>
+          </app-professional-card>
         </div>
       </main>
     </div>
@@ -467,6 +417,43 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Advertencia - Solicitud Pendiente -->
+<div *ngIf="showPendingSolicitudWarning()" class="modal-overlay" (click)="closePendingWarningModal()">
+  <div class="modal-content modal-warning" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <div class="warning-icon">
+        <lucide-angular [img]="Clock" size="32" color="#f59e0b"></lucide-angular>
+      </div>
+      <h2>Solicitud Pendiente</h2>
+      <button class="close-btn" (click)="closePendingWarningModal()">
+        <lucide-angular [img]="X" size="24"></lucide-angular>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <div class="warning-content">
+        <p class="warning-message">
+          Ya tienes una <strong>solicitud pendiente</strong> con
+          <strong>{{ getProfessionalDisplayName(selectedProfessional()!) }}</strong>.
+        </p>
+        <p class="warning-subtitle">
+          Por favor espera a que el profesional responda tu solicitud actual antes de enviar una nueva.
+        </p>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button
+        type="button"
+        class="btn btn-primary btn-block"
+        (click)="closePendingWarningModal()"
+      >
+        Entendido
+      </button>
     </div>
   </div>
 </div>

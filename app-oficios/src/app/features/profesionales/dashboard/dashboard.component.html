@@ -1,10 +1,16 @@
 <div class="dashboard-container">
   <!-- Header -->
   <header class="dashboard-header">
-    <button class="back-btn" (click)="goBack()">
-      <lucide-angular [img]="ArrowLeft" size="20"></lucide-angular>
-      <span>Volver al Inicio</span>
-    </button>
+    <div class="header-top">
+      <button class="back-btn" (click)="goBack()">
+        <lucide-angular [img]="ArrowLeft" size="20"></lucide-angular>
+        <span>Volver al Inicio</span>
+      </button>
+      <button class="logout-btn" (click)="logout()" title="Cerrar sesión">
+        <lucide-angular [img]="LogOut" [size]="20"></lucide-angular>
+        <span>Cerrar sesión</span>
+      </button>
+    </div>
     <div class="header-content">
       <h1>Dashboard Profesional</h1>
       <p class="welcome-text">Bienvenido, <strong>{{ userName() }}</strong></p>

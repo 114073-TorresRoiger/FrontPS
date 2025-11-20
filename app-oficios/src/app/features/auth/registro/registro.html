@@ -1,14 +1,4 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tu Oficio - Registro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="registro.scss">
-</head>
-<body>
-    <div class="registro-container">
+<div class="registro-container">
         <!-- Formulario centrado -->
         <div class="center-section">
             <div class="registro-form-container">
@@ -34,9 +24,9 @@
 
                     <form [formGroup]="datosBasicosForm" class="registro-form">
                         <div class="input-group">
+                            <label class="form-label">Correo electrónico*</label>
                             <input
                                 type="email"
-                                placeholder="Correo electrónico*"
                                 class="form-input"
                                 formControlName="mail"
                                 [class.error]="isFieldInvalid(datosBasicosForm, 'mail')"
@@ -47,9 +37,9 @@
                         </div>
 
                         <div class="input-group">
+                            <label class="form-label">Contraseña*</label>
                             <input
                                 type="password"
-                                placeholder="Contraseña*"
                                 class="form-input"
                                 formControlName="password"
                                 [class.error]="isFieldInvalid(datosBasicosForm, 'password')"
@@ -59,29 +49,91 @@
                             </div>
                         </div>
 
-                        <div class="input-group">
-                            <input
-                                type="text"
-                                placeholder="Nombre*"
-                                class="form-input"
-                                formControlName="name"
-                                [class.error]="isFieldInvalid(datosBasicosForm, 'name')"
-                            />
-                            <div class="error-message" *ngIf="isFieldInvalid(datosBasicosForm, 'name')">
-                                {{ getFieldError(datosBasicosForm, 'name') }}
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label class="form-label">Nombre*</label>
+                                <input
+                                    type="text"
+                                    class="form-input"
+                                    formControlName="name"
+                                    [class.error]="isFieldInvalid(datosBasicosForm, 'name')"
+                                />
+                                <div class="error-message" *ngIf="isFieldInvalid(datosBasicosForm, 'name')">
+                                    {{ getFieldError(datosBasicosForm, 'name') }}
+                                </div>
+                            </div>
+
+                            <div class="input-group">
+                                <label class="form-label">Apellido*</label>
+                                <input
+                                    type="text"
+                                    class="form-input"
+                                    formControlName="lastName"
+                                    [class.error]="isFieldInvalid(datosBasicosForm, 'lastName')"
+                                />
+                                <div class="error-message" *ngIf="isFieldInvalid(datosBasicosForm, 'lastName')">
+                                    {{ getFieldError(datosBasicosForm, 'lastName') }}
+                                </div>
                             </div>
                         </div>
 
-                        <div class="input-group">
-                            <input
-                                type="text"
-                                placeholder="Apellido*"
-                                class="form-input"
-                                formControlName="lastName"
-                                [class.error]="isFieldInvalid(datosBasicosForm, 'lastName')"
-                            />
-                            <div class="error-message" *ngIf="isFieldInvalid(datosBasicosForm, 'lastName')">
-                                {{ getFieldError(datosBasicosForm, 'lastName') }}
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label class="form-label">Tipo de Documento*</label>
+                                <select
+                                    class="form-select"
+                                    formControlName="idTipoDoc"
+                                    [class.error]="isFieldInvalid(datosBasicosForm, 'idTipoDoc')"
+                                    [disabled]="isLoadingTiposDoc">
+                                    <option value="">Seleccione una opción</option>
+                                    <option *ngFor="let tipo of tiposDocumento" [value]="tipo.id">
+                                        {{ tipo.tipo }}
+                                    </option>
+                                </select>
+                                <div class="error-message" *ngIf="isFieldInvalid(datosBasicosForm, 'idTipoDoc')">
+                                    {{ getFieldError(datosBasicosForm, 'idTipoDoc') }}
+                                </div>
+                            </div>
+
+                            <div class="input-group">
+                                <label class="form-label">Número de Documento*</label>
+                                <input
+                                    type="text"
+                                    class="form-input"
+                                    formControlName="documento"
+                                    [class.error]="isFieldInvalid(datosBasicosForm, 'documento')"
+                                />
+                                <div class="error-message" *ngIf="isFieldInvalid(datosBasicosForm, 'documento')">
+                                    {{ getFieldError(datosBasicosForm, 'documento') }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label class="form-label">Teléfono*</label>
+                                <input
+                                    type="tel"
+                                    class="form-input"
+                                    formControlName="telefono"
+                                    [class.error]="isFieldInvalid(datosBasicosForm, 'telefono')"
+                                />
+                                <div class="error-message" *ngIf="isFieldInvalid(datosBasicosForm, 'telefono')">
+                                    {{ getFieldError(datosBasicosForm, 'telefono') }}
+                                </div>
+                            </div>
+
+                            <div class="input-group">
+                                <label class="form-label">Fecha de Nacimiento*</label>
+                                <input
+                                    type="date"
+                                    class="form-input"
+                                    formControlName="nacimiento"
+                                    [class.error]="isFieldInvalid(datosBasicosForm, 'nacimiento')"
+                                />
+                                <div class="error-message" *ngIf="isFieldInvalid(datosBasicosForm, 'nacimiento')">
+                                    {{ getFieldError(datosBasicosForm, 'nacimiento') }}
+                                </div>
                             </div>
                         </div>
 
@@ -95,89 +147,130 @@
                 <div *ngIf="currentStep === 2" class="step-content">
                     <div class="form-header">
                         <h2 class="form-title">Información adicional</h2>
-                        <p class="form-subtitle">Completa tu perfil</p>
+                        <p class="form-subtitle">Completa tu domicilio</p>
                     </div>
 
                     <form [formGroup]="datosAdicionalForm" class="registro-form">
-                        <div class="input-row">
-                            <div class="input-group">
-                                <select
-                                    class="form-select"
-                                    formControlName="departamento"
-                                    [class.error]="isFieldInvalid(datosAdicionalForm, 'departamento')">
-                                    <option value="">Selecciona un departamento*</option>
-                                    <option *ngFor="let departamento of departamentos" [value]="departamento">
-                                        {{ departamento }}
-                                    </option>
-                                </select>
-                                <div class="error-message" *ngIf="isFieldInvalid(datosAdicionalForm, 'departamento')">
-                                    {{ getFieldError(datosAdicionalForm, 'departamento') }}
-                                </div>
-                            </div>
-                        </div>
-
-
-
-                        <div class="input-row">
-                            <div class="input-group">
-                                <input
-                                    type="text"
-                                    placeholder="Ciudad*"
-                                    class="form-input"
-                                    formControlName="ciudad"
-                                    [class.error]="isFieldInvalid(datosAdicionalForm, 'ciudad')"
-                                />
-                                <div class="error-message" *ngIf="isFieldInvalid(datosAdicionalForm, 'ciudad')">
-                                    {{ getFieldError(datosAdicionalForm, 'ciudad') }}
-                                </div>
-                            </div>
-
-                            <div class="input-group">
-                                <input
-                                    type="text"
-                                    placeholder="Barrio*"
-                                    class="form-input"
-                                    formControlName="barrio"
-                                    [class.error]="isFieldInvalid(datosAdicionalForm, 'barrio')"
-                                />
-                                <div class="error-message" *ngIf="isFieldInvalid(datosAdicionalForm, 'barrio')">
-                                    {{ getFieldError(datosAdicionalForm, 'barrio') }}
-                                </div>
+                        <div class="input-group">
+                            <label class="form-label">Departamento*</label>
+                            <select
+                                class="form-select"
+                                formControlName="idDepartamento"
+                                [class.error]="isFieldInvalid(datosAdicionalForm, 'idDepartamento')"
+                                [disabled]="isLoadingDepartamentos"
+                                (change)="onDepartamentoChange($any($event.target).value)">
+                                <option value="">Seleccione una opción</option>
+                                <option *ngFor="let departamento of departamentos" [value]="departamento.id">
+                                    {{ departamento.departamento }}
+                                </option>
+                            </select>
+                            <div class="error-message" *ngIf="isFieldInvalid(datosAdicionalForm, 'idDepartamento')">
+                                {{ getFieldError(datosAdicionalForm, 'idDepartamento') }}
                             </div>
                         </div>
 
                         <div class="input-group">
-                            <input
-                                type="tel"
-                                placeholder="Teléfono*"
-                                class="form-input"
-                                formControlName="telefono"
-                                [class.error]="isFieldInvalid(datosAdicionalForm, 'telefono')"
-                            />
-                            <div class="error-message" *ngIf="isFieldInvalid(datosAdicionalForm, 'telefono')">
-                                {{ getFieldError(datosAdicionalForm, 'telefono') }}
+                            <label class="form-label">Ciudad*</label>
+                            <select
+                                class="form-select"
+                                formControlName="idCiudad"
+                                [class.error]="isFieldInvalid(datosAdicionalForm, 'idCiudad')"
+                                [disabled]="isLoadingCiudades || ciudades.length === 0"
+                                (change)="onCiudadChange($any($event.target).value)">
+                                <option value="">Seleccione una opción</option>
+                                <option *ngFor="let ciudad of ciudades" [value]="ciudad.id">
+                                    {{ ciudad.ciudad }}
+                                </option>
+                            </select>
+                            <div class="error-message" *ngIf="isFieldInvalid(datosAdicionalForm, 'idCiudad')">
+                                {{ getFieldError(datosAdicionalForm, 'idCiudad') }}
                             </div>
                         </div>
 
                         <div class="input-group">
-                            <input
-                                type="text"
-                                placeholder="Dirección*"
-                                class="form-input"
-                                formControlName="direccion"
-                                [class.error]="isFieldInvalid(datosAdicionalForm, 'direccion')"
-                            />
-                            <div class="error-message" *ngIf="isFieldInvalid(datosAdicionalForm, 'direccion')">
-                                {{ getFieldError(datosAdicionalForm, 'direccion') }}
+                            <label class="form-label">Barrio*</label>
+                            <select
+                                class="form-select"
+                                formControlName="idBarrio"
+                                [class.error]="isFieldInvalid(datosAdicionalForm, 'idBarrio')"
+                                [disabled]="isLoadingBarrios || barrios.length === 0">
+                                <option value="">Seleccione una opción</option>
+                                <option *ngFor="let barrio of barrios" [value]="barrio.id">
+                                    {{ barrio.barrio }}
+                                </option>
+                            </select>
+                            <div class="error-message" *ngIf="isFieldInvalid(datosAdicionalForm, 'idBarrio')">
+                                {{ getFieldError(datosAdicionalForm, 'idBarrio') }}
                             </div>
+                        </div>
+
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label class="form-label">Calle*</label>
+                                <input
+                                    type="text"
+                                    class="form-input"
+                                    formControlName="calle"
+                                    [class.error]="isFieldInvalid(datosAdicionalForm, 'calle')"
+                                />
+                                <div class="error-message" *ngIf="isFieldInvalid(datosAdicionalForm, 'calle')">
+                                    {{ getFieldError(datosAdicionalForm, 'calle') }}
+                                </div>
+                            </div>
+
+                            <div class="input-group">
+                                <label class="form-label">Número*</label>
+                                <input
+                                    type="text"
+                                    class="form-input"
+                                    formControlName="numero"
+                                    [class.error]="isFieldInvalid(datosAdicionalForm, 'numero')"
+                                />
+                                <div class="error-message" *ngIf="isFieldInvalid(datosAdicionalForm, 'numero')">
+                                    {{ getFieldError(datosAdicionalForm, 'numero') }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="input-row">
+                            <div class="input-group">
+                                <label class="form-label">Piso (opcional)</label>
+                                <input
+                                    type="text"
+                                    class="form-input"
+                                    formControlName="piso"
+                                />
+                            </div>
+
+                            <div class="input-group">
+                                <label class="form-label">Departamento (opcional)</label>
+                                <input
+                                    type="text"
+                                    class="form-input"
+                                    formControlName="depto"
+                                />
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label class="form-label">Observaciones (opcional)</label>
+                            <textarea
+                                class="form-input"
+                                formControlName="observaciones"
+                                rows="3"
+                            ></textarea>
                         </div>
 
                         <div class="form-actions">
                             <button type="button" class="back-btn" (click)="prevStep()">
                                 Atrás
                             </button>
-                            <button type="submit" class="submit-btn" (click)="onSubmit()" [disabled]="!datosAdicionalForm.valid">
-                                Crear cuenta
+                            <button
+                                type="submit"
+                                class="submit-btn"
+                                (click)="onSubmit()"
+                                [disabled]="!datosAdicionalForm.valid || isSubmitting">
+                                {{ isSubmitting ? 'Creando cuenta...' : 'Crear cuenta' }}
                             </button>
                         </div>
                     </form>
@@ -186,10 +279,8 @@
                 <!-- Link para volver al login -->
                 <div class="login-link">
                     <span>¿Ya tienes una cuenta? </span>
-                    <a href="/auth/login" class="login-text">Inicia sesión</a>
+                    <a routerLink="/auth/login" class="login-text">Inicia sesión</a>
                 </div>
             </div>
         </div>
     </div>
-</body>
-</html>
