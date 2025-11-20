@@ -457,3 +457,12 @@
     </div>
   </div>
 </div>
+
+<!-- Modal de Turnos -->
+<app-turno-modal
+  *ngIf="showTurnoModal() && selectedProfessional()"
+  [professional]="selectedProfessional()!"
+  [idUsuario]="authService.currentUser()?.id!"
+  (close)="closeTurnoModal()"
+  (turnoConfirmado)="onTurnoConfirmado($event)"
+></app-turno-modal>

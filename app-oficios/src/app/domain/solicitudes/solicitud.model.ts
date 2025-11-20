@@ -4,6 +4,7 @@ export interface SolicitudRequest {
   fechasolicitud: string; // ISO 8601 format
   fechaservicio: string; // ISO 8601 format
   observacion: string;
+  horaReserva?: string; // Hora reservada en formato HH:mm:ss
 }
 
 export interface SolicitudResponse {
@@ -14,6 +15,7 @@ export interface SolicitudResponse {
   fechaservicio: string;
   direccion: string;
   observacion: string;
+  horaReserva?: string; // Hora reservada en formato HH:mm:ss
 }
 
 export interface SolicitudConProfesional {
@@ -25,4 +27,20 @@ export interface SolicitudConProfesional {
   fechaSolicitud: string;
   estado: string;
   imagenUrl?: string;
+}
+
+export interface TurnoDisponible {
+  fecha: string; // LocalDate en formato ISO (YYYY-MM-DD)
+  horaInicio: string; // LocalTime en formato ISO (HH:mm:ss)
+  horaFin: string; // LocalTime en formato ISO (HH:mm:ss)
+  disponible: boolean;
+}
+
+export interface ConfirmarTurnoRequest {
+  idUsuario: number;
+  idProfesional: number;
+  fecha: string; // LocalDate formato YYYY-MM-DD
+  hora: string; // LocalTime formato HH:mm:ss
+  duracion: number; // minutos, default 60
+  observacion?: string;
 }

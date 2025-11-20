@@ -12,6 +12,7 @@ import { EnviarSolicitudUseCase } from '../../domain/solicitudes/use-cases/envia
 import { VerificarSolicitudPendienteUseCase } from '../../domain/solicitudes/use-cases/verificar-solicitud-pendiente.usecase';
 import { SolicitudRequest } from '../../domain/solicitudes/solicitud.model';
 import { ProfessionalCardComponent } from './professional-card/professional-card.component';
+import { TurnoModalComponent } from './turno-modal/turno-modal.component';
 
 interface ServiceCard {
   id: number;
@@ -29,7 +30,7 @@ interface ServiceCard {
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideAngularModule, FormsModule, ReactiveFormsModule, ProfessionalCardComponent],
+  imports: [CommonModule, RouterModule, LucideAngularModule, FormsModule, ReactiveFormsModule, ProfessionalCardComponent, TurnoModalComponent],
   templateUrl: './home.page.html',
   styleUrl: './home.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -92,6 +93,9 @@ export class HomePage implements OnInit {
   isSendingSolicitud = signal(false);
   solicitudSuccess = signal(false);
   solicitudError = signal<string | null>(null);
+
+  // Modal de turnos
+  showTurnoModal = signal(false);
 
   // Featured professionals
   featuredProfessionals = signal<any[]>([
@@ -393,30 +397,20 @@ export class HomePage implements OnInit {
       return;
     }
 
-    // Verify if there's already a pending solicitud
-    this.verificarSolicitudPendienteUseCase.execute(currentUser.id, professional.idProfesional).subscribe({
-      next: (tienePendiente) => {
-        if (tienePendiente) {
-          this.selectedProfessional.set(professional);
-          this.showPendingSolicitudWarning.set(true);
-          return;
-        }
+    // Abrir modal de turnos directamente
+    this.selectedProfessional.set(professional);
+    this.showTurnoModal.set(true);
+  }
 
-        // No pending solicitud, proceed to open modal
-        this.selectedProfessional.set(professional);
-        this.solicitudSuccess.set(false);
-        this.solicitudError.set(null);
-        this.solicitudForm.reset({
-          fechaservicio: this.getMinDate(),
-          observacion: ''
-        });
-        this.showSolicitudModal.set(true);
-      },
-      error: (error) => {
-        console.error('Error al verificar solicitud pendiente:', error);
-        alert('Error al verificar solicitudes. Por favor intenta nuevamente.');
-      }
-    });
+  closeTurnoModal() {
+    this.showTurnoModal.set(false);
+    this.selectedProfessional.set(null);
+  }
+
+  onTurnoConfirmado(response: any) {
+    console.log('Turno confirmado:', response);
+    // Aquí puedes agregar lógica adicional después de confirmar el turno
+    // Por ejemplo, mostrar un mensaje de éxito o redirigir
   }
 
   getMinDate(): string {

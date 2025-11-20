@@ -23,6 +23,7 @@ import { AuthService } from '../../../domain/auth';
 import { GetSolicitudesUseCase } from '../../../domain/solicitudes/use-cases/get-solicitudes.usecase';
 import { ResponderSolicitudUseCase } from '../../../domain/solicitudes/use-cases/responder-solicitud.usecase';
 import { SolicitudResponse } from '../../../domain/solicitudes/solicitud.model';
+import { TrabajoService } from '../../../domain/trabajo/trabajo.service';
 
 interface Metric {
   title: string;
@@ -46,6 +47,7 @@ interface SolicitudPendiente {
   fechaservicio: string;
   direccion: string;
   observacion: string;
+  horaReserva?: string;
 }
 
 @Component({
@@ -77,11 +79,17 @@ export class ProfessionalDashboardComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly getSolicitudesUseCase = inject(GetSolicitudesUseCase);
   private readonly responderSolicitudUseCase = inject(ResponderSolicitudUseCase);
+  private readonly trabajoService = inject(TrabajoService);
 
   userName = signal<string>('');
   solicitudesPendientes = signal<SolicitudPendiente[]>([]);
   isLoadingSolicitudes = signal(false);
   respondingToSolicitud = signal<number | null>(null);
+
+  // Modal de respuesta
+  showResponseModal = signal(false);
+  responseModalType = signal<'success' | 'error'>('success');
+  responseModalMessage = signal('');
 
   metrics = signal<Metric[]>([
     {
@@ -164,23 +172,23 @@ export class ProfessionalDashboardComponent implements OnInit {
     this.isLoadingSolicitudes.set(true);
 
     this.getSolicitudesUseCase.execute(idProfesional, 'PENDIENTE').subscribe({
-      next: (solicitud: SolicitudResponse | null) => {
-        // El backend retorna una sola solicitud o null si no hay ninguna
-        // TODO: El backend debería retornar un array de solicitudes
-        const solicitudes: SolicitudPendiente[] = solicitud ? [{
+      next: (solicitudes: SolicitudResponse[]) => {
+        // El backend retorna un array de solicitudes
+        const solicitudesPendientes: SolicitudPendiente[] = solicitudes.map(solicitud => ({
           idSolicitud: solicitud.idSolicitud,
           nombreUsuario: solicitud.nombreUsuario,
           fechasolicitud: solicitud.fechasolicitud,
           fechaservicio: solicitud.fechaservicio,
           direccion: solicitud.direccion,
-          observacion: solicitud.observacion
-        }] : [];
+          observacion: solicitud.observacion,
+          horaReserva: solicitud.horaReserva
+        }));
 
-        this.solicitudesPendientes.set(solicitudes);
+        this.solicitudesPendientes.set(solicitudesPendientes);
         this.isLoadingSolicitudes.set(false);
-        console.log('✅ Solicitudes cargadas:', solicitudes.length);
-        if (solicitudes.length > 0) {
-          console.log('📋 Solicitud ID:', solicitudes[0].idSolicitud);
+        console.log('✅ Solicitudes cargadas:', solicitudesPendientes.length);
+        if (solicitudesPendientes.length > 0) {
+          console.log('📋 Primera solicitud ID:', solicitudesPendientes[0].idSolicitud);
         }
       },
       error: (error) => {
@@ -200,21 +208,24 @@ export class ProfessionalDashboardComponent implements OnInit {
       next: (response) => {
         console.log('✅ Respuesta del servidor:', response);
 
-        // Remover la solicitud de la lista
-        const solicitudes = this.solicitudesPendientes();
-        this.solicitudesPendientes.set(
-          solicitudes.filter(s => s.idSolicitud !== idSolicitud)
-        );
-        this.respondingToSolicitud.set(null);
+        if (aceptada) {
+          // Si se aceptó, crear el trabajo
+          console.log('🛠️ Creando trabajo para solicitud:', idSolicitud);
+          this.crearTrabajo(idSolicitud);
+        } else {
+          // Si se rechazó, solo remover y mostrar mensaje
+          const solicitudes = this.solicitudesPendientes();
+          this.solicitudesPendientes.set(
+            solicitudes.filter(s => s.idSolicitud !== idSolicitud)
+          );
+          this.respondingToSolicitud.set(null);
+          this.showSuccessModal('Solicitud rechazada exitosamente');
 
-        // Mostrar mensaje de éxito
-        const mensaje = aceptada ? 'Solicitud aceptada exitosamente' : 'Solicitud rechazada';
-        alert(mensaje);
-
-        // Recargar el dashboard
-        const user = this.authService.getCurrentUser();
-        if (user?.idProfesional) {
-          this.loadSolicitudesPendientes(user.idProfesional);
+          // Recargar el dashboard
+          const user = this.authService.getCurrentUser();
+          if (user?.idProfesional) {
+            this.loadSolicitudesPendientes(user.idProfesional);
+          }
         }
       },
       error: (error) => {
@@ -226,9 +237,74 @@ export class ProfessionalDashboardComponent implements OnInit {
         this.respondingToSolicitud.set(null);
 
         const mensajeError = error.error?.message || error.message || 'Error desconocido';
-        alert(`Error al responder la solicitud: ${mensajeError}`);
+        this.showErrorModal(`Error al responder la solicitud: ${mensajeError}`);
       }
     });
+  }
+
+  crearTrabajo(idSolicitud: number) {
+    this.trabajoService.crearTrabajo(idSolicitud).subscribe({
+      next: (trabajo) => {
+        console.log('✅ Trabajo creado:', trabajo);
+
+        // Iniciar el trabajo automáticamente
+        console.log('▶️ Iniciando trabajo:', trabajo.id);
+        this.iniciarTrabajo(trabajo.id, idSolicitud);
+      },
+      error: (error) => {
+        console.error('❌ Error al crear trabajo:', error);
+        this.respondingToSolicitud.set(null);
+
+        const mensajeError = error.error?.message || error.message || 'Error desconocido';
+        this.showErrorModal(`Error al crear el trabajo: ${mensajeError}`);
+      }
+    });
+  }
+
+  iniciarTrabajo(idTrabajo: number, idSolicitud: number) {
+    this.trabajoService.iniciarTrabajo(idTrabajo).subscribe({
+      next: (trabajo) => {
+        console.log('✅ Trabajo iniciado:', trabajo);
+
+        // Remover la solicitud de la lista
+        const solicitudes = this.solicitudesPendientes();
+        this.solicitudesPendientes.set(
+          solicitudes.filter(s => s.idSolicitud !== idSolicitud)
+        );
+        this.respondingToSolicitud.set(null);
+
+        this.showSuccessModal('Solicitud aceptada y trabajo iniciado exitosamente');
+
+        // Recargar el dashboard
+        const user = this.authService.getCurrentUser();
+        if (user?.idProfesional) {
+          this.loadSolicitudesPendientes(user.idProfesional);
+        }
+      },
+      error: (error) => {
+        console.error('❌ Error al iniciar trabajo:', error);
+        this.respondingToSolicitud.set(null);
+
+        const mensajeError = error.error?.message || error.message || 'Error desconocido';
+        this.showErrorModal(`Trabajo creado pero error al iniciarlo: ${mensajeError}`);
+      }
+    });
+  }
+
+  showSuccessModal(message: string) {
+    this.responseModalType.set('success');
+    this.responseModalMessage.set(message);
+    this.showResponseModal.set(true);
+  }
+
+  showErrorModal(message: string) {
+    this.responseModalType.set('error');
+    this.responseModalMessage.set(message);
+    this.showResponseModal.set(true);
+  }
+
+  closeResponseModal() {
+    this.showResponseModal.set(false);
   }
 
   formatDate(dateString: string): string {
@@ -256,6 +332,12 @@ export class ProfessionalDashboardComponent implements OnInit {
     } else {
       return date.toLocaleDateString('es-AR');
     }
+  }
+
+  formatHora(hora: string): string {
+    // Formato HH:mm:ss a HH:mm
+    if (!hora) return '';
+    return hora.substring(0, 5);
   }
 
   goToInvoices() {

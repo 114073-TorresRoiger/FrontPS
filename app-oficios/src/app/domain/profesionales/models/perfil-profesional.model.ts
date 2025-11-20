@@ -11,6 +11,6 @@ export interface PerfilProfesional {
   oficio: string;
   telefono: string;
   rangoPrecio: string;
-  disponibilidad: DisponibilidadHorario[];
+  disponibilidad?: DisponibilidadHorario[]; // Opcional
   especialidades: string[];
 }

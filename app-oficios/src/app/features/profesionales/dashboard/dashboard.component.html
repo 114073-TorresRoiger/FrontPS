@@ -69,12 +69,17 @@
             <span><strong>Fecha de servicio:</strong> {{ formatDate(solicitud.fechaservicio) }}</span>
           </div>
 
+          <div class="info-row" *ngIf="solicitud.horaReserva">
+            <lucide-angular [img]="Clock" size="16"></lucide-angular>
+            <span><strong>Hora reservada:</strong> {{ formatHora(solicitud.horaReserva) }}</span>
+          </div>
+
           <div class="info-row" *ngIf="solicitud.direccion">
             <lucide-angular [img]="FileText" size="16"></lucide-angular>
             <span><strong>Dirección:</strong> {{ solicitud.direccion }}</span>
           </div>
 
-          <div class="observaciones">
+          <div class="observaciones" *ngIf="solicitud.observacion">
             <strong>Observaciones:</strong>
             <p>{{ solicitud.observacion }}</p>
           </div>
@@ -155,4 +160,31 @@
       </div>
     </div>
   </section>
+</div>
+
+<!-- Modal de Respuesta -->
+<div *ngIf="showResponseModal()" class="modal-overlay" (click)="closeResponseModal()">
+  <div class="modal-content response-modal" [class.success]="responseModalType() === 'success'" [class.error]="responseModalType() === 'error'" (click)="$event.stopPropagation()">
+    <div class="modal-icon">
+      <lucide-angular
+        *ngIf="responseModalType() === 'success'"
+        [img]="CheckCircle"
+        [size]="64"
+        class="icon-success">
+      </lucide-angular>
+      <lucide-angular
+        *ngIf="responseModalType() === 'error'"
+        [img]="AlertCircle"
+        [size]="64"
+        class="icon-error">
+      </lucide-angular>
+    </div>
+
+    <h2>{{ responseModalType() === 'success' ? '¡Éxito!' : 'Error' }}</h2>
+    <p class="modal-message">{{ responseModalMessage() }}</p>
+
+    <button class="btn-close-modal" (click)="closeResponseModal()">
+      Aceptar
+    </button>
+  </div>
 </div>

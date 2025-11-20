@@ -35,6 +35,18 @@ export const routes: Routes = [
 		loadChildren: () => import('./features/pagos/pagos.routes').then((m) => m.PAGOS_ROUTES),
 	},
 	{
+		path: 'pago-exitoso',
+		loadComponent: () => import('./features/pagos/pago-exitoso/pago-exitoso.component').then((m) => m.PagoExitosoComponent),
+	},
+	{
+		path: 'pago-fallido',
+		loadComponent: () => import('./features/pagos/pago-fallido/pago-fallido.component').then((m) => m.PagoFallidoComponent),
+	},
+	{
+		path: 'pago-pendiente',
+		loadComponent: () => import('./features/pagos/pago-pendiente/pago-pendiente.component').then((m) => m.PagoPendienteComponent),
+	},
+	{
 		path: 'admin',
 		loadChildren: () => import('./features/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
 	},

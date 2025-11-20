@@ -32,11 +32,11 @@ export class ProfessionalCardComponent {
   }
 
   get hasAvailability(): boolean {
-    return this.professional.disponibilidad && this.professional.disponibilidad.length > 0;
+    return !!this.professional.disponibilidad && this.professional.disponibilidad.length > 0;
   }
 
   get sortedDisponibilidad(): DisponibilidadHorario[] {
-    if (!this.hasAvailability) return [];
+    if (!this.hasAvailability || !this.professional.disponibilidad) return [];
 
     const diasOrden = ['LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO', 'DOMINGO'];
 

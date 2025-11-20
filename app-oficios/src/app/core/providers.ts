@@ -9,6 +9,10 @@ import { SolicitudRepository } from '../domain/solicitudes/solicitud.repository'
 import { SolicitudHttpRepository } from '../data/solicitudes/solicitud.http.repository';
 import { ChatRepository } from '../domain/chat/chat.repository';
 import { ChatHttpRepository } from '../data/chat/chat.http.repository';
+import { TrabajoRepository } from '../domain/trabajo/trabajo.repository';
+import { TrabajoHttpRepository } from '../data/trabajos/trabajo.http.repository';
+import { PagoRepository } from '../domain/pago/pago.repository';
+import { PagoHttpRepository } from '../data/pagos/pago.http.repository';
 
 // Use Cases
 import { InitializeChatUseCase } from '../domain/chat/use-cases/initialize-chat.usecase';
@@ -22,6 +26,8 @@ export const CORE_PROVIDERS: Provider[] = [
   { provide: ProfesionalRepository, useClass: ProfesionalHttpRepository },
   { provide: SolicitudRepository, useClass: SolicitudHttpRepository },
   { provide: ChatRepository, useClass: ChatHttpRepository },
+  { provide: TrabajoRepository, useClass: TrabajoHttpRepository },
+  { provide: PagoRepository, useClass: PagoHttpRepository },
   // Chat Use Cases
   InitializeChatUseCase,
   CreateChannelUseCase,

@@ -7,7 +7,7 @@ import { SolicitudResponse } from '../solicitud.model';
 export class GetSolicitudesUseCase {
   private readonly repository = inject(SolicitudRepository);
 
-  execute(idProfesional: number, estado: string): Observable<SolicitudResponse | null> {
+  execute(idProfesional: number, estado: string): Observable<SolicitudResponse[]> {
     return this.repository.getSolicitud(idProfesional, estado);
   }
 }
