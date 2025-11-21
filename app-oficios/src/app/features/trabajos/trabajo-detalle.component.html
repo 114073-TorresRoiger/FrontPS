@@ -75,24 +75,25 @@
         <div *ngSwitchCase="'FINALIZADO'" class="acciones">
           <div class="finalizado-info">
             <p>✅ Trabajo finalizado correctamente</p>
-            <button class="btn btn-payment" (click)="mostrarModalPago.set(true)">
-              <lucide-angular [img]="DollarSign" [size]="20"></lucide-angular>
-              Procesar Pago
-            </button>
+            <!-- Solo mostrar el botón de pago si el usuario es el cliente y el trabajo no tiene factura pagada -->
+            <ng-container *ngif="esUsuarioCliente() && !trabajo()?.estadoPago">
+              <button class="btn btn-payment" (click)="mostrarModalPago.set(true)">
+                <lucide-angular [img]="DollarSign" [size]="20"></lucide-angular>
+                Procesar Pago
+              </button>
+            </ng-container>
           </div>
         </div>
       </ng-container>
     </div>
 
     <!-- Loading -->
-    <div class="loading" *ngIf="loading()">
-      Cargando...
-    </div>
+    <div class="loading" *ngif="loading()">Cargando...</div>
   </div>
 </div>
 
 <!-- Modal Finalización -->
-<div class="modal-overlay" *ngIf="mostrarModalFinalizacion()" (click)="cerrarModalFinalizacion()">
+<div class="modal-overlay" *ngif="mostrarModalFinalizacion()" (click)="cerrarModalFinalizacion()">
   <div class="modal-content" (click)="$event.stopPropagation()">
     <h2>Finalizar Trabajo</h2>
 
@@ -109,7 +110,8 @@
       <label>Costo final:</label>
       <input
         type="number"
-        [(ngModel)]="costoFinal"
+        [value]="costoFinal()"
+        (input)="costoFinal.set(+$event.target.value)"
         placeholder="Ingrese el costo"
         min="0"
         step="0.01"
@@ -117,18 +119,14 @@
     </div>
 
     <div class="modal-acciones">
-      <button class="btn btn-secondary" (click)="cerrarModalFinalizacion()">
-        Cancelar
-      </button>
-      <button class="btn btn-success" (click)="finalizarTrabajo()">
-        Confirmar Finalización
-      </button>
+      <button class="btn btn-secondary" (click)="cerrarModalFinalizacion()">Cancelar</button>
+      <button class="btn btn-success" (click)="finalizarTrabajo()">Confirmar Finalización</button>
     </div>
   </div>
 </div>
 
 <!-- Modal Pago -->
-<div class="modal-overlay" *ngIf="mostrarModalPago()" (click)="cerrarModalPago()">
+<div class="modal-overlay" *ngif="mostrarModalPago()" (click)="cerrarModalPago()">
   <div class="modal-content pago" (click)="$event.stopPropagation()">
     <h2>Procesar Pago</h2>
 
@@ -143,9 +141,7 @@
     </div>
 
     <div class="modal-acciones">
-      <button class="btn btn-secondary" (click)="cerrarModalPago()">
-        Cancelar
-      </button>
+      <button class="btn btn-secondary" (click)="cerrarModalPago()">Cancelar</button>
       <button class="btn btn-payment" (click)="procesarPago()" [disabled]="loading()">
         <lucide-angular [img]="DollarSign" [size]="20"></lucide-angular>
         {{ loading() ? 'Procesando...' : 'Pagar con Mercado Pago' }}

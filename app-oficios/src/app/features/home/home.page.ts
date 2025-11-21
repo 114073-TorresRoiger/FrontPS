@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, signal, inject, HostListener, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgIf } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { LucideAngularModule, Search, MessageCircle, User, UserPlus, Star, MapPin, Clock, Heart, ArrowLeft, Users, Award, DollarSign, ChevronDown, LogIn, LogOut, Settings, Briefcase, CalendarCheck, CheckCircle, X, Send } from 'lucide-angular';
@@ -30,7 +30,7 @@ interface ServiceCard {
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideAngularModule, FormsModule, ReactiveFormsModule, ProfessionalCardComponent, TurnoModalComponent],
+  imports: [CommonModule, NgIf, RouterModule, LucideAngularModule, FormsModule, ReactiveFormsModule, ProfessionalCardComponent, TurnoModalComponent],
   templateUrl: './home.page.html',
   styleUrl: './home.page.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -532,5 +532,9 @@ export class HomePage implements OnInit {
   isProfessional(): boolean {
     const user = this.authService.getCurrentUser();
     return user?.idProfesional != null;
+  }
+
+  isCliente(): boolean {
+    return this.authService.isCliente();
   }
 }

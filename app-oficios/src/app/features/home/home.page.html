@@ -59,6 +59,10 @@
             <lucide-angular [img]="Settings" size="16"></lucide-angular>
             <span>Perfil</span>
           </button>
+          <button class="dropdown-item trabajos" routerlink="/trabajos">
+            <lucide-angular [img]="Briefcase" size="16"></lucide-angular>
+            <span>Mis Trabajos</span>
+          </button>
           <button *ngIf="isProfessional()" class="dropdown-item dashboard" (click)="goToDashboard()">
             <lucide-angular [img]="Briefcase" size="16"></lucide-angular>
             <span>Dashboard Profesional</span>

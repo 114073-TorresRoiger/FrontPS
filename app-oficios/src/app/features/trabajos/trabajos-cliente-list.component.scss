@@ -1,0 +1,23 @@
+.trabajos-list-container {
+  padding: 1rem;
+}
+.trabajos-list {
+  list-style: none;
+  padding: 0;
+}
+.trabajo-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+}
+.badge-pago-pendiente {
+  background: #ff9800;
+  color: #fff;
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: bold;
+}

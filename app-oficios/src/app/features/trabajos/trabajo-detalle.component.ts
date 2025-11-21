@@ -40,10 +40,31 @@ export class TrabajoDetalleComponent implements OnInit {
   mostrarModalFinalizacion = signal(false);
   mostrarModalPago = signal(false);
 
+  // Notificación de pago pendiente
+  mostrarNotificacionPago = signal(false);
+
+  // Simulación de usuario actual (debería venir del servicio de auth)
+  usuarioActualId = 1; // Cambia esto por el id real del usuario logueado
+
+  // Método para saber si el usuario actual es el cliente
+  esUsuarioCliente(): boolean {
+    const trabajo = this.trabajo();
+    if (!trabajo) return false;
+    // Compara el id del usuario actual con el id del cliente del trabajo
+    return trabajo.idUsuario === this.usuarioActualId;
+  }
+
+  // Mostrar notificación si el usuario es cliente y hay pago pendiente
   ngOnInit(): void {
     // Aquí deberías obtener el ID del trabajo desde la ruta o desde el estado
     // Por ahora lo dejo como ejemplo
     // this.cargarTrabajo(idTrabajo);
+    // Simulación: después de cargar el trabajo, mostrar notificación si corresponde
+    // En producción, esto debe ir en el callback de cargarTrabajo
+    // Ejemplo:
+    // if (this.esUsuarioCliente() && trabajo.estado === 'FINALIZADO' && !trabajo.estadoPago) {
+    //   this.mostrarNotificacionPago.set(true);
+    // }
   }
 
   cargarTrabajo(idTrabajo: number): void {

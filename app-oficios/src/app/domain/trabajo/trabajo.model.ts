@@ -28,7 +28,9 @@ export interface TrabajoResponse {
   idTrabajo: number;
   idSolicitud: number;
   estado: 'PENDIENTE' | 'EN_CURSO' | 'PAUSADO' | 'FINALIZADO' | 'CANCELADO';
+  idUsuario: number;
   nombreCliente: string;
+  idProfesional: number;
   nombreProfesional: string;
   oficio: string;
   fechaInicio: string | null;

@@ -221,4 +221,19 @@ export class AuthService {
         })
       );
   }
+
+  /**
+   * Check if the authenticated user is a client (roles array is empty)
+   */
+  isCliente(): boolean {
+    const usuario = this.getCurrentUser();
+    return !!usuario && Array.isArray(usuario.roles) && usuario.roles.length === 0;
+  }
+
+  /**
+   * Get current usuario
+   */
+  getUsuario(): User | null {
+    return this.getCurrentUser();
+  }
 }

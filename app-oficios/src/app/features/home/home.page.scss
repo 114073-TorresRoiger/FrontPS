@@ -57,6 +57,26 @@
     }
   }
 
+  .btn-trabajos {
+    background: #2c5f85;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.5rem 1.2rem;
+    margin-right: 1rem;
+    font-size: 1rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    &:hover {
+      background: #1a3b5c;
+    }
+  }
+
   .search-container {
     display: flex;
     gap: 0.5rem;
@@ -1138,6 +1158,15 @@
       }
     }
 
+    .btn-trabajos {
+      padding: 0.4rem 0.5rem;
+      font-size: 0.8rem;
+
+      span {
+        display: none;
+      }
+    }
+
     .user-dropdown {
       .dropdown-btn {
         padding: 0.4rem 0.6rem;
@@ -1267,6 +1296,11 @@
       span {
         display: none;
       }
+    }
+
+    .btn-trabajos {
+      padding: 0.4rem 0.5rem;
+      font-size: 0.8rem;
     }
 
     .search-btn {

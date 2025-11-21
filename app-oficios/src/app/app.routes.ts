@@ -35,6 +35,10 @@ export const routes: Routes = [
 		loadChildren: () => import('./features/pagos/pagos.routes').then((m) => m.PAGOS_ROUTES),
 	},
 	{
+		path: 'trabajos',
+		loadChildren: () => import('./features/trabajos/trabajos.routes').then((m) => m.TRABAJOS_ROUTES),
+	},
+	{
 		path: 'pago-exitoso',
 		loadComponent: () => import('./features/pagos/pago-exitoso/pago-exitoso.component').then((m) => m.PagoExitosoComponent),
 	},
