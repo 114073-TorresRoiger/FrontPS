@@ -149,6 +149,48 @@
         </div>
       </section>
 
+      <!-- Mis Trabajos Finalizados (solo si está autenticado) -->
+      <section *ngIf="isUserAuthenticated() && trabajosFinalizados().length > 0" class="trabajos-finalizados-section">
+        <div class="section-header">
+          <h2 class="section-title">
+            <lucide-angular [img]="Briefcase" size="24"></lucide-angular>
+            Mis Trabajos Finalizados
+          </h2>
+          <button class="toggle-trabajos-btn" (click)="toggleTrabajosSection()">
+            {{ showTrabajosSection() ? 'Ocultar' : 'Mostrar' }} ({{ trabajosFinalizados().length }})
+          </button>
+        </div>
+
+        <!-- Loading State -->
+        <div *ngIf="isLoadingTrabajos()" class="loading-container">
+          <p>Cargando trabajos...</p>
+        </div>
+
+        <!-- Trabajos List -->
+        <div *ngIf="!isLoadingTrabajos() && showTrabajosSection()" class="trabajos-list">
+          <div *ngFor="let trabajo of trabajosFinalizados()" class="trabajo-card">
+            <div class="trabajo-header">
+              <span class="trabajo-id">Trabajo #{{ trabajo.idTrabajo }}</span>
+              <span class="badge" [ngClass]="getEstadoBadgeClass(trabajo.estado)">
+                {{ trabajo.estado }}
+              </span>
+            </div>
+
+            <div class="trabajo-body">
+              <div class="trabajo-info">
+                <p><strong>Solicitud:</strong> #{{ trabajo.idSolicitud }}</p>
+                <p><strong>Monto:</strong> {{ formatMoneda(trabajo.montoFinal) }}</p>
+                <p *ngIf="trabajo.idpago"><strong>ID Pago:</strong> {{ trabajo.idpago }}</p>
+                <p *ngIf="!trabajo.idpago" class="pago-pendiente">
+                  <lucide-angular [img]="AlertCircle" size="16"></lucide-angular>
+                  Pago pendiente
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- Services Catalog -->
       <main class="services-section">
         <div class="section-header">

@@ -3,7 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { TrabajoRepository } from '../../domain/trabajo/trabajo.repository';
-import { Trabajo, TrabajoResponse, FinalizarTrabajoRequest } from '../../domain/trabajo/trabajo.model';
+import { Trabajo, TrabajoResponse, FinalizarTrabajoRequest, TrabajoClienteResponse } from '../../domain/trabajo/trabajo.model';
 
 @Injectable({ providedIn: 'root' })
 export class TrabajoHttpRepository implements TrabajoRepository {
@@ -61,5 +61,9 @@ export class TrabajoHttpRepository implements TrabajoRepository {
 
   obtenerTrabajosSinFactura(): Observable<TrabajoResponse[]> {
     return this.http.get<TrabajoResponse[]>(`${this.baseUrl}/sin-factura`);
+  }
+
+  obtenerTrabajosFinalizadosPorCliente(idUsuario: number): Observable<TrabajoClienteResponse[]> {
+    return this.http.get<TrabajoClienteResponse[]>(`${this.baseUrl}/cliente/finalizados/${idUsuario}`);
   }
 }

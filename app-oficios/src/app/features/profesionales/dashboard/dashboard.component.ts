@@ -28,6 +28,7 @@ import { GetSolicitudesUseCase } from '../../../domain/solicitudes/use-cases/get
 import { ResponderSolicitudUseCase } from '../../../domain/solicitudes/use-cases/responder-solicitud.usecase';
 import { SolicitudResponse } from '../../../domain/solicitudes/solicitud.model';
 import { TrabajoService } from '../../../domain/trabajo/trabajo.service';
+import { PagoService } from '../../../domain/pago/pago.service';
 
 interface Metric {
   title: string;
@@ -88,6 +89,7 @@ export class ProfessionalDashboardComponent implements OnInit {
   private readonly getSolicitudesUseCase = inject(GetSolicitudesUseCase);
   private readonly responderSolicitudUseCase = inject(ResponderSolicitudUseCase);
   private readonly trabajoService = inject(TrabajoService);
+  private readonly pagoService = inject(PagoService);
 
   userName = signal<string>('');
   solicitudesPendientes = signal<SolicitudPendiente[]>([]);
@@ -358,16 +360,46 @@ export class ProfessionalDashboardComponent implements OnInit {
     this.trabajoService.finalizarTrabajo(idTrabajo, observaciones, montoFinal).subscribe({
       next: (trabajo) => {
         console.log('✅ Trabajo finalizado:', trabajo);
-        this.actionLoading.set(null);
-        this.closeFinalizarModal();
-        this.showSuccessModal('Trabajo finalizado exitosamente');
-        this.loadTrabajos();
+
+        // Crear factura automáticamente después de finalizar
+        this.crearFacturaTrabajo(trabajo.idSolicitud, trabajo.idTrabajo, trabajo.oficio, montoFinal);
       },
       error: (error) => {
         console.error('❌ Error al finalizar trabajo:', error);
         this.actionLoading.set(null);
         const mensajeError = error.error?.message || error.message || 'Error desconocido';
         this.showErrorModal(`Error al finalizar trabajo: ${mensajeError}`);
+      }
+    });
+  }
+
+  crearFacturaTrabajo(idSolicitud: number, idTrabajo: number, oficio: string, monto: number) {
+    const facturaRequest = {
+      idSolicitud: idSolicitud,
+      idTrabajo: idTrabajo,
+      titulo: `Pago por servicio de ${oficio}`,
+      descripcion: `Trabajo finalizado - ${oficio}`,
+      cantidad: 1,
+      monto: monto
+    };
+
+    console.log('📄 Creando factura:', facturaRequest);
+
+    this.pagoService.crearPreferencia(facturaRequest).subscribe({
+      next: (response) => {
+        console.log('✅ Factura creada:', response);
+        this.actionLoading.set(null);
+        this.closeFinalizarModal();
+        this.showSuccessModal('Trabajo finalizado y factura creada exitosamente');
+        this.loadTrabajos();
+      },
+      error: (error) => {
+        console.error('❌ Error al crear factura:', error);
+        this.actionLoading.set(null);
+        this.closeFinalizarModal();
+        const mensajeError = error.error?.message || error.message || 'Error desconocido';
+        this.showErrorModal(`Trabajo finalizado pero error al crear factura: ${mensajeError}`);
+        this.loadTrabajos();
       }
     });
   }

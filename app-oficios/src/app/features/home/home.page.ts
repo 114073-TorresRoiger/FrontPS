@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, signal, inject, HostListener, OnIni
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { LucideAngularModule, Search, MessageCircle, User, UserPlus, Star, MapPin, Clock, Heart, ArrowLeft, Users, Award, DollarSign, ChevronDown, LogIn, LogOut, Settings, Briefcase, CalendarCheck, CheckCircle, X, Send } from 'lucide-angular';
+import { LucideAngularModule, Search, MessageCircle, User, UserPlus, Star, MapPin, Clock, Heart, ArrowLeft, Users, Award, DollarSign, ChevronDown, LogIn, LogOut, Settings, Briefcase, CalendarCheck, CheckCircle, X, Send, AlertCircle } from 'lucide-angular';
 import { AuthService } from '../../domain/auth';
 import { ListOficiosUseCase } from '../../domain/oficios/use-cases/list-oficios.usecase';
 import { Oficio } from '../../domain/oficios/oficio.model';
@@ -11,6 +11,8 @@ import { PerfilProfesional } from '../../domain/profesionales/models/perfil-prof
 import { EnviarSolicitudUseCase } from '../../domain/solicitudes/use-cases/enviar-solicitud.usecase';
 import { VerificarSolicitudPendienteUseCase } from '../../domain/solicitudes/use-cases/verificar-solicitud-pendiente.usecase';
 import { SolicitudRequest } from '../../domain/solicitudes/solicitud.model';
+import { TrabajoService } from '../../domain/trabajo/trabajo.service';
+import { TrabajoClienteResponse } from '../../domain/trabajo/trabajo.model';
 import { ProfessionalCardComponent } from './professional-card/professional-card.component';
 import { TurnoModalComponent } from './turno-modal/turno-modal.component';
 
@@ -44,6 +46,7 @@ export class HomePage implements OnInit {
   private readonly getProfesionalesByOficioUseCase = inject(GetProfesionalesByOficioUseCase);
   private readonly enviarSolicitudUseCase = inject(EnviarSolicitudUseCase);
   private readonly verificarSolicitudPendienteUseCase = inject(VerificarSolicitudPendienteUseCase);
+  private readonly trabajoService = inject(TrabajoService);
 
   // Icons
   readonly Search = Search;
@@ -67,6 +70,7 @@ export class HomePage implements OnInit {
   readonly Briefcase = Briefcase;
   readonly CalendarCheck = CalendarCheck;
   readonly CheckCircle = CheckCircle;
+  readonly AlertCircle = AlertCircle;
 
   // Search functionality
   searchQuery = signal('');
@@ -96,6 +100,11 @@ export class HomePage implements OnInit {
 
   // Modal de turnos
   showTurnoModal = signal(false);
+
+  // Trabajos finalizados del cliente
+  trabajosFinalizados = signal<TrabajoClienteResponse[]>([]);
+  isLoadingTrabajos = signal(false);
+  showTrabajosSection = signal(false);
 
   // Featured professionals
   featuredProfessionals = signal<any[]>([
@@ -253,6 +262,7 @@ export class HomePage implements OnInit {
   ngOnInit(): void {
     this.loadServices();
     this.initSolicitudForm();
+    this.loadTrabajosFinalizados();
   }
 
   private initSolicitudForm(): void {
@@ -489,6 +499,52 @@ export class HomePage implements OnInit {
   goToChat() {
     console.log('Navigating to chat');
     this.router.navigate(['/chat']);
+  }
+
+  loadTrabajosFinalizados(): void {
+    const user = this.authService.getCurrentUser();
+    if (!user?.id) {
+      console.log('Usuario no autenticado, no se cargan trabajos');
+      return;
+    }
+
+    this.isLoadingTrabajos.set(true);
+    this.trabajoService.obtenerTrabajosFinalizadosPorCliente(user.id).subscribe({
+      next: (trabajos) => {
+        console.log('✅ Trabajos finalizados cargados:', trabajos);
+        this.trabajosFinalizados.set(trabajos);
+        this.isLoadingTrabajos.set(false);
+      },
+      error: (error) => {
+        console.log('❌ Error al cargar trabajos finalizados:', error);
+        this.trabajosFinalizados.set([]);
+        this.isLoadingTrabajos.set(false);
+      }
+    });
+  }
+
+  toggleTrabajosSection(): void {
+    this.showTrabajosSection.set(!this.showTrabajosSection());
+  }
+
+  formatMoneda(monto: string): string {
+    const montoNumero = parseFloat(monto);
+    if (isNaN(montoNumero)) return '-';
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS'
+    }).format(montoNumero);
+  }
+
+  getEstadoBadgeClass(estado: string): string {
+    const classes: Record<string, string> = {
+      'PENDIENTE': 'badge-pendiente',
+      'EN_CURSO': 'badge-en-curso',
+      'PAUSADO': 'badge-pausado',
+      'FINALIZADO': 'badge-finalizado',
+      'CANCELADO': 'badge-cancelado'
+    };
+    return classes[estado] || 'badge-default';
   }
 
   goToSignIn() {

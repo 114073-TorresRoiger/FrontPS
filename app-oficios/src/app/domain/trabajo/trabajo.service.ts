@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { TrabajoRepository } from './trabajo.repository';
-import { Trabajo, TrabajoResponse, FinalizarTrabajoRequest } from './trabajo.model';
+import { Trabajo, TrabajoResponse, FinalizarTrabajoRequest, TrabajoClienteResponse } from './trabajo.model';
 
 @Injectable({ providedIn: 'root' })
 export class TrabajoService {
@@ -57,5 +57,9 @@ export class TrabajoService {
 
   obtenerTrabajosSinFactura(): Observable<TrabajoResponse[]> {
     return this.repository.obtenerTrabajosSinFactura();
+  }
+
+  obtenerTrabajosFinalizadosPorCliente(idUsuario: number): Observable<TrabajoClienteResponse[]> {
+    return this.repository.obtenerTrabajosFinalizadosPorCliente(idUsuario);
   }
 }

@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { Trabajo, TrabajoResponse, FinalizarTrabajoRequest } from './trabajo.model';
+import { Trabajo, TrabajoResponse, FinalizarTrabajoRequest, TrabajoClienteResponse } from './trabajo.model';
 
 export abstract class TrabajoRepository {
   abstract crearTrabajo(idSolicitud: number): Observable<Trabajo>;
@@ -13,4 +13,5 @@ export abstract class TrabajoRepository {
   abstract obtenerTrabajosPorProfesional(idProfesional: number, estado?: string): Observable<TrabajoResponse[]>;
   abstract obtenerTrabajosPorUsuario(idUsuario: number, estado?: string): Observable<TrabajoResponse[]>;
   abstract obtenerTrabajosSinFactura(): Observable<TrabajoResponse[]>;
+  abstract obtenerTrabajosFinalizadosPorCliente(idUsuario: number): Observable<TrabajoClienteResponse[]>;
 }

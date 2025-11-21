@@ -42,3 +42,11 @@ export interface TrabajoResponse {
   idFactura: number | null;
   estadoPago: string | null;
 }
+
+export interface TrabajoClienteResponse {
+  idTrabajo: number;
+  idSolicitud: number;
+  idpago: string | null;
+  estado: string;
+  montoFinal: string;
+}

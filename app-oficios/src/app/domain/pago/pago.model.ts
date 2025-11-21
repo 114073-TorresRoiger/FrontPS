@@ -1,9 +1,10 @@
 export interface FacturaRequest {
+  idSolicitud: number;
   idTrabajo: number;
   titulo: string;
   descripcion: string;
+  cantidad: number;
   monto: number;
-  cantidad?: number;
 }
 
 export interface PreferenceResponse {

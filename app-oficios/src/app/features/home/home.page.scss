@@ -431,6 +431,132 @@
   }
 }
 
+// Trabajos Finalizados Section
+.trabajos-finalizados-section {
+  margin: 3rem 0;
+  padding: 2rem;
+  background: rgba($white, 0.95);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.75rem;
+      font-weight: 600;
+      color: $text-dark;
+      margin: 0;
+    }
+
+    .toggle-trabajos-btn {
+      padding: 0.5rem 1rem;
+      background: $primary-color;
+      color: $white;
+      border: none;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+
+      &:hover {
+        background: darken($primary-color, 8%);
+        transform: translateY(-1px);
+      }
+    }
+  }
+
+  .loading-container {
+    text-align: center;
+    padding: 2rem;
+    color: $text-medium;
+  }
+
+  .trabajos-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .trabajo-card {
+    background: $white;
+    border: 1px solid $border-light;
+    border-radius: 8px;
+    padding: 1.25rem;
+    transition: all 0.2s;
+
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .trabajo-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid $border-light;
+
+      .trabajo-id {
+        font-weight: 600;
+        color: $text-dark;
+        font-size: 0.95rem;
+      }
+
+      .badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+
+        &.badge-finalizado {
+          background: #d1fae5;
+          color: #065f46;
+        }
+
+        &.badge-pendiente {
+          background: #fef3c7;
+          color: #92400e;
+        }
+      }
+    }
+
+    .trabajo-body {
+      .trabajo-info {
+        p {
+          margin: 0.5rem 0;
+          color: $text-medium;
+          font-size: 0.9rem;
+
+          strong {
+            color: $text-dark;
+            font-weight: 600;
+          }
+        }
+
+        .pago-pendiente {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          color: #f59e0b;
+          font-weight: 500;
+          margin-top: 0.75rem;
+        }
+      }
+    }
+  }
+}
+
 // Services Section
 .services-section {
   .section-header {

@@ -164,11 +164,12 @@ export class TrabajoDetalleComponent implements OnInit {
     if (!trabajo || !trabajo.montoFinal) return;
 
     const request: FacturaRequest = {
+      idSolicitud: trabajo.idSolicitud,
       idTrabajo: trabajo.idTrabajo,
       titulo: `Pago por ${trabajo.oficio || 'servicio'}`,
       descripcion: trabajo.observacionesTrabajo || 'Servicio profesional completado',
-      monto: trabajo.montoFinal,
-      cantidad: 1
+      cantidad: 1,
+      monto: trabajo.montoFinal
     };
 
     this.loading.set(true);
