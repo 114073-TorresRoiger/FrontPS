@@ -843,6 +843,8 @@
 .cancelar-modal {
   max-width: 500px;
   width: 90%;
+  background: $white;
+  border-radius: 16px;
 
   .modal-header {
     display: flex;
