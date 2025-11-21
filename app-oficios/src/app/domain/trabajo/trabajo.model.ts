@@ -16,12 +16,29 @@ export interface Trabajo {
 }
 
 export interface FinalizarTrabajoRequest {
-  descripcionFinalizacion: string;
-  costoFinal: number;
+  duracionReal?: number | null;
+  montoFinal: number;
+  montoAdicional?: number | null;
+  descripcionAdicional?: string | null;
+  fotoTrabajo?: string | null;
+  observaciones: string;
 }
 
-export interface TrabajoResponse extends Trabajo {
-  nombreUsuario?: string;
-  nombreProfesional?: string;
-  descripcionOficio?: string;
+export interface TrabajoResponse {
+  idTrabajo: number;
+  idSolicitud: number;
+  estado: 'PENDIENTE' | 'EN_CURSO' | 'PAUSADO' | 'FINALIZADO' | 'CANCELADO';
+  nombreCliente: string;
+  nombreProfesional: string;
+  oficio: string;
+  fechaInicio: string | null;
+  fechaFinalizacion: string | null;
+  duracionReal: number | null;
+  montoFinal: number | null;
+  montoAdicional: number | null;
+  descripcionAdicional: string | null;
+  fotoTrabajo: string | null;
+  observacionesTrabajo: string | null;
+  idFactura: number | null;
+  estadoPago: string | null;
 }

@@ -17,7 +17,11 @@ import { LucideAngularModule,
   AlertCircle,
   X as XIcon,
   Check,
-  LogOut
+  LogOut,
+  Play,
+  Pause,
+  Square,
+  Ban
 } from 'lucide-angular';
 import { AuthService } from '../../../domain/auth';
 import { GetSolicitudesUseCase } from '../../../domain/solicitudes/use-cases/get-solicitudes.usecase';
@@ -74,6 +78,10 @@ export class ProfessionalDashboardComponent implements OnInit {
   readonly AlertCircle = AlertCircle;
   readonly XIcon = XIcon;
   readonly Check = Check;
+  readonly Play = Play;
+  readonly Pause = Pause;
+  readonly Square = Square;
+  readonly Ban = Ban;
 
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
@@ -91,7 +99,23 @@ export class ProfessionalDashboardComponent implements OnInit {
   responseModalType = signal<'success' | 'error'>('success');
   responseModalMessage = signal('');
 
-  metrics = signal<Metric[]>([
+  // Trabajos
+  trabajos = signal<any[]>([]);
+  isLoadingTrabajos = signal(false);
+
+  // Modal de finalizar trabajo
+  showFinalizarModal = signal(false);
+  trabajoAFinalizar = signal<number | null>(null);
+  descripcionFinalizacion = signal('');
+  costoFinalTrabajo = signal<number>(0);
+
+  // Modal de cancelar trabajo
+  showCancelarModal = signal(false);
+  trabajoACancelar = signal<number | null>(null);
+  motivoCancelacion = signal('');
+
+  // Loading states para acciones
+  actionLoading = signal<number | null>(null);  metrics = signal<Metric[]>([
     {
       title: 'Ingresos del Mes',
       value: '$12,450',
@@ -122,32 +146,7 @@ export class ProfessionalDashboardComponent implements OnInit {
     }
   ]);
 
-  recentActivities = signal<RecentActivity[]>([
-    {
-      type: 'payment',
-      description: 'Pago recibido de Juan Pérez - $850',
-      time: 'Hace 2 horas',
-      icon: this.DollarSign
-    },
-    {
-      type: 'review',
-      description: 'Nueva reseña de María García - 5 estrellas',
-      time: 'Hace 5 horas',
-      icon: this.Star
-    },
-    {
-      type: 'message',
-      description: 'Nuevo mensaje de Carlos López',
-      time: 'Hace 1 día',
-      icon: this.MessageSquare
-    },
-    {
-      type: 'booking',
-      description: 'Nueva reserva para el 15 de Nov',
-      time: 'Hace 2 días',
-      icon: this.Calendar
-    }
-  ]);
+
 
   ngOnInit() {
     const user = this.authService.getCurrentUser();
@@ -160,6 +159,8 @@ export class ProfessionalDashboardComponent implements OnInit {
       if (user.idProfesional) {
         console.log('Dashboard - Cargando solicitudes para profesional ID:', user.idProfesional);
         this.loadSolicitudesPendientes(user.idProfesional);
+        // Cargar trabajos automáticamente
+        this.loadTrabajos();
       } else {
         console.warn('Dashboard - Usuario no tiene idProfesional asignado');
       }
@@ -247,9 +248,23 @@ export class ProfessionalDashboardComponent implements OnInit {
       next: (trabajo) => {
         console.log('✅ Trabajo creado:', trabajo);
 
-        // Iniciar el trabajo automáticamente
-        console.log('▶️ Iniciando trabajo:', trabajo.id);
-        this.iniciarTrabajo(trabajo.id, idSolicitud);
+        // Remover la solicitud de la lista
+        const solicitudes = this.solicitudesPendientes();
+        this.solicitudesPendientes.set(
+          solicitudes.filter(s => s.idSolicitud !== idSolicitud)
+        );
+        this.respondingToSolicitud.set(null);
+
+        this.showSuccessModal('Solicitud aceptada y trabajo creado exitosamente. El profesional debe iniciarlo manualmente.');
+
+        // Recargar trabajos para mostrar el nuevo trabajo PENDIENTE
+        this.loadTrabajos();
+
+        // Recargar solicitudes
+        const user = this.authService.getCurrentUser();
+        if (user?.idProfesional) {
+          this.loadSolicitudesPendientes(user.idProfesional);
+        }
       },
       error: (error) => {
         console.error('❌ Error al crear trabajo:', error);
@@ -261,32 +276,137 @@ export class ProfessionalDashboardComponent implements OnInit {
     });
   }
 
-  iniciarTrabajo(idTrabajo: number, idSolicitud: number) {
+  iniciarTrabajoManual(idTrabajo: number) {
+    this.actionLoading.set(idTrabajo);
     this.trabajoService.iniciarTrabajo(idTrabajo).subscribe({
       next: (trabajo) => {
         console.log('✅ Trabajo iniciado:', trabajo);
-
-        // Remover la solicitud de la lista
-        const solicitudes = this.solicitudesPendientes();
-        this.solicitudesPendientes.set(
-          solicitudes.filter(s => s.idSolicitud !== idSolicitud)
-        );
-        this.respondingToSolicitud.set(null);
-
-        this.showSuccessModal('Solicitud aceptada y trabajo iniciado exitosamente');
-
-        // Recargar el dashboard
-        const user = this.authService.getCurrentUser();
-        if (user?.idProfesional) {
-          this.loadSolicitudesPendientes(user.idProfesional);
-        }
+        this.actionLoading.set(null);
+        this.showSuccessModal('Trabajo iniciado exitosamente');
+        this.loadTrabajos();
       },
       error: (error) => {
         console.error('❌ Error al iniciar trabajo:', error);
-        this.respondingToSolicitud.set(null);
-
+        this.actionLoading.set(null);
         const mensajeError = error.error?.message || error.message || 'Error desconocido';
-        this.showErrorModal(`Trabajo creado pero error al iniciarlo: ${mensajeError}`);
+        this.showErrorModal(`Error al iniciar trabajo: ${mensajeError}`);
+      }
+    });
+  }
+
+  pausarTrabajoManual(idTrabajo: number) {
+    this.actionLoading.set(idTrabajo);
+    this.trabajoService.pausarTrabajo(idTrabajo).subscribe({
+      next: (trabajo) => {
+        console.log('✅ Trabajo pausado:', trabajo);
+        this.actionLoading.set(null);
+        this.showSuccessModal('Trabajo pausado exitosamente');
+        this.loadTrabajos();
+      },
+      error: (error) => {
+        console.error('❌ Error al pausar trabajo:', error);
+        this.actionLoading.set(null);
+        const mensajeError = error.error?.message || error.message || 'Error desconocido';
+        this.showErrorModal(`Error al pausar trabajo: ${mensajeError}`);
+      }
+    });
+  }
+
+  reanudarTrabajoManual(idTrabajo: number) {
+    this.actionLoading.set(idTrabajo);
+    this.trabajoService.reanudarTrabajo(idTrabajo).subscribe({
+      next: (trabajo) => {
+        console.log('✅ Trabajo reanudado:', trabajo);
+        this.actionLoading.set(null);
+        this.showSuccessModal('Trabajo reanudado exitosamente');
+        this.loadTrabajos();
+      },
+      error: (error) => {
+        console.error('❌ Error al reanudar trabajo:', error);
+        this.actionLoading.set(null);
+        const mensajeError = error.error?.message || error.message || 'Error desconocido';
+        this.showErrorModal(`Error al reanudar trabajo: ${mensajeError}`);
+      }
+    });
+  }
+
+  openFinalizarModal(idTrabajo: number) {
+    this.trabajoAFinalizar.set(idTrabajo);
+    this.descripcionFinalizacion.set('');
+    this.costoFinalTrabajo.set(0);
+    this.showFinalizarModal.set(true);
+  }
+
+  closeFinalizarModal() {
+    this.showFinalizarModal.set(false);
+    this.trabajoAFinalizar.set(null);
+    this.descripcionFinalizacion.set('');
+    this.costoFinalTrabajo.set(0);
+  }
+
+  confirmarFinalizarTrabajo() {
+    const idTrabajo = this.trabajoAFinalizar();
+    const observaciones = this.descripcionFinalizacion();
+    const montoFinal = this.costoFinalTrabajo();
+
+    if (!idTrabajo || !observaciones || montoFinal <= 0) {
+      this.showErrorModal('Debe completar todos los campos para finalizar el trabajo');
+      return;
+    }
+
+    this.actionLoading.set(idTrabajo);
+    this.trabajoService.finalizarTrabajo(idTrabajo, observaciones, montoFinal).subscribe({
+      next: (trabajo) => {
+        console.log('✅ Trabajo finalizado:', trabajo);
+        this.actionLoading.set(null);
+        this.closeFinalizarModal();
+        this.showSuccessModal('Trabajo finalizado exitosamente');
+        this.loadTrabajos();
+      },
+      error: (error) => {
+        console.error('❌ Error al finalizar trabajo:', error);
+        this.actionLoading.set(null);
+        const mensajeError = error.error?.message || error.message || 'Error desconocido';
+        this.showErrorModal(`Error al finalizar trabajo: ${mensajeError}`);
+      }
+    });
+  }
+
+  openCancelarModal(idTrabajo: number) {
+    this.trabajoACancelar.set(idTrabajo);
+    this.motivoCancelacion.set('');
+    this.showCancelarModal.set(true);
+  }
+
+  closeCancelarModal() {
+    this.showCancelarModal.set(false);
+    this.trabajoACancelar.set(null);
+    this.motivoCancelacion.set('');
+  }
+
+  confirmarCancelarTrabajo() {
+    const idTrabajo = this.trabajoACancelar();
+    const motivo = this.motivoCancelacion();
+
+    if (!idTrabajo || !motivo) {
+      this.showErrorModal('Debe proporcionar un motivo para cancelar el trabajo');
+      return;
+    }
+
+    this.actionLoading.set(idTrabajo);
+    this.trabajoService.cancelarTrabajo(idTrabajo, motivo).subscribe({
+      next: (trabajo) => {
+        console.log('✅ Trabajo cancelado:', trabajo);
+        this.actionLoading.set(null);
+        this.closeCancelarModal();
+        this.showSuccessModal('Trabajo cancelado exitosamente');
+        this.loadTrabajos();
+      },
+      error: (error) => {
+        console.error('❌ Error al cancelar trabajo:', error);
+        this.actionLoading.set(null);
+        const mensajeError = error.error?.message || error.message || 'Error desconocido';
+        this.showErrorModal(`Error al cancelar trabajo: ${mensajeError}`);
       }
     });
   }
@@ -305,6 +425,44 @@ export class ProfessionalDashboardComponent implements OnInit {
 
   closeResponseModal() {
     this.showResponseModal.set(false);
+  }
+
+  loadTrabajos() {
+    const user = this.authService.getCurrentUser();
+    if (!user?.idProfesional) return;
+
+    this.isLoadingTrabajos.set(true);
+    this.trabajoService.obtenerTrabajosPorProfesional(user.idProfesional).subscribe({
+      next: (trabajos) => {
+        console.log('✅ Trabajos cargados:', trabajos);
+        this.trabajos.set(trabajos);
+        this.isLoadingTrabajos.set(false);
+      },
+      error: (error) => {
+        console.error('❌ Error al cargar trabajos:', error);
+        this.trabajos.set([]);
+        this.isLoadingTrabajos.set(false);
+      }
+    });
+  }
+
+  getEstadoBadgeClass(estado: string): string {
+    const classes: Record<string, string> = {
+      'PENDIENTE': 'badge-pendiente',
+      'EN_CURSO': 'badge-en-curso',
+      'PAUSADO': 'badge-pausado',
+      'FINALIZADO': 'badge-finalizado',
+      'CANCELADO': 'badge-cancelado'
+    };
+    return classes[estado] || 'badge-default';
+  }
+
+  formatMoneda(monto: number | null): string {
+    if (monto === null) return '-';
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS'
+    }).format(monto);
   }
 
   formatDate(dateString: string): string {

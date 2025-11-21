@@ -68,7 +68,7 @@ export class TrabajoDetalleComponent implements OnInit {
     if (!trabajo) return;
 
     this.loading.set(true);
-    this.trabajoService.iniciarTrabajo(trabajo.id).subscribe({
+    this.trabajoService.iniciarTrabajo(trabajo.idTrabajo).subscribe({
       next: (trabajoActualizado) => {
         this.trabajo.set(trabajoActualizado);
         this.loading.set(false);
@@ -87,7 +87,7 @@ export class TrabajoDetalleComponent implements OnInit {
     if (!trabajo) return;
 
     this.loading.set(true);
-    this.trabajoService.pausarTrabajo(trabajo.id).subscribe({
+    this.trabajoService.pausarTrabajo(trabajo.idTrabajo).subscribe({
       next: (trabajoActualizado) => {
         this.trabajo.set(trabajoActualizado);
         this.loading.set(false);
@@ -106,7 +106,7 @@ export class TrabajoDetalleComponent implements OnInit {
     if (!trabajo) return;
 
     this.loading.set(true);
-    this.trabajoService.reanudarTrabajo(trabajo.id).subscribe({
+    this.trabajoService.reanudarTrabajo(trabajo.idTrabajo).subscribe({
       next: (trabajoActualizado) => {
         this.trabajo.set(trabajoActualizado);
         this.loading.set(false);
@@ -143,7 +143,7 @@ export class TrabajoDetalleComponent implements OnInit {
     }
 
     this.loading.set(true);
-    this.trabajoService.finalizarTrabajo(trabajo.id, descripcion, costo).subscribe({
+    this.trabajoService.finalizarTrabajo(trabajo.idTrabajo, descripcion, costo).subscribe({
       next: (trabajoActualizado) => {
         this.trabajo.set(trabajoActualizado);
         this.loading.set(false);
@@ -161,13 +161,13 @@ export class TrabajoDetalleComponent implements OnInit {
 
   procesarPago(): void {
     const trabajo = this.trabajo();
-    if (!trabajo || !trabajo.costofinal) return;
+    if (!trabajo || !trabajo.montoFinal) return;
 
     const request: FacturaRequest = {
-      idTrabajo: trabajo.id,
-      titulo: `Pago por ${trabajo.descripcionOficio || 'servicio'}`,
-      descripcion: trabajo.descripcionfinalizacion || 'Servicio profesional completado',
-      monto: trabajo.costofinal,
+      idTrabajo: trabajo.idTrabajo,
+      titulo: `Pago por ${trabajo.oficio || 'servicio'}`,
+      descripcion: trabajo.observacionesTrabajo || 'Servicio profesional completado',
+      monto: trabajo.montoFinal,
       cantidad: 1
     };
 
@@ -216,7 +216,7 @@ export class TrabajoDetalleComponent implements OnInit {
     if (!motivo) return;
 
     this.loading.set(true);
-    this.trabajoService.cancelarTrabajo(trabajo.id, motivo).subscribe({
+    this.trabajoService.cancelarTrabajo(trabajo.idTrabajo, motivo).subscribe({
       next: (trabajoActualizado) => {
         this.trabajo.set(trabajoActualizado);
         this.loading.set(false);

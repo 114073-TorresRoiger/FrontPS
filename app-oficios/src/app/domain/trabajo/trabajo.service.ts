@@ -23,10 +23,14 @@ export class TrabajoService {
     return this.repository.reanudarTrabajo(idTrabajo);
   }
 
-  finalizarTrabajo(idTrabajo: number, descripcion: string, costoFinal: number): Observable<TrabajoResponse> {
+  finalizarTrabajo(idTrabajo: number, observaciones: string, montoFinal: number, duracionReal?: number, montoAdicional?: number, descripcionAdicional?: string, fotoTrabajo?: string): Observable<TrabajoResponse> {
     const request: FinalizarTrabajoRequest = {
-      descripcionFinalizacion: descripcion,
-      costoFinal: costoFinal
+      observaciones,
+      montoFinal,
+      duracionReal: duracionReal || null,
+      montoAdicional: montoAdicional || null,
+      descripcionAdicional: descripcionAdicional || null,
+      fotoTrabajo: fotoTrabajo || null
     };
     return this.repository.finalizarTrabajo(idTrabajo, request);
   }

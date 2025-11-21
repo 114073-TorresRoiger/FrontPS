@@ -107,6 +107,122 @@
     </div>
   </section>
 
+  <!-- Mis Trabajos -->
+  <section class="trabajos-section">
+    <div class="section-header">
+      <h2 class="section-title">
+        <lucide-angular [img]="FileText" size="24"></lucide-angular>
+        Mis Trabajos
+      </h2>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoadingTrabajos()" class="loading-container">
+      <p>Cargando trabajos...</p>
+    </div>
+
+    <!-- Tabla de Trabajos -->
+    <div *ngIf="!isLoadingTrabajos()" class="trabajos-table-container">
+      <div *ngIf="trabajos().length === 0" class="empty-state">
+        <lucide-angular [img]="FileText" size="48"></lucide-angular>
+        <p>No hay trabajos registrados</p>
+      </div>
+
+      <table *ngIf="trabajos().length > 0" class="trabajos-table">
+        <thead>
+          <tr>
+            <th>Cliente</th>
+            <th>Oficio</th>
+            <th>Estado</th>
+            <th>Fecha Inicio</th>
+            <th>Fecha Fin</th>
+            <th>Monto Final</th>
+            <th>Estado Pago</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let trabajo of trabajos()">
+            <td>{{ trabajo.nombreCliente }}</td>
+            <td>{{ trabajo.oficio }}</td>
+            <td>
+              <span class="badge" [ngClass]="getEstadoBadgeClass(trabajo.estado)">
+                {{ trabajo.estado }}
+              </span>
+            </td>
+            <td>{{ trabajo.fechaInicio ? formatDate(trabajo.fechaInicio) : '-' }}</td>
+            <td>{{ trabajo.fechaFinalizacion ? formatDate(trabajo.fechaFinalizacion) : '-' }}</td>
+            <td>{{ formatMoneda(trabajo.montoFinal) }}</td>
+            <td>
+              <span *ngIf="trabajo.estadoPago" class="badge badge-pago">{{ trabajo.estadoPago }}</span>
+              <span *ngIf="!trabajo.estadoPago">-</span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <!-- Iniciar trabajo (solo si está PENDIENTE) -->
+                <button
+                  *ngIf="trabajo.estado === 'PENDIENTE'"
+                  class="btn-action btn-iniciar"
+                  (click)="iniciarTrabajoManual(trabajo.idTrabajo)"
+                  [disabled]="actionLoading() === trabajo.idTrabajo"
+                  title="Iniciar trabajo">
+                  <lucide-angular [img]="Play" [size]="16"></lucide-angular>
+                </button>
+
+                <!-- Pausar trabajo (solo si está EN_CURSO) -->
+                <button
+                  *ngIf="trabajo.estado === 'EN_CURSO'"
+                  class="btn-action btn-pausar"
+                  (click)="pausarTrabajoManual(trabajo.idTrabajo)"
+                  [disabled]="actionLoading() === trabajo.idTrabajo"
+                  title="Pausar trabajo">
+                  <lucide-angular [img]="Pause" [size]="16"></lucide-angular>
+                </button>
+
+                <!-- Reanudar trabajo (solo si está PAUSADO) -->
+                <button
+                  *ngIf="trabajo.estado === 'PAUSADO'"
+                  class="btn-action btn-reanudar"
+                  (click)="reanudarTrabajoManual(trabajo.idTrabajo)"
+                  [disabled]="actionLoading() === trabajo.idTrabajo"
+                  title="Reanudar trabajo">
+                  <lucide-angular [img]="Play" [size]="16"></lucide-angular>
+                </button>
+
+                <!-- Finalizar trabajo (solo si está EN_CURSO o PAUSADO) -->
+                <button
+                  *ngIf="trabajo.estado === 'EN_CURSO' || trabajo.estado === 'PAUSADO'"
+                  class="btn-action btn-finalizar"
+                  (click)="openFinalizarModal(trabajo.idTrabajo)"
+                  [disabled]="actionLoading() === trabajo.idTrabajo"
+                  title="Finalizar trabajo">
+                  <lucide-angular [img]="Square" [size]="16"></lucide-angular>
+                </button>
+
+                <!-- Cancelar trabajo (si no está FINALIZADO ni CANCELADO) -->
+                <button
+                  *ngIf="trabajo.estado !== 'FINALIZADO' && trabajo.estado !== 'CANCELADO'"
+                  class="btn-action btn-cancelar"
+                  (click)="openCancelarModal(trabajo.idTrabajo)"
+                  [disabled]="actionLoading() === trabajo.idTrabajo"
+                  title="Cancelar trabajo">
+                  <lucide-angular [img]="Ban" [size]="16"></lucide-angular>
+                </button>
+
+                <!-- Sin acciones disponibles -->
+                <span
+                  *ngIf="trabajo.estado === 'FINALIZADO' || trabajo.estado === 'CANCELADO'"
+                  class="no-actions">
+                  -
+                </span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
   <!-- Quick Actions -->
   <section class="actions-section">
     <h2 class="section-title">Acciones Rápidas</h2>
@@ -145,21 +261,103 @@
     </div>
   </section>
 
-  <!-- Recent Activity -->
-  <section class="activity-section">
-    <h2 class="section-title">Actividad Reciente</h2>
-    <div class="activity-list">
-      <div *ngFor="let activity of recentActivities()" class="activity-item">
-        <div class="activity-icon">
-          <lucide-angular [img]="activity.icon" size="20"></lucide-angular>
-        </div>
-        <div class="activity-content">
-          <p class="activity-description">{{ activity.description }}</p>
-          <span class="activity-time">{{ activity.time }}</span>
-        </div>
+</div>
+
+<!-- Modal de Finalizar Trabajo -->
+<div *ngIf="showFinalizarModal()" class="modal-overlay" (click)="closeFinalizarModal()">
+  <div class="modal-content finalizar-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>
+        <lucide-angular [img]="Square" [size]="24"></lucide-angular>
+        Finalizar Trabajo
+      </h2>
+      <button class="btn-close" (click)="closeFinalizarModal()">
+        <lucide-angular [img]="XIcon" [size]="20"></lucide-angular>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <p class="modal-description">Complete los siguientes campos para finalizar el trabajo:</p>
+
+      <div class="form-group">
+        <label for="descripcionFinal">Descripción de finalización *</label>
+        <textarea
+          id="descripcionFinal"
+          rows="4"
+          placeholder="Describa el trabajo realizado, materiales utilizados, etc."
+          [value]="descripcionFinalizacion()"
+          (input)="descripcionFinalizacion.set($any($event.target).value)"
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="costoFinal">Costo final (ARS) *</label>
+        <input
+          id="costoFinal"
+          type="number"
+          min="0"
+          step="0.01"
+          placeholder="0.00"
+          [value]="costoFinalTrabajo()"
+          (input)="costoFinalTrabajo.set(+$any($event.target).value)"
+        />
       </div>
     </div>
-  </section>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeFinalizarModal()">
+        Cancelar
+      </button>
+      <button
+        class="btn btn-primary"
+        (click)="confirmarFinalizarTrabajo()"
+        [disabled]="!descripcionFinalizacion() || costoFinalTrabajo() <= 0">
+        Confirmar Finalización
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Cancelar Trabajo -->
+<div *ngIf="showCancelarModal()" class="modal-overlay" (click)="closeCancelarModal()">
+  <div class="modal-content cancelar-modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>
+        <lucide-angular [img]="Ban" [size]="24"></lucide-angular>
+        Cancelar Trabajo
+      </h2>
+      <button class="btn-close" (click)="closeCancelarModal()">
+        <lucide-angular [img]="XIcon" [size]="20"></lucide-angular>
+      </button>
+    </div>
+
+    <div class="modal-body">
+      <p class="modal-description">Por favor indique el motivo de cancelación del trabajo:</p>
+
+      <div class="form-group">
+        <label for="motivoCancelacion">Motivo de cancelación *</label>
+        <textarea
+          id="motivoCancelacion"
+          rows="4"
+          placeholder="Explique por qué se cancela el trabajo..."
+          [value]="motivoCancelacion()"
+          (input)="motivoCancelacion.set($any($event.target).value)"
+        ></textarea>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeCancelarModal()">
+        Volver
+      </button>
+      <button
+        class="btn btn-danger"
+        (click)="confirmarCancelarTrabajo()"
+        [disabled]="!motivoCancelacion()">
+        Confirmar Cancelación
+      </button>
+    </div>
+  </div>
 </div>
 
 <!-- Modal de Respuesta -->

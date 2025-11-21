@@ -8,7 +8,7 @@
       <div class="info-grid">
         <div class="info-item">
           <span class="label">ID Trabajo:</span>
-          <span class="valor">{{ trabajo()?.id }}</span>
+          <span class="valor">{{ trabajo()?.idTrabajo }}</span>
         </div>
         <div class="info-item">
           <span class="label">Estado:</span>
@@ -18,11 +18,11 @@
         </div>
         <div class="info-item">
           <span class="label">Oficio:</span>
-          <span class="valor">{{ trabajo()?.descripcionOficio || 'N/A' }}</span>
+          <span class="valor">{{ trabajo()?.oficio || 'N/A' }}</span>
         </div>
-        <div class="info-item" *ngIf="trabajo()?.costofinal">
+        <div class="info-item" *ngIf="trabajo()?.montoFinal">
           <span class="label">Costo:</span>
-          <span class="valor">${{ trabajo()?.costofinal }}</span>
+          <span class="valor">${{ trabajo()?.montoFinal }}</span>
         </div>
       </div>
     </div>
@@ -47,8 +47,8 @@
           </button>
         </div>
 
-        <!-- Estado EN_PROGRESO -->
-        <div *ngSwitchCase="'EN_PROGRESO'" class="acciones">
+        <!-- Estado EN_CURSO -->
+        <div *ngSwitchCase="'EN_CURSO'" class="acciones">
           <button class="btn btn-warning" (click)="pausarTrabajo()">
             <lucide-angular [img]="PauseCircle" [size]="20"></lucide-angular>
             Pausar Trabajo
@@ -135,7 +135,7 @@
     <div class="pago-info">
       <p>El trabajo ha sido finalizado correctamente.</p>
       <p class="costo-destacado">
-        Monto a pagar: <strong>${{ trabajo()?.costofinal }}</strong>
+        Monto a pagar: <strong>${{ trabajo()?.montoFinal }}</strong>
       </p>
       <p class="info-text">
         Al confirmar, serás redirigido a Mercado Pago para completar el pago de forma segura.
