@@ -46,7 +46,10 @@ export interface TrabajoResponse {
 export interface TrabajoClienteResponse {
   idTrabajo: number;
   idSolicitud: number;
+  profesional: string;
+  descripcion: string;
   idpago: string | null;
   estado: string;
   montoFinal: string;
+  fechaFinalizacion: string;
 }

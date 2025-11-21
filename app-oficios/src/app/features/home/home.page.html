@@ -166,28 +166,46 @@
           <p>Cargando trabajos...</p>
         </div>
 
-        <!-- Trabajos List -->
-        <div *ngIf="!isLoadingTrabajos() && showTrabajosSection()" class="trabajos-list">
-          <div *ngFor="let trabajo of trabajosFinalizados()" class="trabajo-card">
-            <div class="trabajo-header">
-              <span class="trabajo-id">Trabajo #{{ trabajo.idTrabajo }}</span>
-              <span class="badge" [ngClass]="getEstadoBadgeClass(trabajo.estado)">
-                {{ trabajo.estado }}
-              </span>
-            </div>
-
-            <div class="trabajo-body">
-              <div class="trabajo-info">
-                <p><strong>Solicitud:</strong> #{{ trabajo.idSolicitud }}</p>
-                <p><strong>Monto:</strong> {{ formatMoneda(trabajo.montoFinal) }}</p>
-                <p *ngIf="trabajo.idpago"><strong>ID Pago:</strong> {{ trabajo.idpago }}</p>
-                <p *ngIf="!trabajo.idpago" class="pago-pendiente">
-                  <lucide-angular [img]="AlertCircle" size="16"></lucide-angular>
-                  Pago pendiente
-                </p>
-              </div>
-            </div>
-          </div>
+        <!-- Trabajos Table -->
+        <div *ngIf="!isLoadingTrabajos() && showTrabajosSection()" class="trabajos-table-container">
+          <table class="trabajos-table">
+            <thead>
+              <tr>
+                <th>Profesional</th>
+                <th>Descripción</th>
+                <th>Estado</th>
+                <th>Fecha Finalización</th>
+                <th>Monto</th>
+                <th>Pago</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let trabajo of trabajosFinalizados()">
+                <td>{{ trabajo.profesional }}</td>
+                <td class="descripcion-cell">{{ trabajo.descripcion || '-' }}</td>
+                <td>
+                  <span class="badge" [ngClass]="getEstadoBadgeClass(trabajo.estado)">
+                    {{ trabajo.estado }}
+                  </span>
+                </td>
+                <td>{{ formatDate(trabajo.fechaFinalizacion) }}</td>
+                <td>{{ formatMoneda(trabajo.montoFinal) }}</td>
+                <td>
+                  <button
+                    *ngIf="trabajo.idpago"
+                    class="btn-pagar"
+                    (click)="irAPago(trabajo.idpago!)">
+                    <lucide-angular [img]="DollarSign" size="16"></lucide-angular>
+                    Ir a Pagar
+                  </button>
+                  <span *ngIf="!trabajo.idpago" class="pago-pendiente">
+                    <lucide-angular [img]="AlertCircle" size="16"></lucide-angular>
+                    Pendiente
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </section>
 

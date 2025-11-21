@@ -1,7 +1,8 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { LucideAngularModule, Eye, EyeOff } from 'lucide-angular';
 import { AuthService } from '../../../domain/auth/auth.service';
 import { DomicilioService } from '../../../domain/domicilio/domicilio.service';
 import { Departamento, Ciudad, Barrio } from '../../../domain/domicilio/domicilio.model';
@@ -9,11 +10,13 @@ import { TipoDocumento } from '../../../domain/auth/auth.model';
 
 @Component({
   selector: 'app-registro',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, RouterModule, LucideAngularModule],
   templateUrl: './registro.html',
   styleUrl: './registro.scss'
 })
 export class Registro implements OnInit {
+  readonly Eye = Eye;
+  readonly EyeOff = EyeOff;
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly domicilioService = inject(DomicilioService);
@@ -37,6 +40,12 @@ export class Registro implements OnInit {
   isLoadingBarrios = false;
   isLoadingTiposDoc = false;
   isSubmitting = false;
+
+  // Terms and Conditions modal
+  showTermsModal = signal(false);
+
+  // Password visibility
+  showPassword = signal(false);
 
   constructor() {
     this.initializeForms();
@@ -66,7 +75,8 @@ export class Registro implements OnInit {
       numero: ['', [Validators.required]],
       piso: [''],
       depto: [''],
-      observaciones: ['']
+      observaciones: [''],
+      aceptaTerminos: [false, Validators.requiredTrue]
     });
   }
 
@@ -265,5 +275,17 @@ export class Registro implements OnInit {
       if (field.errors['maxlength']) return `Máximo ${field.errors['maxlength'].requiredLength} caracteres`;
     }
     return '';
+  }
+
+  openTermsModal(): void {
+    this.showTermsModal.set(true);
+  }
+
+  closeTermsModal(): void {
+    this.showTermsModal.set(false);
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword.set(!this.showPassword());
   }
 }

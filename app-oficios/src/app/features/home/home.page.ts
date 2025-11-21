@@ -547,6 +547,24 @@ export class HomePage implements OnInit {
     return classes[estado] || 'badge-default';
   }
 
+  formatDate(dateString: string): string {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-AR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  irAPago(urlPago: string): void {
+    if (urlPago) {
+      window.open(urlPago, '_blank');
+    }
+  }
+
   goToSignIn() {
     this.isDropdownOpen.set(false);
     this.router.navigate(['/auth/login']);
