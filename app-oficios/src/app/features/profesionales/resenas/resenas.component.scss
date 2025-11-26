@@ -12,20 +12,10 @@
   .back-btn {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.75rem 1.25rem;
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 8px;
-    color: #374151;
-    font-weight: 500;
-    cursor: pointer;
     transition: all 0.2s;
-    margin-bottom: 1.5rem;
 
     &:hover {
-      background: #f9fafb;
-      border-color: #d1d5db;
+      transform: translateX(-4px);
     }
   }
 
@@ -37,185 +27,39 @@
 }
 
 .rating-summary {
-  background: white;
+  border: none;
   border-radius: 12px;
-  padding: 2rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.rating-overview {
-  text-align: center;
-
-  .rating-score {
-    .score-value {
-      font-size: 3rem;
-      font-weight: 700;
-      color: #1a1a1a;
-      display: block;
-    }
-
-    .stars {
-      display: flex;
-      justify-content: center;
-      gap: 0.25rem;
-      margin: 0.5rem 0;
-
-      .star-icon {
-        color: #fbbf24;
-        fill: #fbbf24;
-      }
-    }
-
-    .total-reviews {
-      color: #6b7280;
-      font-size: 0.95rem;
-      margin-top: 0.5rem;
-    }
-  }
-}
-
-.resenas-content {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  padding: 1.5rem;
-}
-
-.resenas-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
 }
 
 .resena-card {
-  padding: 1.5rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 10px;
   transition: all 0.2s;
 
   &:hover {
-    border-color: #d1d5db;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    background-color: #f8f9fa;
   }
 
-  .resena-header {
+  .avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
     display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 1rem;
-
-    .cliente-info {
-      display: flex;
-      gap: 1rem;
-      align-items: center;
-
-      .avatar {
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      .info {
-        h3 {
-          font-size: 1rem;
-          font-weight: 600;
-          color: #1a1a1a;
-          margin-bottom: 0.25rem;
-        }
-
-        .servicio {
-          font-size: 0.875rem;
-          color: #6b7280;
-        }
-      }
-    }
-
-    .rating-date {
-      text-align: right;
-
-      .stars {
-        display: flex;
-        gap: 0.25rem;
-        margin-bottom: 0.5rem;
-        justify-content: flex-end;
-
-        .star-icon {
-          color: #d1d5db;
-
-          &.filled {
-            color: #fbbf24;
-            fill: #fbbf24;
-          }
-        }
-      }
-
-      .fecha {
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
-        color: #9ca3af;
-        font-size: 0.875rem;
-      }
-    }
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
   }
+}
 
-  .resena-body {
-    .comentario {
-      color: #374151;
-      line-height: 1.6;
-      font-size: 0.95rem;
-    }
-  }
-
-  .resena-footer {
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid #e5e7eb;
-
-    .helpful-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 1rem;
-      background: transparent;
-      border: 1px solid #e5e7eb;
-      border-radius: 6px;
-      color: #6b7280;
-      font-size: 0.875rem;
-      cursor: pointer;
-      transition: all 0.2s;
-
-      &:hover {
-        background: #f9fafb;
-        border-color: #3b82f6;
-        color: #3b82f6;
-      }
-    }
+// Estilos para las estrellas llenas
+.star-icon {
+  &.text-warning {
+    fill: currentColor;
   }
 }
 
 @media (max-width: 768px) {
   .resenas-container {
     padding: 1rem;
-  }
-
-  .resena-header {
-    flex-direction: column;
-    gap: 1rem;
-
-    .rating-date {
-      text-align: left;
-      align-self: flex-start;
-
-      .stars {
-        justify-content: flex-start;
-      }
-    }
   }
 }

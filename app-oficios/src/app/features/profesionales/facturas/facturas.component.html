@@ -1,46 +1,91 @@
 <div class="facturas-container">
   <header class="page-header">
-    <button class="back-btn" (click)="goBack()">
+    <button class="btn btn-outline-secondary back-btn mb-3" (click)="goBack()">
       <lucide-angular [img]="ArrowLeft" size="20"></lucide-angular>
-      <span>Volver al Dashboard</span>
+      <span class="ms-2">Volver al Dashboard</span>
     </button>
     <h1>Facturas Generadas</h1>
   </header>
 
-  <form class="filtro-form" (ngSubmit)="cargarFacturas()">
-    <label>
-      Desde:
-      <input type="datetime-local" [(ngModel)]="fechaDesde" name="fechaDesde" />
-    </label>
-    <label>
-      Hasta:
-      <input type="datetime-local" [(ngModel)]="fechaHasta" name="fechaHasta" />
-    </label>
-    <button type="submit" [disabled]="loading">Filtrar</button>
-  </form>
-
-  <div class="facturas-content">
-    <div *ngIf="loading">Cargando facturas...</div>
-    <div class="facturas-list">
-      <div *ngFor="let factura of facturas" class="factura-card">
-        <div class="factura-icon">
-          <lucide-angular [img]="FileText" size="24"></lucide-angular>
-        </div>
-        <div class="factura-info">
-          <div class="fecha">
-            <lucide-angular [img]="Calendar" size="14"></lucide-angular>
-            <span>{{ factura.fecha | date : 'dd/MM/yyyy HH:mm' }}</span>
-          </div>
-          <p class="cliente">Cliente: {{ factura.cliente }}</p>
-        </div>
-        <div class="factura-monto">
-          <span class="label">Monto</span>
-          <span class="value">${{ factura.monto | number : '1.2-2' }}</span>
-        </div>
+  <form class="filtro-form card shadow-sm p-4 mb-4" (ngSubmit)="cargarFacturas()">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-4">
+        <label for="fechaDesde" class="form-label">Desde:</label>
+        <input 
+          id="fechaDesde"
+          type="datetime-local" 
+          class="form-control"
+          [(ngModel)]="fechaDesde" 
+          name="fechaDesde" 
+        />
+      </div>
+      
+      <div class="col-md-4">
+        <label for="fechaHasta" class="form-label">Hasta:</label>
+        <input 
+          id="fechaHasta"
+          type="datetime-local" 
+          class="form-control"
+          [(ngModel)]="fechaHasta" 
+          name="fechaHasta" 
+        />
+      </div>
+      
+      <div class="col-md-4">
+        <button 
+          type="submit" 
+          class="btn btn-primary w-100"
+          [disabled]="loading"
+        >
+          <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+          {{ loading ? 'Cargando...' : 'Filtrar' }}
+        </button>
       </div>
     </div>
-    <div *ngIf="!loading && facturas.length === 0" class="no-facturas">
-      No se encontraron facturas para los criterios seleccionados.
+  </form>
+
+  <div class="facturas-content card shadow-sm">
+    <div class="card-body">
+      <div *ngIf="loading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="mt-2 text-muted">Cargando facturas...</p>
+      </div>
+
+      <div class="facturas-list" *ngIf="!loading">
+        <div *ngFor="let factura of facturas" class="factura-card card mb-3">
+          <div class="card-body">
+            <div class="row align-items-center">
+              <div class="col-auto">
+                <div class="factura-icon">
+                  <lucide-angular [img]="FileText" size="24"></lucide-angular>
+                </div>
+              </div>
+              
+              <div class="col">
+                <div class="d-flex align-items-center mb-2">
+                  <lucide-angular [img]="Calendar" size="14" class="text-muted me-2"></lucide-angular>
+                  <small class="text-muted">{{ factura.fecha | date:'dd/MM/yyyy HH:mm' }}</small>
+                </div>
+                <p class="mb-0 text-secondary">
+                  <strong>Cliente:</strong> {{ factura.cliente }}
+                </p>
+              </div>
+              
+              <div class="col-auto text-end">
+                <small class="text-muted text-uppercase d-block mb-1">Monto</small>
+                <h5 class="mb-0 fw-bold">${{ factura.monto | number:'1.2-2' }}</h5>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="facturas.length === 0" class="alert alert-info text-center" role="alert">
+          <lucide-angular [img]="FileText" size="48" class="mb-3 text-muted"></lucide-angular>
+          <p class="mb-0">No se encontraron facturas para los criterios seleccionados.</p>
+        </div>
+      </div>
     </div>
   </div>
 </div>
