@@ -7,17 +7,33 @@
     <h1>Facturas Generadas</h1>
   </header>
 
-  <form class="filtro-form" (ngSubmit)="cargarFacturas()">
-    <label>
-      Desde:
-      <input type="datetime-local" [(ngModel)]="fechaDesde" name="fechaDesde" />
-    </label>
-    <label>
-      Hasta:
-      <input type="datetime-local" [(ngModel)]="fechaHasta" name="fechaHasta" />
-    </label>
-    <button type="submit" [disabled]="loading">Filtrar</button>
-  </form>
+<form class="filtro-form" (ngSubmit)="cargarFacturas()" style="display: flex; gap: 1rem; align-items: flex-end;">
+  <label style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.875rem; font-weight: 500; color: #374151;">
+    Desde:
+    <input 
+      type="datetime-local" 
+      [(ngModel)]="fechaDesde" 
+      name="fechaDesde"
+      style="padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.875rem;"
+    />
+  </label>
+  <label style="display: flex; flex-direction: column; gap: 0.5rem; font-size: 0.875rem; font-weight: 500; color: #374151;">
+    Hasta:
+    <input 
+      type="datetime-local" 
+      [(ngModel)]="fechaHasta" 
+      name="fechaHasta"
+      style="padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 0.875rem;"
+    />
+  </label>
+  <button 
+    type="submit" 
+    [disabled]="loading"
+    style="padding: 0.5rem 1.5rem; background-color: #3b82f6; color: white; border: none; border-radius: 6px; font-weight: 500; cursor: pointer;"
+  >
+    Filtrar
+  </button>
+</form>
 
   <div class="facturas-content">
     <div *ngIf="loading">Cargando facturas...</div>
@@ -29,13 +45,13 @@
         <div class="factura-info">
           <div class="fecha">
             <lucide-angular [img]="Calendar" size="14"></lucide-angular>
-            <span>{{ factura.fecha | date:'dd/MM/yyyy HH:mm' }}</span>
+            <span>{{ factura.fecha | date : 'dd/MM/yyyy HH:mm' }}</span>
           </div>
           <p class="cliente">Cliente: {{ factura.cliente }}</p>
         </div>
         <div class="factura-monto">
           <span class="label">Monto</span>
-          <span class="value">${{ factura.monto | number:'1.2-2' }}</span>
+          <span class="value">${{ factura.monto | number : '1.2-2' }}</span>
         </div>
       </div>
     </div>
