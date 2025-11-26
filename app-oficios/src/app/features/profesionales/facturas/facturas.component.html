@@ -7,42 +7,40 @@
     <h1>Facturas Generadas</h1>
   </header>
 
+  <form class="filtro-form" (ngSubmit)="cargarFacturas()">
+    <label>
+      Desde:
+      <input type="datetime-local" [(ngModel)]="fechaDesde" name="fechaDesde" />
+    </label>
+    <label>
+      Hasta:
+      <input type="datetime-local" [(ngModel)]="fechaHasta" name="fechaHasta" />
+    </label>
+    <button type="submit" [disabled]="loading">Filtrar</button>
+  </form>
+
   <div class="facturas-content">
+    <div *ngIf="loading">Cargando facturas...</div>
     <div class="facturas-list">
       <div *ngFor="let factura of facturas" class="factura-card">
         <div class="factura-icon">
           <lucide-angular [img]="FileText" size="24"></lucide-angular>
         </div>
-
         <div class="factura-info">
-          <h3>{{ factura.numero }}</h3>
-          <p class="cliente">{{ factura.cliente }}</p>
           <div class="fecha">
             <lucide-angular [img]="Calendar" size="14"></lucide-angular>
-            <span>{{ factura.fecha }}</span>
+            <span>{{ factura.fecha | date:'dd/MM/yyyy HH:mm' }}</span>
           </div>
+          <p class="cliente">Cliente: {{ factura.cliente }}</p>
         </div>
-
         <div class="factura-monto">
           <span class="label">Monto</span>
-          <span class="value">\${{ factura.monto }}</span>
-        </div>
-
-        <div class="factura-estado">
-          <span class="estado-badge" [ngClass]="getEstadoClass(factura.estado)">
-            {{ factura.estado }}
-          </span>
-        </div>
-
-        <div class="factura-actions">
-          <button class="action-btn" (click)="verFactura(factura)" title="Ver factura">
-            <lucide-angular [img]="Eye" size="18"></lucide-angular>
-          </button>
-          <button class="action-btn" (click)="descargarFactura(factura)" title="Descargar">
-            <lucide-angular [img]="Download" size="18"></lucide-angular>
-          </button>
+          <span class="value">${{ factura.monto | number:'1.2-2' }}</span>
         </div>
       </div>
+    </div>
+    <div *ngIf="!loading && facturas.length === 0" class="no-facturas">
+      No se encontraron facturas para los criterios seleccionados.
     </div>
   </div>
 </div>
