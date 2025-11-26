@@ -207,15 +207,46 @@ export class ChatPage implements OnInit, OnDestroy {
       return;
     }
 
-    this.professionalModal = new (window as any).bootstrap.Modal(
-      document.getElementById('professionalModal')
-    );
-    this.professionalModal.show();
+    const modalElement = document.getElementById('professionalModal');
+    if (!modalElement) {
+      console.error('❌ Modal element not found');
+      return;
+    }
+
+    // ✅ Verificar si Bootstrap está disponible
+    if (typeof (window as any).bootstrap !== 'undefined') {
+      this.professionalModal = new (window as any).bootstrap.Modal(modalElement);
+      this.professionalModal.show();
+    } else {
+      // ✅ Fallback: mostrar modal manualmente
+      modalElement.classList.add('show');
+      modalElement.style.display = 'block';
+      document.body.classList.add('modal-open');
+      
+      // Crear backdrop
+      const backdrop = document.createElement('div');
+      backdrop.className = 'modal-backdrop fade show';
+      backdrop.id = 'professionalModalBackdrop';
+      document.body.appendChild(backdrop);
+    }
   }
 
   closeProfessionalModal(): void {
-    if (this.professionalModal) {
+    const modalElement = document.getElementById('professionalModal');
+    
+    if (this.professionalModal && typeof (window as any).bootstrap !== 'undefined') {
       this.professionalModal.hide();
+    } else if (modalElement) {
+      // ✅ Fallback: ocultar modal manualmente
+      modalElement.classList.remove('show');
+      modalElement.style.display = 'none';
+      document.body.classList.remove('modal-open');
+      
+      // Remover backdrop
+      const backdrop = document.getElementById('professionalModalBackdrop');
+      if (backdrop) {
+        backdrop.remove();
+      }
     }
   }
 
@@ -240,10 +271,29 @@ export class ChatPage implements OnInit, OnDestroy {
   // Eliminar mensajes
   openDeleteModal(message: any): void {
     this.selectedMessageToDelete = message;
-    this.deleteModal = new (window as any).bootstrap.Modal(
-      document.getElementById('deleteMessageModal')
-    );
-    this.deleteModal.show();
+    
+    const modalElement = document.getElementById('deleteMessageModal');
+    if (!modalElement) {
+      console.error('❌ Delete modal element not found');
+      return;
+    }
+
+    // ✅ Verificar si Bootstrap está disponible
+    if (typeof (window as any).bootstrap !== 'undefined') {
+      this.deleteModal = new (window as any).bootstrap.Modal(modalElement);
+      this.deleteModal.show();
+    } else {
+      // ✅ Fallback: mostrar modal manualmente
+      modalElement.classList.add('show');
+      modalElement.style.display = 'block';
+      document.body.classList.add('modal-open');
+      
+      // Crear backdrop
+      const backdrop = document.createElement('div');
+      backdrop.className = 'modal-backdrop fade show';
+      backdrop.id = 'deleteModalBackdrop';
+      document.body.appendChild(backdrop);
+    }
   }
 
   async deleteMessage(): Promise<void> {
@@ -253,12 +303,31 @@ export class ChatPage implements OnInit, OnDestroy {
       const client = this.chatService.getChatClient();
       await client.deleteMessage(this.selectedMessageToDelete.id);
       
-      this.deleteModal.hide();
+      this.closeDeleteModal();
       await this.loadMessages();
     } catch (error) {
       console.error('Error al eliminar mensaje:', error);
       alert('Error al eliminar el mensaje');
     }
+  }
+
+  closeDeleteModal(): void {
+    const modalElement = document.getElementById('deleteMessageModal');
+    
+    if (this.deleteModal && typeof (window as any).bootstrap !== 'undefined') {
+      this.deleteModal.hide();
+    } else if (modalElement) {
+      modalElement.classList.remove('show');
+      modalElement.style.display = 'none';
+      document.body.classList.remove('modal-open');
+      
+      const backdrop = document.getElementById('deleteModalBackdrop');
+      if (backdrop) {
+        backdrop.remove();
+      }
+    }
+    
+    this.selectedMessageToDelete = null;
   }
 
   // Scroll automático

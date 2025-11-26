@@ -112,19 +112,20 @@
               <div class="message-content">
                 <div class="message-bubble">
                   <p class="message-text">{{ message.text }}</p>
-                  <span class="message-time">
-                    {{ formatTime(message.created_at) }}
-                  </span>
+                  <div class="message-footer">
+                    <span class="message-time">
+                      {{ formatTime(message.created_at) }}
+                    </span>
+                    <!-- Botón eliminar (solo mensajes propios) -->
+                    <button 
+                      *ngIf="message.user?.id === userId()"
+                      class="btn-delete-inline"
+                      (click)="openDeleteModal(message); $event.stopPropagation()"
+                      title="Eliminar mensaje">
+                      <i class="bi bi-trash3-fill"></i>
+                    </button>
+                  </div>
                 </div>
-
-                <!-- Botón eliminar (solo mensajes propios) -->
-                <button 
-                  *ngIf="message.user?.id === userId()"
-                  class="btn btn-link btn-sm text-danger"
-                  (click)="openDeleteModal(message)"
-                  style="padding: 0 8px;">
-                  <i class="bi bi-trash"></i>
-                </button>
               </div>
             </div>
           </div>

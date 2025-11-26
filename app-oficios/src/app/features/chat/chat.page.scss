@@ -320,10 +320,39 @@
       line-height: 1.4;
     }
 
+    .message-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
     .message-time {
       font-size: 0.7rem;
       color: #6c757d;
       display: inline-block;
+    }
+
+    .btn-delete-inline {
+      background: none;
+      border: none;
+      color: #6c757d;
+      padding: 2px 4px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      opacity: 0.6;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        opacity: 1;
+        color: #dc3545;
+        transform: scale(1.1);
+      }
+      
+      &:active {
+        transform: scale(0.95);
+      }
     }
   }
 }
@@ -343,6 +372,14 @@
 
     .message-time {
       color: rgba(255,255,255,0.8);
+    }
+
+    .btn-delete-inline {
+      color: rgba(255,255,255,0.7);
+      
+      &:hover {
+        color: rgba(255,255,255,1);
+      }
     }
   }
 }
@@ -502,6 +539,130 @@
     height: 40px;
     min-width: 40px;
     font-size: 1rem;
+  }
+}
+
+/* ============================
+   🗑️ MODAL ELIMINAR MENSAJE
+   ============================ */
+
+// ✅ Estilos para modal sin Bootstrap JS
+.modal {
+  &.show {
+    display: block !important;
+  }
+}
+
+.modal-backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+  
+  &.show {
+    opacity: 0.5;
+  }
+}
+
+.modal-content {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+  border-bottom: 1px solid #dee2e6;
+  padding: 1.25rem;
+  
+  .modal-title {
+    font-weight: 600;
+    color: #212529;
+    display: flex;
+    align-items: center;
+    
+    i {
+      font-size: 1.2rem;
+    }
+  }
+  
+  .btn-close {
+    padding: 0.5rem;
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+    
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+.modal-body {
+  padding: 1.5rem 1.25rem;
+  
+  p {
+    margin-bottom: 0.75rem;
+    color: #495057;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+  
+  .text-muted {
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 8px;
+    border-left: 3px solid #6c757d;
+    font-style: italic;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: flex-start;
+    
+    i {
+      margin-top: 2px;
+    }
+  }
+}
+
+.modal-footer {
+  border-top: 1px solid #dee2e6;
+  padding: 1rem 1.25rem;
+  
+  .btn {
+    padding: 0.5rem 1.5rem;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    
+    i {
+      font-size: 1rem;
+    }
+    
+    &.btn-secondary {
+      background-color: #6c757d;
+      border-color: #6c757d;
+      
+      &:hover {
+        background-color: #5a6268;
+        border-color: #545b62;
+        transform: translateY(-1px);
+      }
+    }
+    
+    &.btn-danger {
+      background-color: #dc3545;
+      border-color: #dc3545;
+      
+      &:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+        transform: translateY(-1px);
+      }
+      
+      &:active {
+        transform: scale(0.98);
+      }
+    }
   }
 }
 
