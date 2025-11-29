@@ -478,16 +478,16 @@ export class ProfessionalDashboardComponent implements OnInit {
     });
   }
 
-  getEstadoBadgeClass(estado: string): string {
-    const classes: Record<string, string> = {
-      'PENDIENTE': 'badge-pendiente',
-      'EN_CURSO': 'badge-en-curso',
-      'PAUSADO': 'badge-pausado',
-      'FINALIZADO': 'badge-finalizado',
-      'CANCELADO': 'badge-cancelado'
-    };
-    return classes[estado] || 'badge-default';
-  }
+getEstadoBadgeClass(estado: string): string {
+  const classes: { [key: string]: string } = {
+    'PENDIENTE': 'badge-pendiente',
+    'EN_CURSO': 'badge-en-curso',
+    'PAUSADO': 'badge-pausado',
+    'FINALIZADO': 'badge-finalizado',
+    'CANCELADO': 'badge-cancelado'
+  };
+  return classes[estado] || 'bg-secondary';
+}
 
   formatMoneda(monto: number | null): string {
     if (monto === null) return '-';
