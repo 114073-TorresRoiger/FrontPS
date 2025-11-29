@@ -45,83 +45,7 @@
       </div>
     </section>
 
-    <!-- Solicitudes Pendientes -->
-    <section *ngIf="solicitudesPendientes().length > 0 || isLoadingSolicitudes()" class="mb-5">
-      <div class="d-flex align-items-center gap-3 mb-3">
-        <h2 class="section-title mb-0 d-flex align-items-center gap-2">
-          <lucide-angular [img]="AlertCircle" size="24"></lucide-angular>
-          Solicitudes Pendientes
-        </h2>
-        <span class="badge bg-danger rounded-pill">{{ solicitudesPendientes().length }}</span>
-      </div>
 
-      <!-- Loading State -->
-      <div *ngIf="isLoadingSolicitudes()" class="text-center py-5">
-        <div class="spinner-border text-light" role="status">
-          <span class="visually-hidden">Cargando...</span>
-        </div>
-        <p class="text-white mt-3">Cargando solicitudes...</p>
-      </div>
-
-      <!-- Solicitudes List -->
-      <div *ngIf="!isLoadingSolicitudes()" class="row g-3">
-        <div *ngFor="let solicitud of solicitudesPendientes()" class="col-12">
-          <div class="card solicitud-card">
-            <div class="card-body">
-              <!-- Header -->
-              <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
-                <div class="d-flex align-items-center gap-2">
-                  <lucide-angular [img]="Users" size="20" class="text-primary"></lucide-angular>
-                  <h3 class="h5 mb-0 text-primary">{{ solicitud.nombreUsuario }}</h3>
-                </div>
-                <span class="badge bg-info">{{ formatTime(solicitud.fechasolicitud) }}</span>
-              </div>
-
-              <!-- Body -->
-              <div class="mb-3">
-                <div class="d-flex align-items-center gap-2 mb-2">
-                  <lucide-angular [img]="Calendar" size="16" class="text-primary"></lucide-angular>
-                  <span><strong>Fecha de servicio:</strong> {{ formatDate(solicitud.fechaservicio) }}</span>
-                </div>
-
-                <div *ngIf="solicitud.horaReserva" class="d-flex align-items-center gap-2 mb-2">
-                  <lucide-angular [img]="Clock" size="16" class="text-primary"></lucide-angular>
-                  <span><strong>Hora reservada:</strong> {{ formatHora(solicitud.horaReserva) }}</span>
-                </div>
-
-                <div *ngIf="solicitud.direccion" class="d-flex align-items-center gap-2 mb-2">
-                  <lucide-angular [img]="FileText" size="16" class="text-primary"></lucide-angular>
-                  <span><strong>Dirección:</strong> {{ solicitud.direccion }}</span>
-                </div>
-
-                <div *ngIf="solicitud.observacion" class="alert alert-info mt-3 mb-0">
-                  <strong>Observaciones:</strong>
-                  <p class="mb-0 mt-1">{{ solicitud.observacion }}</p>
-                </div>
-              </div>
-
-              <!-- Actions -->
-              <div class="d-flex gap-2 justify-content-end">
-                <button
-                  class="btn btn-outline-danger"
-                  (click)="responderSolicitud(solicitud.idSolicitud, false)"
-                  [disabled]="respondingToSolicitud() === solicitud.idSolicitud">
-                  <lucide-angular [img]="XIcon" size="18" class="me-1"></lucide-angular>
-                  Rechazar
-                </button>
-                <button
-                  class="btn btn-success"
-                  (click)="responderSolicitud(solicitud.idSolicitud, true)"
-                  [disabled]="respondingToSolicitud() === solicitud.idSolicitud">
-                  <lucide-angular [img]="Check" size="18" class="me-1"></lucide-angular>
-                  {{ respondingToSolicitud() === solicitud.idSolicitud ? 'Procesando...' : 'Aceptar' }}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <!-- Mis Trabajos -->
     <section class="mb-5">
@@ -256,8 +180,8 @@
               <div class="action-icon solicitudes mx-auto mb-3">
                 <lucide-angular [img]="MapPin" size="32"></lucide-angular>
               </div>
-              <h3 class="h5 mb-2">Solicitudes con Mapa</h3>
-              <p class="text-white small mb-0">Ver solicitudes con ubicación en el mapa</p>
+              <h3 class="h5 mb-2">Solicitudes</h3>
+              <p class="text-white small mb-0">Ver solicitudes del profesional</p>
             </div>
           </div>
         </div>
@@ -294,18 +218,6 @@
               </div>
               <h3 class="h5 mb-2">Mensajería</h3>
               <p class="text-white small mb-0">Chat con clientes y gestión de conversaciones</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="col-12 col-sm-6 col-lg-3">
-          <div class="card action-card h-100" (click)="goToPaymentMethods()">
-            <div class="card-body text-center">
-              <div class="action-icon payments mx-auto mb-3">
-                <lucide-angular [img]="CreditCard" size="32"></lucide-angular>
-              </div>
-              <h3 class="h5 mb-2">Métodos de Pago</h3>
-              <p class="text-white small mb-0">Agregar y gestionar formas de cobro</p>
             </div>
           </div>
         </div>

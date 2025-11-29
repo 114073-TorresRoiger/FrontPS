@@ -93,8 +93,6 @@ export class ProfessionalDashboardComponent implements OnInit {
   private readonly http = inject(HttpClient);
 
   userName = signal<string>('');
-  solicitudesPendientes = signal<SolicitudPendiente[]>([]);
-  isLoadingSolicitudes = signal(false);
   respondingToSolicitud = signal<number | null>(null);
 
   // Modal de respuesta
@@ -166,8 +164,7 @@ export class ProfessionalDashboardComponent implements OnInit {
       this.userName.set(`${user.name} ${user.lastName}`);
 
       if (user.idProfesional) {
-        console.log('Dashboard - Cargando solicitudes para profesional ID:', user.idProfesional);
-        this.loadSolicitudesPendientes(user.idProfesional);
+        console.log('Dashboard - Cargando datos para profesional ID:', user.idProfesional);
         this.loadTrabajos();
       } else {
         console.warn('Dashboard - Usuario no tiene idProfesional asignado');
@@ -254,11 +251,6 @@ export class ProfessionalDashboardComponent implements OnInit {
         this.showSuccessModal('Solicitud rechazada exitosamente');
         this.cerrarDetalleMapaModal();
         this.cargarSolicitudesConMapa();
-        
-        const user = this.authService.getCurrentUser();
-        if (user?.idProfesional) {
-          this.loadSolicitudesPendientes(user.idProfesional);
-        }
       },
       error: (error) => {
         console.error('❌ Error al rechazar solicitud:', error);
@@ -270,76 +262,10 @@ export class ProfessionalDashboardComponent implements OnInit {
 
   // ====== MÉTODOS EXISTENTES ======
 
-  private loadSolicitudesPendientes(idProfesional: number) {
-    this.isLoadingSolicitudes.set(true);
-
-    this.getSolicitudesUseCase.execute(idProfesional, 'PENDIENTE').subscribe({
-      next: (solicitudes: SolicitudResponse[]) => {
-        const solicitudesPendientes: SolicitudPendiente[] = solicitudes.map(solicitud => ({
-          idSolicitud: solicitud.idSolicitud,
-          nombreUsuario: solicitud.nombreUsuario,
-          fechasolicitud: solicitud.fechasolicitud,
-          fechaservicio: solicitud.fechaservicio,
-          direccion: solicitud.direccion,
-          observacion: solicitud.observacion,
-          horaReserva: solicitud.horaReserva
-        }));
-
-        this.solicitudesPendientes.set(solicitudesPendientes);
-        this.isLoadingSolicitudes.set(false);
-        console.log('✅ Solicitudes cargadas:', solicitudesPendientes.length);
-      },
-      error: (error) => {
-        console.error('❌ Error al cargar solicitudes:', error);
-        this.solicitudesPendientes.set([]);
-        this.isLoadingSolicitudes.set(false);
-      }
-    });
-  }
-
-  responderSolicitud(idSolicitud: number, aceptada: boolean) {
-    this.respondingToSolicitud.set(idSolicitud);
-    console.log(`📤 Enviando respuesta: idSolicitud=${idSolicitud}, aceptada=${aceptada}`);
-
-    this.responderSolicitudUseCase.execute(idSolicitud, aceptada).subscribe({
-      next: (response) => {
-        console.log('✅ Respuesta del servidor:', response);
-
-        if (aceptada) {
-          console.log('🛠️ Creando trabajo para solicitud:', idSolicitud);
-          this.crearTrabajo(idSolicitud);
-        } else {
-          const solicitudes = this.solicitudesPendientes();
-          this.solicitudesPendientes.set(
-            solicitudes.filter(s => s.idSolicitud !== idSolicitud)
-          );
-          this.respondingToSolicitud.set(null);
-          this.showSuccessModal('Solicitud rechazada exitosamente');
-
-          const user = this.authService.getCurrentUser();
-          if (user?.idProfesional) {
-            this.loadSolicitudesPendientes(user.idProfesional);
-          }
-        }
-      },
-      error: (error) => {
-        console.error('❌ Error respondiendo solicitud:', error);
-        this.respondingToSolicitud.set(null);
-        const mensajeError = error.error?.message || error.message || 'Error desconocido';
-        this.showErrorModal(`Error al responder la solicitud: ${mensajeError}`);
-      }
-    });
-  }
-
   crearTrabajo(idSolicitud: number) {
     this.trabajoService.crearTrabajo(idSolicitud).subscribe({
       next: (trabajo) => {
         console.log('✅ Trabajo creado:', trabajo);
-
-        const solicitudes = this.solicitudesPendientes();
-        this.solicitudesPendientes.set(
-          solicitudes.filter(s => s.idSolicitud !== idSolicitud)
-        );
         this.respondingToSolicitud.set(null);
 
         this.showSuccessModal('Solicitud aceptada y trabajo creado exitosamente. El profesional debe iniciarlo manualmente.');
@@ -348,11 +274,6 @@ export class ProfessionalDashboardComponent implements OnInit {
         // Recargar también las solicitudes con mapa si está en esa vista
         if (this.mostrarVistaSolicitudes()) {
           this.cargarSolicitudesConMapa();
-        }
-
-        const user = this.authService.getCurrentUser();
-        if (user?.idProfesional) {
-          this.loadSolicitudesPendientes(user.idProfesional);
         }
       },
       error: (error) => {
@@ -633,10 +554,6 @@ export class ProfessionalDashboardComponent implements OnInit {
 
   goToMessages() {
     this.router.navigate(['/chat']);
-  }
-
-  goToPaymentMethods() {
-    this.router.navigate(['/profesionales/metodos-pago']);
   }
 
   goBack() {
