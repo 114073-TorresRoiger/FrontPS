@@ -52,4 +52,5 @@ export interface TrabajoClienteResponse {
   estado: string;
   montoFinal: string;
   fechaFinalizacion: string;
+  estadoPago: string;
 }

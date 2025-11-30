@@ -1,8 +1,45 @@
-import { ChangeDetectionStrategy, Component, signal, inject, HostListener, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  signal,
+  inject,
+  HostListener,
+  OnInit,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { LucideAngularModule, Search, MessageCircle, User, UserPlus, Star, MapPin, Clock, Heart, ArrowLeft, Users, Award, DollarSign, ChevronDown, LogIn, LogOut, Settings, Briefcase, CalendarCheck, CheckCircle, X, Send, AlertCircle } from 'lucide-angular';
+import {
+  FormsModule,
+  ReactiveFormsModule,
+  FormBuilder,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
+import {
+  LucideAngularModule,
+  Search,
+  MessageCircle,
+  User,
+  UserPlus,
+  Star,
+  MapPin,
+  Clock,
+  Heart,
+  ArrowLeft,
+  Users,
+  Award,
+  DollarSign,
+  ChevronDown,
+  LogIn,
+  LogOut,
+  Settings,
+  Briefcase,
+  CalendarCheck,
+  CheckCircle,
+  X,
+  Send,
+  AlertCircle,
+} from 'lucide-angular';
 import { AuthService } from '../../domain/auth';
 import { ListOficiosUseCase } from '../../domain/oficios/use-cases/list-oficios.usecase';
 import { Oficio } from '../../domain/oficios/oficio.model';
@@ -32,10 +69,18 @@ interface ServiceCard {
 @Component({
   selector: 'app-home-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideAngularModule, FormsModule, ReactiveFormsModule, ProfessionalCardComponent, TurnoModalComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    LucideAngularModule,
+    FormsModule,
+    ReactiveFormsModule,
+    ProfessionalCardComponent,
+    TurnoModalComponent,
+  ],
   templateUrl: './home.page.html',
   styleUrl: './home.page.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomePage implements OnInit {
   // Dependencies
@@ -118,7 +163,7 @@ export class HomePage implements OnInit {
       location: 'San Miguel, Buenos Aires',
       experience: '12 años de experiencia',
       verified: true,
-      image: 'assets/professionals/juan-perez.jpg'
+      image: 'assets/professionals/juan-perez.jpg',
     },
     {
       id: 2,
@@ -130,7 +175,7 @@ export class HomePage implements OnInit {
       location: 'Villa Ballester, Buenos Aires',
       experience: '9 años de experiencia',
       verified: true,
-      image: 'assets/professionals/roberto-silva.jpg'
+      image: 'assets/professionals/roberto-silva.jpg',
     },
     {
       id: 3,
@@ -142,7 +187,7 @@ export class HomePage implements OnInit {
       location: 'San Martín, Buenos Aires',
       experience: '15 años de experiencia',
       verified: true,
-      image: 'assets/professionals/miguel-torres.jpg'
+      image: 'assets/professionals/miguel-torres.jpg',
     },
     {
       id: 4,
@@ -154,8 +199,8 @@ export class HomePage implements OnInit {
       location: 'José C. Paz, Buenos Aires',
       experience: '8 años de experiencia',
       verified: true,
-      image: 'assets/professionals/juan-perez.jpg'
-    }
+      image: 'assets/professionals/juan-perez.jpg',
+    },
   ]);
 
   // Mock data for professionals by service
@@ -265,6 +310,14 @@ export class HomePage implements OnInit {
     this.loadTrabajosFinalizados();
   }
 
+  @HostListener('window:focus', ['$event'])
+  onWindowFocus(event: FocusEvent): void {
+    // Recargar trabajos cuando la ventana recupera el foco
+    if (this.isUserAuthenticated()) {
+      this.loadTrabajosFinalizados();
+    }
+  }
+
   private initSolicitudForm(): void {
     // Get tomorrow's date as minimum
     const tomorrow = new Date();
@@ -273,7 +326,7 @@ export class HomePage implements OnInit {
 
     this.solicitudForm = this.fb.group({
       fechaservicio: [minDate, Validators.required],
-      observacion: ['', [Validators.required, Validators.minLength(10)]]
+      observacion: ['', [Validators.required, Validators.minLength(10)]],
     });
   }
 
@@ -281,27 +334,27 @@ export class HomePage implements OnInit {
     this.isLoadingServices.set(true);
     this.listOficiosUseCase.execute().subscribe({
       next: (oficios: Oficio[]) => {
-        const serviceCards = oficios.map(oficio => this.mapOficioToServiceCard(oficio));
+        const serviceCards = oficios.map((oficio) => this.mapOficioToServiceCard(oficio));
         this.services.set(serviceCards);
         this.isLoadingServices.set(false);
       },
       error: (error) => {
         console.error('Error loading services:', error);
         this.isLoadingServices.set(false);
-      }
+      },
     });
   }
 
   private mapOficioToServiceCard(oficio: Oficio): ServiceCard {
     // Map service name to image
     const imageMap: { [key: string]: string } = {
-      'GASISTA': 'assets/services/gasista.jpg',
-      'ELECTRICISTA': 'assets/services/electricista.jpg',
-      'PLOMERO': 'assets/services/plomero.jpg',
-      'CARPINTERO': 'assets/services/carpintero.jpg',
-      'PINTOR': 'assets/services/pintura.jpg',
+      GASISTA: 'assets/services/gasista.jpg',
+      ELECTRICISTA: 'assets/services/electricista.jpg',
+      PLOMERO: 'assets/services/plomero.jpg',
+      CARPINTERO: 'assets/services/carpintero.jpg',
+      PINTOR: 'assets/services/pintura.jpg',
       'EMPLEADA DOMESTICA': 'assets/services/empleada-domestica.jpg',
-      'INSTALADOR DE AIRES ACONDICIONADOS': 'assets/services/instalacion-aire-acondicionado.jpg'
+      'INSTALADOR DE AIRES ACONDICIONADOS': 'assets/services/instalacion-aire-acondicionado.jpg',
     };
 
     return {
@@ -314,15 +367,16 @@ export class HomePage implements OnInit {
       averageRating: 0,
       totalReviews: 0,
       priceRange: { min: 0, max: 0 },
-      isFavorite: false
+      isFavorite: false,
     };
   }
 
   private formatOficioName(oficio: string): string {
     // Convert to title case
-    return oficio.toLowerCase()
+    return oficio
+      .toLowerCase()
       .split(' ')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
   }
 
@@ -333,7 +387,7 @@ export class HomePage implements OnInit {
 
   toggleFavorite(serviceId: number) {
     const currentServices = this.services();
-    const service = currentServices.find(s => s.id === serviceId);
+    const service = currentServices.find((s) => s.id === serviceId);
     if (service) {
       service.isFavorite = !service.isFavorite;
       this.services.set([...currentServices]); // Trigger change detection
@@ -361,11 +415,14 @@ export class HomePage implements OnInit {
         const currentServices = this.services();
         const selectedService = this.selectedService();
         if (selectedService) {
-          const service = currentServices.find(s => s.id === selectedService.id);
+          const service = currentServices.find((s) => s.id === selectedService.id);
           if (service) {
             service.professionalCount = profesionales.length;
             this.services.set([...currentServices]);
-            this.selectedService.set({...selectedService, professionalCount: profesionales.length});
+            this.selectedService.set({
+              ...selectedService,
+              professionalCount: profesionales.length,
+            });
           }
         }
       },
@@ -374,7 +431,7 @@ export class HomePage implements OnInit {
         this.currentProfessionals.set([]);
         this.noProfessionalsFound.set(true);
         this.isLoadingProfessionals.set(false);
-      }
+      },
     });
   }
 
@@ -459,7 +516,7 @@ export class HomePage implements OnInit {
       idProfesional: this.getProfessionalId(this.selectedProfessional()!),
       fechasolicitud: new Date().toISOString(),
       fechaservicio: new Date(this.solicitudForm.value.fechaservicio).toISOString(),
-      observacion: this.solicitudForm.value.observacion
+      observacion: this.solicitudForm.value.observacion,
     };
 
     this.enviarSolicitudUseCase.execute(solicitud).subscribe({
@@ -474,7 +531,7 @@ export class HomePage implements OnInit {
         console.error('Error enviando solicitud:', error);
         this.isSendingSolicitud.set(false);
         this.solicitudError.set('Error al enviar la solicitud. Por favor, intenta nuevamente.');
-      }
+      },
     });
   }
 
@@ -519,7 +576,7 @@ export class HomePage implements OnInit {
         console.log('❌ Error al cargar trabajos finalizados:', error);
         this.trabajosFinalizados.set([]);
         this.isLoadingTrabajos.set(false);
-      }
+      },
     });
   }
 
@@ -532,17 +589,17 @@ export class HomePage implements OnInit {
     if (isNaN(montoNumero)) return '-';
     return new Intl.NumberFormat('es-AR', {
       style: 'currency',
-      currency: 'ARS'
+      currency: 'ARS',
     }).format(montoNumero);
   }
 
   getEstadoBadgeClass(estado: string): string {
     const classes: Record<string, string> = {
-      'PENDIENTE': 'badge-pendiente',
-      'EN_CURSO': 'badge-en-curso',
-      'PAUSADO': 'badge-pausado',
-      'FINALIZADO': 'badge-finalizado',
-      'CANCELADO': 'badge-cancelado'
+      PENDIENTE: 'badge-pendiente',
+      EN_CURSO: 'badge-en-curso',
+      PAUSADO: 'badge-pausado',
+      FINALIZADO: 'badge-finalizado',
+      CANCELADO: 'badge-cancelado',
     };
     return classes[estado] || 'badge-default';
   }
@@ -555,7 +612,7 @@ export class HomePage implements OnInit {
       month: '2-digit',
       year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   }
 
