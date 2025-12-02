@@ -1,9 +1,9 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { PagoRepository } from '../../domain/pago/pago.repository';
-import { FacturaRequest, PreferenceResponse, MercadoPagoConfig } from '../../domain/pago/pago.model';
+import { FacturaRequest, PreferenceResponse, MercadoPagoConfig, PagoFactura } from '../../domain/pago/pago.model';
 
 @Injectable({ providedIn: 'root' })
 export class PagoHttpRepository implements PagoRepository {
@@ -16,5 +16,17 @@ export class PagoHttpRepository implements PagoRepository {
 
   obtenerConfiguracion(): Observable<MercadoPagoConfig> {
     return this.http.get<MercadoPagoConfig>(`${this.baseUrl}/config`);
+  }
+
+  historialIngresos(desde: string, hasta: string, idProfesional?: number): Observable<PagoFactura[]> {
+    let params = new HttpParams()
+      .set('desde', desde)
+      .set('hasta', hasta);
+
+    if (idProfesional) {
+      params = params.set('idProfesional', idProfesional.toString());
+    }
+
+    return this.http.get<PagoFactura[]>(`${this.baseUrl}/historial-ingresos`, { params });
   }
 }

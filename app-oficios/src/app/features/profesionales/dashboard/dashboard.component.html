@@ -19,8 +19,51 @@
 
   <!-- Metrics Grid -->
   <section class="metrics-section">
-    <h2 class="section-title">Resumen de Métricas</h2>
-    <div class="metrics-grid">
+    <div class="section-header-with-filters">
+      <h2 class="section-title">Resumen de Métricas</h2>
+
+      <!-- Date Filters -->
+      <div class="date-filters">
+        <div class="filter-group">
+          <label for="fechaDesde">Desde:</label>
+          <input
+            type="date"
+            id="fechaDesde"
+            [ngModel]="fechaDesde()"
+            (ngModelChange)="fechaDesde.set($event)"
+            [max]="fechaHasta()"
+          />
+        </div>
+
+        <div class="filter-group">
+          <label for="fechaHasta">Hasta:</label>
+          <input
+            type="date"
+            id="fechaHasta"
+            [ngModel]="fechaHasta()"
+            (ngModelChange)="fechaHasta.set($event)"
+            [min]="fechaDesde()"
+            [max]="getDefaultHasta()"
+          />
+        </div>
+
+        <button
+          class="btn-filter"
+          (click)="aplicarFiltroFechas()"
+          [disabled]="isLoadingMetrics()"
+        >
+          <lucide-angular [img]="Filter" [size]="18"></lucide-angular>
+          <span>{{ isLoadingMetrics() ? 'Cargando...' : 'Filtrar' }}</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoadingMetrics()" class="loading-container">
+      <p>Cargando métricas...</p>
+    </div>
+
+    <div *ngIf="!isLoadingMetrics()" class="metrics-grid">
       <div *ngFor="let metric of metrics()" class="metric-card">
         <div class="metric-icon">
           <lucide-angular [img]="metric.icon" size="24"></lucide-angular>
@@ -30,7 +73,7 @@
           <h3 class="metric-value">{{ metric.value }}</h3>
           <div class="metric-change" [class.positive]="metric.trend === 'up'" [class.negative]="metric.trend === 'down'">
             <lucide-angular [img]="TrendingUp" size="14"></lucide-angular>
-            <span>{{ metric.change }} vs mes anterior</span>
+            <span>{{ metric.change }}</span>
           </div>
         </div>
       </div>

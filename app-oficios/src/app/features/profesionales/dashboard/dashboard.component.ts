@@ -21,7 +21,8 @@ import { LucideAngularModule,
   Play,
   Pause,
   Square,
-  Ban
+  Ban,
+  Filter
 } from 'lucide-angular';
 import { AuthService } from '../../../domain/auth';
 import { GetSolicitudesUseCase } from '../../../domain/solicitudes/use-cases/get-solicitudes.usecase';
@@ -55,10 +56,12 @@ interface SolicitudPendiente {
   horaReserva?: string;
 }
 
+import { FormsModule } from '@angular/forms';
+
 @Component({
   selector: 'app-professional-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideAngularModule],
+  imports: [CommonModule, RouterModule, LucideAngularModule, FormsModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
@@ -83,6 +86,7 @@ export class ProfessionalDashboardComponent implements OnInit {
   readonly Pause = Pause;
   readonly Square = Square;
   readonly Ban = Ban;
+  readonly Filter = Filter;
 
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
@@ -117,36 +121,54 @@ export class ProfessionalDashboardComponent implements OnInit {
   motivoCancelacion = signal('');
 
   // Loading states para acciones
-  actionLoading = signal<number | null>(null);  metrics = signal<Metric[]>([
+  actionLoading = signal<number | null>(null);
+
+  // Date filters
+  fechaDesde = signal<string>(this.getDefaultDesde());
+  fechaHasta = signal<string>(this.getDefaultHasta());
+  isLoadingMetrics = signal(false);
+
+  metrics = signal<Metric[]>([
     {
-      title: 'Ingresos del Mes',
-      value: '$12,450',
-      change: '+12.5%',
+      title: 'Ingresos del Período',
+      value: '$0',
+      change: '0%',
       trend: 'up',
       icon: this.DollarSign
     },
     {
       title: 'Trabajos Completados',
-      value: '24',
-      change: '+8.3%',
+      value: '0',
+      change: '0%',
       trend: 'up',
       icon: this.CheckCircle
     },
     {
-      title: 'Clientes Activos',
-      value: '18',
-      change: '+15.2%',
+      title: 'Clientes Únicos',
+      value: '0',
+      change: '0%',
       trend: 'up',
       icon: this.Users
     },
     {
       title: 'Calificación Promedio',
-      value: '4.8',
-      change: '+0.2',
+      value: '-',
+      change: '0',
       trend: 'up',
       icon: this.Star
     }
   ]);
+
+  private getDefaultDesde(): string {
+    const date = new Date();
+    date.setMonth(date.getMonth() - 1);
+    return date.toISOString().split('T')[0];
+  }
+
+  getDefaultHasta(): string {
+    const date = new Date();
+    return date.toISOString().split('T')[0];
+  }
 
 
 
@@ -163,12 +185,128 @@ export class ProfessionalDashboardComponent implements OnInit {
         this.loadSolicitudesPendientes(user.idProfesional);
         // Cargar trabajos automáticamente
         this.loadTrabajos();
+        // Cargar métricas con rango de fechas por defecto
+        this.loadMetrics();
       } else {
         console.warn('Dashboard - Usuario no tiene idProfesional asignado');
       }
     } else {
       console.error('Dashboard - No hay usuario autenticado');
     }
+  }
+
+  loadMetrics() {
+    const user = this.authService.getCurrentUser();
+    if (!user?.idProfesional) return;
+
+    const desde = this.fechaDesde();
+    const hasta = this.fechaHasta();
+
+    if (!desde || !hasta) {
+      this.showErrorModal('Por favor seleccione un rango de fechas válido');
+      return;
+    }
+
+    if (new Date(desde) > new Date(hasta)) {
+      this.showErrorModal('La fecha "desde" no puede ser mayor a la fecha "hasta"');
+      return;
+    }
+
+    this.isLoadingMetrics.set(true);
+    console.log('📊 Cargando métricas desde:', desde, 'hasta:', hasta);
+
+    this.pagoService.historialIngresos(desde, hasta, user.idProfesional).subscribe({
+      next: (pagos) => {
+        console.log('✅ Historial de ingresos recibido:', pagos);
+        this.calculateMetrics(pagos);
+        this.isLoadingMetrics.set(false);
+      },
+      error: (error) => {
+        console.error('❌ Error al cargar métricas:', error);
+        this.isLoadingMetrics.set(false);
+
+        // Si es un 404, mostrar métricas en 0 (no hay datos en ese período)
+        if (error.status === 404) {
+          this.calculateMetrics([]);
+        } else {
+          const mensajeError = error.error?.message || error.message || 'Error al cargar métricas';
+          this.showErrorModal(mensajeError);
+        }
+      }
+    });
+  }
+
+  private calculateMetrics(pagos: any[]) {
+    console.log('📊 Calculando métricas con pagos:', pagos);
+
+    // Calcular ingresos totales - todos los pagos retornados ya están aprobados
+    const ingresoTotal = pagos.reduce((sum, pago) => sum + Number(pago.monto), 0);
+
+    // Contar trabajos completados - cada pago representa un trabajo completado
+    const trabajosCompletados = pagos.length;
+
+    // Contar medios de pago únicos
+    const mediosPago = new Set(pagos.map(p => p.medioPago));
+    const cantidadMediosPago = mediosPago.size;
+
+    // Formatear ingresos
+    const ingresoFormateado = new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(ingresoTotal);
+
+    this.metrics.set([
+      {
+        title: 'Ingresos del Período',
+        value: ingresoFormateado,
+        change: trabajosCompletados > 0 ? `${trabajosCompletados} pago${trabajosCompletados !== 1 ? 's' : ''}` : 'Sin datos',
+        trend: 'up',
+        icon: this.DollarSign
+      },
+      {
+        title: 'Trabajos Completados',
+        value: trabajosCompletados.toString(),
+        change: ingresoTotal > 0 ? `Total: ${ingresoFormateado}` : 'Sin ingresos',
+        trend: 'up',
+        icon: this.CheckCircle
+      },
+      {
+        title: 'Medios de Pago',
+        value: cantidadMediosPago.toString(),
+        change: cantidadMediosPago > 0 ? Array.from(mediosPago).join(', ') : 'Sin datos',
+        trend: 'up',
+        icon: this.Users
+      },
+      {
+        title: 'Promedio por Trabajo',
+        value: trabajosCompletados > 0 ?
+          new Intl.NumberFormat('es-AR', {
+            style: 'currency',
+            currency: 'ARS',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+          }).format(ingresoTotal / trabajosCompletados) :
+          '$0',
+        change: trabajosCompletados > 0 ? `En ${trabajosCompletados} trabajo${trabajosCompletados !== 1 ? 's' : ''}` : 'Sin datos',
+        trend: 'up',
+        icon: this.Star
+      }
+    ]);
+
+    console.log('✅ Métricas calculadas:', {
+      ingresoTotal,
+      trabajosCompletados,
+      cantidadMediosPago,
+      mediosPago: Array.from(mediosPago),
+      promedio: trabajosCompletados > 0 ? ingresoTotal / trabajosCompletados : 0
+    });
+  }
+
+  aplicarFiltroFechas() {
+    console.log('🔍 Aplicando filtro de fechas:', this.fechaDesde(), '-', this.fechaHasta());
+    this.loadMetrics();
   }
 
   private loadSolicitudesPendientes(idProfesional: number) {
