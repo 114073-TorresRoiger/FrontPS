@@ -545,6 +545,11 @@ export class HomePage implements OnInit {
     this.isSidebarOpen.set(false);
     this.router.navigate(['/usuarios/perfil']);
   }
+  goToTrabajosFinalizados() {
+    this.isDropdownOpen.set(false);
+    this.isSidebarOpen.set(false);
+    this.router.navigate(['/trabajos/finalizados']);
+  }
   goToRegisterProfessional() {
     this.isDropdownOpen.set(false);
     this.isSidebarOpen.set(false);

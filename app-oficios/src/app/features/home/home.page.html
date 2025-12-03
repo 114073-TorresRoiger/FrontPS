@@ -54,7 +54,7 @@
         <lucide-angular [img]="User" size="20"></lucide-angular>
         <span>Mi Perfil</span>
       </button>
-      <button class="nav-item" (click)="closeSidebar()">
+      <button class="nav-item" (click)="goToTrabajosFinalizados()">
         <lucide-angular [img]="CalendarCheck" size="20"></lucide-angular>
         <span>Mis Trabajos</span>
       </button>
@@ -175,114 +175,6 @@
               Enjoy quality service with our satisfaction guarantee and secure payment protection.
             </p>
           </div>
-        </div>
-      </section>
-
-      <!-- Mis Trabajos Finalizados (solo si está autenticado) -->
-      <section
-        *ngIf="isUserAuthenticated() && trabajosFinalizados().length > 0"
-        class="trabajos-finalizados-section"
-      >
-        <div class="section-header">
-          <h2 class="section-title">
-            <lucide-angular [img]="Briefcase" size="24"></lucide-angular>
-            Mis Trabajos Finalizados
-          </h2>
-          <button class="toggle-trabajos-btn" (click)="toggleTrabajosSection()">
-            {{ showTrabajosSection() ? 'Ocultar' : 'Mostrar' }} ({{ trabajosFinalizados().length }})
-          </button>
-        </div>
-
-        <!-- Loading State -->
-        <div *ngIf="isLoadingTrabajos()" class="loading-container">
-          <p>Cargando trabajos...</p>
-        </div>
-
-        <!-- Trabajos Table -->
-        <div *ngIf="!isLoadingTrabajos() && showTrabajosSection()" class="trabajos-table-container">
-          <table class="trabajos-table">
-            <thead>
-              <tr>
-                <th>Profesional</th>
-                <th>Descripción</th>
-                <th>Estado</th>
-                <th>Fecha Finalización</th>
-                <th>Monto</th>
-                <th>Pago</th>
-                <th>Reseña</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let trabajo of trabajosFinalizados()">
-                <td>{{ trabajo.profesional }}</td>
-                <td class="descripcion-cell">{{ trabajo.descripcion || '-' }}</td>
-                <td>
-                  <span class="badge" [ngClass]="getEstadoBadgeClass(trabajo.estado)">
-                    {{ trabajo.estado }}
-                  </span>
-                </td>
-                <td>{{ formatDate(trabajo.fechaFinalizacion) }}</td>
-                <td>{{ formatMoneda(trabajo.montoFinal) }}</td>
-                <td class="pago-cell">
-                  <!-- Botón "Ir a Pagar" -->
-                  <button
-                    *ngIf="trabajo.idpago && trabajo.estadoPago !== 'APROBADO'"
-                    class="btn-pagar"
-                    (click)="irAPago(trabajo.idpago!)"
-                  >
-                    <lucide-angular [img]="DollarSign" size="16"></lucide-angular>
-                    Ir a Pagar
-                  </button>
-
-                  <!-- Pagado -->
-                  <span
-                    *ngIf="trabajo.estadoPago === 'APROBADO'"
-                    class="pago-aprobado"
-                  >
-                    <lucide-angular [img]="CheckCircle" size="16"></lucide-angular>
-                    Pagado
-                  </span>
-
-                  <!-- Sin factura -->
-                  <span
-                    *ngIf="!trabajo.idpago && trabajo.estadoPago !== 'APROBADO'"
-                    class="pago-pendiente"
-                  >
-                    <lucide-angular [img]="AlertCircle" size="16"></lucide-angular>
-                    Sin Factura
-                  </span>
-                </td>
-                <td class="resenia-cell">
-                  <!-- Botón Reseñar -->
-                  <button
-                    *ngIf="trabajo.estadoPago === 'APROBADO' && !trabajo.tieneResenia"
-                    class="btn-reseniar"
-                    (click)="abrirModalResenia(trabajo)"
-                  >
-                    <lucide-angular [img]="Star" size="16"></lucide-angular>
-                    Reseñar
-                  </button>
-
-                  <!-- Ya reseñado -->
-                  <span
-                    *ngIf="trabajo.estadoPago === 'APROBADO' && trabajo.tieneResenia"
-                    class="trabajo-reseniado"
-                  >
-                    <lucide-angular [img]="CheckCircle" size="16"></lucide-angular>
-                    Ya Reseñado
-                  </span>
-
-                  <!-- Pendiente de pago -->
-                  <span
-                    *ngIf="trabajo.estadoPago !== 'APROBADO'"
-                    class="resenia-pendiente"
-                  >
-                    -
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
         </div>
       </section>
 
