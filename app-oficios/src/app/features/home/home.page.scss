@@ -572,19 +572,18 @@
           align-items: center;
           gap: 0.5rem;
           padding: 0.5rem 1rem;
-          background: $success-color;
-          color: $white;
+          background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+          color: white;
           border: none;
-          border-radius: 6px;
-          font-weight: 500;
-          font-size: 0.875rem;
+          border-radius: 8px;
+          font-weight: 600;
           cursor: pointer;
-          transition: all 0.2s;
+          transition: all 0.3s ease;
+          font-size: 0.875rem;
 
           &:hover {
-            background: darken($success-color, 8%);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba($success-color, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
           }
 
           &:active {
@@ -596,9 +595,39 @@
           display: inline-flex;
           align-items: center;
           gap: 0.5rem;
-          color: #f59e0b;
-          font-weight: 500;
+          color: #ffc107;
+          font-weight: 600;
+          padding: 0.5rem 1rem;
+          background: #fff3cd;
+          border-radius: 8px;
           font-size: 0.875rem;
+        }
+
+        .pago-actions {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          align-items: flex-start;
+        }
+
+        .btn-reseniar {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.5rem 1rem;
+          background-color: #fbbf24;
+          color: white;
+          border: none;
+          border-radius: 0.5rem;
+          font-size: 0.875rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s;
+
+          &:hover {
+            background-color: #f59e0b;
+            transform: translateY(-1px);
+          }
         }
       }
     }
@@ -1205,7 +1234,11 @@
         transition: all 0.3s ease;
 
         &:hover {
-          background: linear-gradient(135deg, darken($success-color, 10%), darken($success-color, 20%));
+          background: linear-gradient(
+            135deg,
+            darken($success-color, 10%),
+            darken($success-color, 20%)
+          );
           transform: translateY(-1px);
         }
       }
@@ -1232,7 +1265,8 @@
   }
 
   .footer-section {
-    h3, h4 {
+    h3,
+    h4 {
       margin-bottom: 1rem;
       color: $white;
     }

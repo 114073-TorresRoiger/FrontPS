@@ -21,7 +21,9 @@ import { LucideAngularModule,
   Play,
   Pause,
   Square,
-  Ban
+  Ban,
+  Inbox,
+  MapPin
 } from 'lucide-angular';
 import { AuthService } from '../../../domain/auth';
 import { GetSolicitudesUseCase } from '../../../domain/solicitudes/use-cases/get-solicitudes.usecase';
@@ -29,19 +31,15 @@ import { ResponderSolicitudUseCase } from '../../../domain/solicitudes/use-cases
 import { SolicitudResponse } from '../../../domain/solicitudes/solicitud.model';
 import { TrabajoService } from '../../../domain/trabajo/trabajo.service';
 import { PagoService } from '../../../domain/pago/pago.service';
+import { SolicitudMapComponent } from '../../../domain/solicitudes/solicitud-map.component';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 
 interface Metric {
   title: string;
   value: string;
   change: string;
   trend: 'up' | 'down';
-  icon: any;
-}
-
-interface RecentActivity {
-  type: string;
-  description: string;
-  time: string;
   icon: any;
 }
 
@@ -58,7 +56,7 @@ interface SolicitudPendiente {
 @Component({
   selector: 'app-professional-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideAngularModule],
+  imports: [CommonModule, RouterModule, LucideAngularModule, SolicitudMapComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
@@ -83,6 +81,8 @@ export class ProfessionalDashboardComponent implements OnInit {
   readonly Pause = Pause;
   readonly Square = Square;
   readonly Ban = Ban;
+  readonly Inbox = Inbox;
+  readonly MapPin = MapPin;
 
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
@@ -90,10 +90,9 @@ export class ProfessionalDashboardComponent implements OnInit {
   private readonly responderSolicitudUseCase = inject(ResponderSolicitudUseCase);
   private readonly trabajoService = inject(TrabajoService);
   private readonly pagoService = inject(PagoService);
+  private readonly http = inject(HttpClient);
 
   userName = signal<string>('');
-  solicitudesPendientes = signal<SolicitudPendiente[]>([]);
-  isLoadingSolicitudes = signal(false);
   respondingToSolicitud = signal<number | null>(null);
 
   // Modal de respuesta
@@ -117,7 +116,16 @@ export class ProfessionalDashboardComponent implements OnInit {
   motivoCancelacion = signal('');
 
   // Loading states para acciones
-  actionLoading = signal<number | null>(null);  metrics = signal<Metric[]>([
+  actionLoading = signal<number | null>(null);
+
+  // ====== NUEVA FUNCIONALIDAD: Vista de Solicitudes con Mapa ======
+  mostrarVistaSolicitudes = signal(false);
+  solicitudesConMapa = signal<any[]>([]);
+  solicitudSeleccionadaMapa = signal<any>(null);
+  isLoadingSolicitudesConMapa = signal(false);
+  showDetalleMapaModal = signal(false);
+
+  metrics = signal<Metric[]>([
     {
       title: 'Ingresos del Mes',
       value: '$12,450',
@@ -148,8 +156,6 @@ export class ProfessionalDashboardComponent implements OnInit {
     }
   ]);
 
-
-
   ngOnInit() {
     const user = this.authService.getCurrentUser();
     console.log('Dashboard - Usuario actual:', user);
@@ -157,11 +163,8 @@ export class ProfessionalDashboardComponent implements OnInit {
     if (user) {
       this.userName.set(`${user.name} ${user.lastName}`);
 
-      // Cargar solicitudes pendientes si el usuario es profesional
       if (user.idProfesional) {
-        console.log('Dashboard - Cargando solicitudes para profesional ID:', user.idProfesional);
-        this.loadSolicitudesPendientes(user.idProfesional);
-        // Cargar trabajos automáticamente
+        console.log('Dashboard - Cargando datos para profesional ID:', user.idProfesional);
         this.loadTrabajos();
       } else {
         console.warn('Dashboard - Usuario no tiene idProfesional asignado');
@@ -171,107 +174,111 @@ export class ProfessionalDashboardComponent implements OnInit {
     }
   }
 
-  private loadSolicitudesPendientes(idProfesional: number) {
-    this.isLoadingSolicitudes.set(true);
-
-    this.getSolicitudesUseCase.execute(idProfesional, 'PENDIENTE').subscribe({
-      next: (solicitudes: SolicitudResponse[]) => {
-        // El backend retorna un array de solicitudes
-        const solicitudesPendientes: SolicitudPendiente[] = solicitudes.map(solicitud => ({
-          idSolicitud: solicitud.idSolicitud,
-          nombreUsuario: solicitud.nombreUsuario,
-          fechasolicitud: solicitud.fechasolicitud,
-          fechaservicio: solicitud.fechaservicio,
-          direccion: solicitud.direccion,
-          observacion: solicitud.observacion,
-          horaReserva: solicitud.horaReserva
-        }));
-
-        this.solicitudesPendientes.set(solicitudesPendientes);
-        this.isLoadingSolicitudes.set(false);
-        console.log('✅ Solicitudes cargadas:', solicitudesPendientes.length);
-        if (solicitudesPendientes.length > 0) {
-          console.log('📋 Primera solicitud ID:', solicitudesPendientes[0].idSolicitud);
-        }
-      },
-      error: (error) => {
-        // Manejar cualquier error inesperado
-        console.error('❌ Error al cargar solicitudes:', error);
-        this.solicitudesPendientes.set([]);
-        this.isLoadingSolicitudes.set(false);
-      }
-    });
+  // ====== NUEVOS MÉTODOS PARA SOLICITUDES CON MAPA ======
+  
+  async verTodasLasSolicitudes() {
+    this.mostrarVistaSolicitudes.set(true);
+    await this.cargarSolicitudesConMapa();
   }
 
-  responderSolicitud(idSolicitud: number, aceptada: boolean) {
+  volverAlDashboard() {
+    this.mostrarVistaSolicitudes.set(false);
+    this.solicitudSeleccionadaMapa.set(null);
+  }
+
+  async cargarSolicitudesConMapa() {
+    const user = this.authService.getCurrentUser();
+    if (!user?.idProfesional) return;
+
+    this.isLoadingSolicitudesConMapa.set(true);
+
+    try {
+      const url = `${environment.apiUrl}/api/v1/solicitudes/profesional/${user.idProfesional}/con-ubicacion`;
+      const result = await this.http.get<any[]>(url).toPromise();
+      this.solicitudesConMapa.set(result || []);
+      console.log('✅ Solicitudes con mapa cargadas:', result);
+    } catch (error) {
+      console.error('❌ Error cargando solicitudes con mapa:', error);
+      this.solicitudesConMapa.set([]);
+    } finally {
+      this.isLoadingSolicitudesConMapa.set(false);
+    }
+  }
+
+  verDetalleSolicitudMapa(solicitud: any) {
+    console.log('👁️ Abriendo detalle con mapa:', solicitud);
+    this.solicitudSeleccionadaMapa.set(solicitud);
+    this.showDetalleMapaModal.set(true);
+  }
+
+  cerrarDetalleMapaModal() {
+    this.showDetalleMapaModal.set(false);
+    setTimeout(() => {
+      this.solicitudSeleccionadaMapa.set(null);
+    }, 300);
+  }
+
+  async aceptarSolicitudConMapa(idSolicitud: number) {
+    if (!confirm('¿Estás seguro de que deseas aceptar esta solicitud?')) {
+      return;
+    }
+
     this.respondingToSolicitud.set(idSolicitud);
-    console.log(`📤 Enviando respuesta: idSolicitud=${idSolicitud}, aceptada=${aceptada}`);
 
-    this.responderSolicitudUseCase.execute(idSolicitud, aceptada).subscribe({
-      next: (response) => {
-        console.log('✅ Respuesta del servidor:', response);
-
-        if (aceptada) {
-          // Si se aceptó, crear el trabajo
-          console.log('🛠️ Creando trabajo para solicitud:', idSolicitud);
-          this.crearTrabajo(idSolicitud);
-        } else {
-          // Si se rechazó, solo remover y mostrar mensaje
-          const solicitudes = this.solicitudesPendientes();
-          this.solicitudesPendientes.set(
-            solicitudes.filter(s => s.idSolicitud !== idSolicitud)
-          );
-          this.respondingToSolicitud.set(null);
-          this.showSuccessModal('Solicitud rechazada exitosamente');
-
-          // Recargar el dashboard
-          const user = this.authService.getCurrentUser();
-          if (user?.idProfesional) {
-            this.loadSolicitudesPendientes(user.idProfesional);
-          }
-        }
+    this.responderSolicitudUseCase.execute(idSolicitud, true).subscribe({
+      next: () => {
+        this.crearTrabajo(idSolicitud);
+        this.cerrarDetalleMapaModal();
       },
       error: (error) => {
-        console.error('❌ Error respondiendo solicitud:', error);
-        console.error('Error status:', error.status);
-        console.error('Error message:', error.message);
-        console.error('Error body:', error.error);
-
+        console.error('❌ Error al aceptar solicitud:', error);
         this.respondingToSolicitud.set(null);
-
-        const mensajeError = error.error?.message || error.message || 'Error desconocido';
-        this.showErrorModal(`Error al responder la solicitud: ${mensajeError}`);
+        this.showErrorModal('Error al aceptar la solicitud');
       }
     });
   }
+
+  async rechazarSolicitudConMapa(idSolicitud: number) {
+    if (!confirm('¿Estás seguro de que deseas rechazar esta solicitud?')) {
+      return;
+    }
+
+    this.respondingToSolicitud.set(idSolicitud);
+
+    this.responderSolicitudUseCase.execute(idSolicitud, false).subscribe({
+      next: () => {
+        this.respondingToSolicitud.set(null);
+        this.showSuccessModal('Solicitud rechazada exitosamente');
+        this.cerrarDetalleMapaModal();
+        this.cargarSolicitudesConMapa();
+      },
+      error: (error) => {
+        console.error('❌ Error al rechazar solicitud:', error);
+        this.respondingToSolicitud.set(null);
+        this.showErrorModal('Error al rechazar la solicitud');
+      }
+    });
+  }
+
+  // ====== MÉTODOS EXISTENTES ======
 
   crearTrabajo(idSolicitud: number) {
     this.trabajoService.crearTrabajo(idSolicitud).subscribe({
       next: (trabajo) => {
         console.log('✅ Trabajo creado:', trabajo);
-
-        // Remover la solicitud de la lista
-        const solicitudes = this.solicitudesPendientes();
-        this.solicitudesPendientes.set(
-          solicitudes.filter(s => s.idSolicitud !== idSolicitud)
-        );
         this.respondingToSolicitud.set(null);
 
         this.showSuccessModal('Solicitud aceptada y trabajo creado exitosamente. El profesional debe iniciarlo manualmente.');
-
-        // Recargar trabajos para mostrar el nuevo trabajo PENDIENTE
         this.loadTrabajos();
-
-        // Recargar solicitudes
-        const user = this.authService.getCurrentUser();
-        if (user?.idProfesional) {
-          this.loadSolicitudesPendientes(user.idProfesional);
+        
+        // Recargar también las solicitudes con mapa si está en esa vista
+        if (this.mostrarVistaSolicitudes()) {
+          this.cargarSolicitudesConMapa();
         }
       },
       error: (error) => {
         console.error('❌ Error al crear trabajo:', error);
         this.respondingToSolicitud.set(null);
-
         const mensajeError = error.error?.message || error.message || 'Error desconocido';
         this.showErrorModal(`Error al crear el trabajo: ${mensajeError}`);
       }
@@ -360,8 +367,6 @@ export class ProfessionalDashboardComponent implements OnInit {
     this.trabajoService.finalizarTrabajo(idTrabajo, observaciones, montoFinal).subscribe({
       next: (trabajo) => {
         console.log('✅ Trabajo finalizado:', trabajo);
-
-        // Crear factura automáticamente después de finalizar
         this.crearFacturaTrabajo(trabajo.idSolicitud, trabajo.idTrabajo, trabajo.oficio, montoFinal);
       },
       error: (error) => {
@@ -478,16 +483,25 @@ export class ProfessionalDashboardComponent implements OnInit {
     });
   }
 
-getEstadoBadgeClass(estado: string): string {
-  const classes: { [key: string]: string } = {
-    'PENDIENTE': 'badge-pendiente',
-    'EN_CURSO': 'badge-en-curso',
-    'PAUSADO': 'badge-pausado',
-    'FINALIZADO': 'badge-finalizado',
-    'CANCELADO': 'badge-cancelado'
-  };
-  return classes[estado] || 'bg-secondary';
-}
+  getEstadoBadgeClass(estado: string): string {
+    const classes: { [key: string]: string } = {
+      'PENDIENTE': 'badge-pendiente',
+      'EN_CURSO': 'badge-en-curso',
+      'PAUSADO': 'badge-pausado',
+      'FINALIZADO': 'badge-finalizado',
+      'CANCELADO': 'badge-cancelado'
+    };
+    return classes[estado] || 'bg-secondary';
+  }
+
+  getBadgeClassSolicitud(estado: string): string {
+    switch (estado) {
+      case 'PENDIENTE': return 'bg-warning';
+      case 'ACEPTADA': return 'bg-success';
+      case 'RECHAZADA': return 'bg-danger';
+      default: return 'bg-secondary';
+    }
+  }
 
   formatMoneda(monto: number | null): string {
     if (monto === null) return '-';
@@ -498,6 +512,7 @@ getEstadoBadgeClass(estado: string): string {
   }
 
   formatDate(dateString: string): string {
+    if (!dateString) return 'No especificada';
     const date = new Date(dateString);
     return date.toLocaleDateString('es-AR', {
       day: '2-digit',
@@ -525,7 +540,6 @@ getEstadoBadgeClass(estado: string): string {
   }
 
   formatHora(hora: string): string {
-    // Formato HH:mm:ss a HH:mm
     if (!hora) return '';
     return hora.substring(0, 5);
   }
@@ -540,10 +554,6 @@ getEstadoBadgeClass(estado: string): string {
 
   goToMessages() {
     this.router.navigate(['/chat']);
-  }
-
-  goToPaymentMethods() {
-    this.router.navigate(['/profesionales/metodos-pago']);
   }
 
   goBack() {
