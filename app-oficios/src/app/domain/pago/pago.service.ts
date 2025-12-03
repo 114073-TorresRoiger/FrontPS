@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { PagoRepository } from './pago.repository';
-import { FacturaRequest, PreferenceResponse, MercadoPagoConfig } from './pago.model';
+import { FacturaRequest, PreferenceResponse, MercadoPagoConfig, PagoFactura } from './pago.model';
 
 @Injectable({ providedIn: 'root' })
 export class PagoService {
@@ -26,6 +26,10 @@ export class PagoService {
 
   obtenerConfiguracion(): Observable<MercadoPagoConfig> {
     return this.repository.obtenerConfiguracion();
+  }
+
+  historialIngresos(desde: string, hasta: string, idProfesional?: number): Observable<PagoFactura[]> {
+    return this.repository.historialIngresos(desde, hasta, idProfesional);
   }
 
   redirigirAPago(initPoint: string): void {

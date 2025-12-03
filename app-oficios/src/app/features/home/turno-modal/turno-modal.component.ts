@@ -33,6 +33,7 @@ export class TurnoModalComponent implements OnInit {
   error = signal<string | null>(null);
   success = signal(false);
   turnosDisponibles = signal<TurnoDisponible[]>([]);
+  paso = signal<'seleccion-turno' | 'observacion'>('seleccion-turno'); // Controla el paso actual
 
   // Form
   fechaInicio = signal<string>('');
@@ -87,10 +88,31 @@ export class TurnoModalComponent implements OnInit {
     this.error.set(null);
   }
 
+  continuarAObservacion(): void {
+    if (!this.turnoSeleccionado()) {
+      this.error.set('Por favor seleccione un turno');
+      return;
+    }
+    this.paso.set('observacion');
+    this.error.set(null);
+  }
+
+  volverASeleccionTurno(): void {
+    this.paso.set('seleccion-turno');
+    this.error.set(null);
+  }
+
   confirmarTurno(): void {
     const turno = this.turnoSeleccionado();
+    const obs = this.observacion().trim();
+
     if (!turno) {
       this.error.set('Por favor seleccione un turno');
+      return;
+    }
+
+    if (!obs) {
+      this.error.set('Por favor ingrese una observación sobre el trabajo');
       return;
     }
 
@@ -100,7 +122,7 @@ export class TurnoModalComponent implements OnInit {
       fecha: turno.fecha,
       hora: turno.horaInicio,
       duracion: this.duracion(),
-      observacion: this.observacion() || undefined
+      observacion: obs
     };
 
     this.loading.set(true);

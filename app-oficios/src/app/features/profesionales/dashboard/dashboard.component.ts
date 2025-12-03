@@ -23,7 +23,8 @@ import { LucideAngularModule,
   Square,
   Ban,
   Inbox,
-  MapPin
+  MapPin,
+  Filter
 } from 'lucide-angular';
 import { AuthService } from '../../../domain/auth';
 import { GetSolicitudesUseCase } from '../../../domain/solicitudes/use-cases/get-solicitudes.usecase';
@@ -53,10 +54,12 @@ interface SolicitudPendiente {
   horaReserva?: string;
 }
 
+import { FormsModule } from '@angular/forms';
+
 @Component({
   selector: 'app-professional-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, LucideAngularModule, SolicitudMapComponent],
+  imports: [CommonModule, RouterModule, LucideAngularModule, SolicitudMapComponent, FormsModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })
@@ -83,6 +86,7 @@ export class ProfessionalDashboardComponent implements OnInit {
   readonly Ban = Ban;
   readonly Inbox = Inbox;
   readonly MapPin = MapPin;
+  readonly Filter = Filter;
 
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
@@ -126,36 +130,54 @@ export class ProfessionalDashboardComponent implements OnInit {
   isLoadingSolicitudesConMapa = signal(false);
   showDetalleMapaModal = signal(false);
 
+  // Date filters
+  fechaDesde = signal<string>(this.getDefaultDesde());
+  fechaHasta = signal<string>(this.getDefaultHasta());
+  isLoadingMetrics = signal(false);
+
   metrics = signal<Metric[]>([
     {
-      title: 'Ingresos del Mes',
-      value: '$12,450',
-      change: '+12.5%',
+      title: 'Ingresos del Período',
+      value: '$0',
+      change: '0%',
       trend: 'up',
       icon: this.DollarSign
     },
     {
       title: 'Trabajos Completados',
-      value: '24',
-      change: '+8.3%',
+      value: '0',
+      change: '0%',
       trend: 'up',
       icon: this.CheckCircle
     },
     {
-      title: 'Clientes Activos',
-      value: '18',
-      change: '+15.2%',
+      title: 'Clientes Únicos',
+      value: '0',
+      change: '0%',
       trend: 'up',
       icon: this.Users
     },
     {
       title: 'Calificación Promedio',
-      value: '4.8',
-      change: '+0.2',
+      value: '-',
+      change: '0',
       trend: 'up',
       icon: this.Star
     }
   ]);
+
+  private getDefaultDesde(): string {
+    const date = new Date();
+    date.setMonth(date.getMonth() - 1);
+    return date.toISOString().split('T')[0];
+  }
+
+  getDefaultHasta(): string {
+    const date = new Date();
+    return date.toISOString().split('T')[0];
+  }
+
+
 
   ngOnInit() {
     const user = this.authService.getCurrentUser();
@@ -175,6 +197,8 @@ export class ProfessionalDashboardComponent implements OnInit {
             this.verTodasLasSolicitudes();
           }
         });
+        // Cargar métricas con rango de fechas por defecto
+        this.loadMetrics();
       } else {
         console.warn('Dashboard - Usuario no tiene idProfesional asignado');
       }
@@ -183,8 +207,109 @@ export class ProfessionalDashboardComponent implements OnInit {
     }
   }
 
+  loadMetrics() {
+    const user = this.authService.getCurrentUser();
+    if (!user?.idProfesional) return;
+
+    const desde = this.fechaDesde();
+    const hasta = this.fechaHasta();
+
+    if (!desde || !hasta) {
+      this.showErrorModal('Por favor seleccione un rango de fechas válido');
+      return;
+    }
+
+    if (new Date(desde) > new Date(hasta)) {
+      this.showErrorModal('La fecha "desde" no puede ser mayor a la fecha "hasta"');
+      return;
+    }
+
+    this.isLoadingMetrics.set(true);
+    console.log('📊 Cargando métricas desde:', desde, 'hasta:', hasta);
+
+    this.pagoService.historialIngresos(desde, hasta, user.idProfesional).subscribe({
+      next: (pagos) => {
+        console.log('✅ Historial de ingresos recibido:', pagos);
+        this.calculateMetrics(pagos);
+        this.isLoadingMetrics.set(false);
+      },
+      error: (error) => {
+        console.error('❌ Error al cargar métricas:', error);
+        this.isLoadingMetrics.set(false);
+
+        // Si es un 404, mostrar métricas en 0 (no hay datos en ese período)
+        if (error.status === 404) {
+          this.calculateMetrics([]);
+        } else {
+          const mensajeError = error.error?.message || error.message || 'Error al cargar métricas';
+          this.showErrorModal(mensajeError);
+        }
+      }
+    });
+  }
+
+  private calculateMetrics(pagos: any[]) {
+    console.log('📊 Calculando métricas con pagos:', pagos);
+
+    // Calcular ingresos totales - todos los pagos retornados ya están aprobados
+    const ingresoTotal = pagos.reduce((sum, pago) => sum + Number(pago.monto), 0);
+
+    // Contar trabajos completados - cada pago representa un trabajo completado
+    const trabajosCompletados = pagos.length;
+
+    // Formatear ingresos
+    const ingresoFormateado = new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(ingresoTotal);
+
+    this.metrics.set([
+      {
+        title: 'Ingresos del Período',
+        value: ingresoFormateado,
+        change: trabajosCompletados > 0 ? `${trabajosCompletados} pago${trabajosCompletados !== 1 ? 's' : ''}` : 'Sin datos',
+        trend: 'up',
+        icon: this.DollarSign
+      },
+      {
+        title: 'Trabajos Completados',
+        value: trabajosCompletados.toString(),
+        change: ingresoTotal > 0 ? `Total: ${ingresoFormateado}` : 'Sin ingresos',
+        trend: 'up',
+        icon: this.CheckCircle
+      },
+      {
+        title: 'Promedio por Trabajo',
+        value: trabajosCompletados > 0 ?
+          new Intl.NumberFormat('es-AR', {
+            style: 'currency',
+            currency: 'ARS',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+          }).format(ingresoTotal / trabajosCompletados) :
+          '$0',
+        change: trabajosCompletados > 0 ? `En ${trabajosCompletados} trabajo${trabajosCompletados !== 1 ? 's' : ''}` : 'Sin datos',
+        trend: 'up',
+        icon: this.Star
+      }
+    ]);
+
+    console.log('✅ Métricas calculadas:', {
+      ingresoTotal,
+      trabajosCompletados,
+      promedio: trabajosCompletados > 0 ? ingresoTotal / trabajosCompletados : 0
+    });
+  }
+
+  aplicarFiltroFechas() {
+    console.log('🔍 Aplicando filtro de fechas:', this.fechaDesde(), '-', this.fechaHasta());
+    this.loadMetrics();
+  }
+
   // ====== NUEVOS MÉTODOS PARA SOLICITUDES CON MAPA ======
-  
+
   async verTodasLasSolicitudes() {
     this.mostrarVistaSolicitudes.set(true);
     await this.cargarSolicitudesConMapa();
@@ -279,7 +404,7 @@ export class ProfessionalDashboardComponent implements OnInit {
 
         this.showSuccessModal('Solicitud aceptada y trabajo creado exitosamente. El profesional debe iniciarlo manualmente.');
         this.loadTrabajos();
-        
+
         // Recargar también las solicitudes con mapa si está en esa vista
         if (this.mostrarVistaSolicitudes()) {
           this.cargarSolicitudesConMapa();

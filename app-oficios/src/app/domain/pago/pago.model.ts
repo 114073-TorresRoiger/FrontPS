@@ -18,3 +18,9 @@ export interface MercadoPagoConfig {
   publicKey: string;
   sandbox: boolean;
 }
+
+export interface PagoFactura {
+  fecha: string;
+  monto: number;
+  medioPago: string;
+}
