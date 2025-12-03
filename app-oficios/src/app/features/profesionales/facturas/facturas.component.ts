@@ -75,7 +75,12 @@ export class FacturasComponent implements OnInit {
     
     this.http.get<Factura[]>(url, { params }).subscribe({
       next: (data) => {
-        this.facturas = data;
+        // Ordenar por fecha descendente (más recientes primero)
+        this.facturas = data.sort((a, b) => {
+          const fechaA = new Date(a.fecha).getTime();
+          const fechaB = new Date(b.fecha).getTime();
+          return fechaB - fechaA;
+        });
         this.loading = false;
       },
       error: (error) => {

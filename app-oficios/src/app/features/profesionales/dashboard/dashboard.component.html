@@ -585,6 +585,45 @@
 </div>
 <div *ngIf="showCancelarModal()" class="modal-backdrop fade show"></div>
 
+<!-- Modal de Confirmación -->
+<div *ngIf="showConfirmModal()" class="modal fade show d-block" tabindex="-1" (click)="closeConfirmModal()">
+  <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
+    <div class="modal-content">
+      <div class="modal-header" [ngClass]="confirmModalType() === 'aceptar' ? 'bg-success-gradient' : 'bg-danger-gradient'">
+        <h5 class="modal-title d-flex align-items-center gap-2">
+          <lucide-angular 
+            [img]="confirmModalType() === 'aceptar' ? Check : XIcon" 
+            [size]="24">
+          </lucide-angular>
+          {{ confirmModalTitle() }}
+        </h5>
+        <button type="button" class="btn-close" (click)="closeConfirmModal()"></button>
+      </div>
+      <div class="modal-body py-4">
+        <p class="mb-0 text-center fs-6">{{ confirmModalMessage() }}</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeConfirmModal()">
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="btn"
+          [ngClass]="confirmModalType() === 'aceptar' ? 'btn-success' : 'btn-danger'"
+          (click)="executeConfirmAction()">
+          <lucide-angular 
+            [img]="confirmModalType() === 'aceptar' ? Check : XIcon" 
+            [size]="18" 
+            class="me-1">
+          </lucide-angular>
+          {{ confirmModalType() === 'aceptar' ? 'Sí, aceptar' : 'Sí, rechazar' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div *ngIf="showConfirmModal()" class="modal-backdrop fade show"></div>
+
 <!-- Modal de Respuesta -->
 <div *ngIf="showResponseModal()" class="modal fade show d-block" tabindex="-1" (click)="closeResponseModal()">
   <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
