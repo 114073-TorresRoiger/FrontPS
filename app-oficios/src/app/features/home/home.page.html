@@ -32,6 +32,7 @@
 <!-- Floating Chat Button -->
 <button class="floating-chat-btn" (click)="goToChat()">
   <lucide-angular [img]="MessageCircle" size="24"></lucide-angular>
+  <span *ngIf="mensajesNoLeidos() > 0" class="chat-badge">{{ mensajesNoLeidos() }}</span>
 </button>
 
 <!-- Sidebar -->
@@ -57,6 +58,13 @@
       <button class="nav-item" (click)="goToTrabajosFinalizados()">
         <lucide-angular [img]="CalendarCheck" size="20"></lucide-angular>
         <span>Mis Trabajos</span>
+      </button>
+      <button class="nav-item" (click)="notificacionesModal.toggle()">
+        <lucide-angular [img]="Bell" size="20"></lucide-angular>
+        <span>Notificaciones</span>
+        <span *ngIf="notificacionService.notificacionesNoLeidas() > 0" class="nav-badge">
+          {{ notificacionService.notificacionesNoLeidas() }}
+        </span>
       </button>
     </div>
 
@@ -541,3 +549,6 @@
   (close)="cerrarModalResenia()"
   (reseniaEnviada)="onReseniaEnviada()"
 ></app-resenia-modal>
+
+<!-- Modal de Notificaciones -->
+<app-notificaciones-modal #notificacionesModal></app-notificaciones-modal>

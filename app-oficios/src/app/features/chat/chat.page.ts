@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { StreamChatService } from './services/stream-chat.service';
 import { AuthService } from '../../domain/auth/auth.service';
+import { NotificacionService } from '../../data/notificaciones/notificacion.service';
 import { Channel } from 'stream-chat';
 
 @Component({
@@ -37,7 +38,8 @@ export class ChatPage implements OnInit, OnDestroy {
   constructor(
     private chatService: StreamChatService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private notificacionService: NotificacionService
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -139,6 +141,8 @@ export class ChatPage implements OnInit, OnDestroy {
   async openChannel(channel: Channel): Promise<void> {
     this.selectedChannel = channel;
     await this.loadMessages();
+    // Actualizar contador de mensajes no leídos después de marcar como leído
+    await this.updateUnreadCount();
   }
 
   // Obtención de nombre del canal
@@ -181,6 +185,22 @@ export class ChatPage implements OnInit, OnDestroy {
       setTimeout(() => this.scrollToBottom(), 100);
     } catch (error) {
       console.error('❌ Error cargando mensajes:', error);
+    }
+  }
+
+  private async updateUnreadCount(): Promise<void> {
+    try {
+      const channels = await this.chatService.getUserChannels();
+      let totalUnread = 0;
+      
+      for (const channel of channels) {
+        totalUnread += channel.countUnread();
+      }
+      
+      console.log('💬 Actualizando contador de mensajes no leídos:', totalUnread);
+      this.notificacionService.actualizarMensajesNoLeidos(totalUnread);
+    } catch (error) {
+      console.error('❌ Error actualizando contador de mensajes:', error);
     }
   }
 

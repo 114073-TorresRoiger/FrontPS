@@ -358,6 +358,7 @@
       cursor: pointer;
       transition: all 0.2s ease;
       font-size: 0.95rem;
+      position: relative;
 
       &:hover {
         background: rgba(255, 255, 255, 0.1);
@@ -366,6 +367,23 @@
 
       lucide-icon {
         flex-shrink: 0;
+      }
+
+      .nav-badge {
+        position: absolute;
+        right: 1rem;
+        background: #ef4444;
+        color: white;
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 0.125rem 0.5rem;
+        border-radius: 12px;
+        min-width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
       }
     }
   }
@@ -471,6 +489,25 @@
 
   lucide-icon {
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  }
+
+  .chat-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ef4444;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    min-width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+    animation: badge-pulse 2s infinite;
   }
 }
 
@@ -2298,5 +2335,17 @@
     .hero-title {
       font-size: 1.75rem;
     }
+  }
+}
+
+// Badge pulse animation
+@keyframes badge-pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    transform: scale(1.1);
+    box-shadow: 0 2px 12px rgba(239, 68, 68, 0.6);
   }
 }
