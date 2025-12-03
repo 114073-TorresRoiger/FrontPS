@@ -240,6 +240,7 @@ export class HomePage implements OnInit {
     if (this.isUserAuthenticated()) {
       this.loadTrabajosFinalizados();
       this.loadMensajesNoLeidos();
+      this.loadNotificaciones();
     }
   }
 
@@ -612,7 +613,11 @@ export class HomePage implements OnInit {
     const user = this.authService.getCurrentUser();
     if (!user?.id) return;
 
-    this.notificacionService.cargarNotificaciones(user.id).subscribe({
+    const userAny = user as any;
+    const isProfessional = !!userAny.idProfesional;
+    const userId = isProfessional ? userAny.idProfesional : user.id;
+
+    this.notificacionService.cargarNotificaciones(userId, isProfessional).subscribe({
       next: () => {
         console.log('✅ Notificaciones cargadas');
       },

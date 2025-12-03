@@ -21,19 +21,60 @@ export class NotificacionService {
   /**
    * Cargar notificaciones del usuario actual
    */
-  cargarNotificaciones(idUsuario: number): Observable<Notificacion[]> {
-    // Por ahora simulamos notificaciones hasta que el backend las implemente
-    return this.simularNotificaciones(idUsuario).pipe(
-      map(notificaciones => {
-        this.notificaciones.set(notificaciones);
-        this.actualizarContadorNoLeidas();
-        return notificaciones;
-      }),
-      catchError(error => {
-        console.error('Error cargando notificaciones:', error);
-        return of([]);
-      })
-    );
+  cargarNotificaciones(idUsuario: number, isProfessional: boolean = false): Observable<Notificacion[]> {
+    // Si es profesional, cargar notificaciones de nuevas solicitudes
+    if (isProfessional) {
+      return this.cargarNotificacionesProfesional(idUsuario);
+    }
+    
+    // Si es cliente, cargar notificaciones de trabajos finalizados
+    return this.cargarNotificacionesCliente(idUsuario);
+  }
+
+  /**
+   * Cargar notificaciones específicas de profesional (nuevas solicitudes)
+   */
+  private cargarNotificacionesProfesional(idProfesional: number): Observable<Notificacion[]> {
+    // Usar el endpoint correcto: /solicitud/{idProfesional}/{estado}
+    return this.http.get<any[]>(`${this.API_URL}/api/v1/solicitudes/solicitud/${idProfesional}/PENDIENTE`)
+      .pipe(
+        map(solicitudes => {
+          // Mapear las solicitudes pendientes a notificaciones
+          const notificaciones = solicitudes.map((solicitud) => ({
+            id: solicitud.idSolicitud,
+            tipo: 'NUEVA_SOLICITUD' as TipoNotificacion,
+            titulo: 'Nueva Solicitud Recibida',
+            mensaje: `${solicitud.nombreCliente} ${solicitud.apellidoCliente} te ha enviado una solicitud`,
+            fecha: new Date(solicitud.fechaSolicitud),
+            leida: false,
+            idRelacionado: solicitud.idSolicitud,
+            urlAccion: '/profesionales/dashboard?view=solicitudes'
+          }));
+          
+          this.notificaciones.set(notificaciones);
+          this.actualizarContadorNoLeidas();
+          return notificaciones;
+        }),
+        catchError(error => {
+          console.error('Error cargando notificaciones de profesional:', error);
+          // En caso de error 403/404 o cualquier otro, simplemente retornar array vacío
+          // No es crítico, las notificaciones son una feature nice-to-have
+          this.notificaciones.set([]);
+          this.actualizarContadorNoLeidas();
+          return of([]);
+        })
+      );
+  }
+
+  /**
+   * Cargar notificaciones específicas de cliente (trabajos finalizados)
+   */
+  private cargarNotificacionesCliente(idUsuario: number): Observable<Notificacion[]> {
+    // TODO: Implementar cuando el backend tenga endpoint de notificaciones
+    // Por ahora retornamos array vacío para clientes
+    this.notificaciones.set([]);
+    this.actualizarContadorNoLeidas();
+    return of([]);
   }
 
   /**
@@ -124,36 +165,6 @@ export class NotificacionService {
   private actualizarContadorNoLeidas(): void {
     const noLeidas = this.notificaciones().filter(n => !n.leida).length;
     this.notificacionesNoLeidas.set(noLeidas);
-  }
-
-  /**
-   * Simular notificaciones (temporal hasta que el backend lo implemente)
-   */
-  private simularNotificaciones(idUsuario: number): Observable<Notificacion[]> {
-    // Simulamos algunas notificaciones de ejemplo
-    const notificacionesEjemplo: Notificacion[] = [
-      {
-        id: 1,
-        tipo: 'NUEVA_SOLICITUD',
-        titulo: 'Nueva Solicitud Recibida',
-        mensaje: 'Has recibido una nueva solicitud de trabajo',
-        fecha: new Date(Date.now() - 3600000), // Hace 1 hora
-        leida: false,
-        urlAccion: '/profesional/solicitudes'
-      },
-      {
-        id: 2,
-        tipo: 'TRABAJO_FINALIZADO',
-        titulo: 'Trabajo Finalizado',
-        mensaje: 'El profesional ha marcado el trabajo como finalizado',
-        fecha: new Date(Date.now() - 7200000), // Hace 2 horas
-        leida: false,
-        urlAccion: '/trabajos/finalizados'
-      }
-    ];
-
-    // En un caso real, esto haría una petición HTTP al backend
-    return of(notificacionesEjemplo);
   }
 
   /**

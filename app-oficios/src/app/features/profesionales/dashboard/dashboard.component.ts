@@ -1,6 +1,6 @@
 import { Component, signal, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { LucideAngularModule,
   TrendingUp,
   DollarSign,
@@ -85,6 +85,7 @@ export class ProfessionalDashboardComponent implements OnInit {
   readonly MapPin = MapPin;
 
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly authService = inject(AuthService);
   private readonly getSolicitudesUseCase = inject(GetSolicitudesUseCase);
   private readonly responderSolicitudUseCase = inject(ResponderSolicitudUseCase);
@@ -166,6 +167,14 @@ export class ProfessionalDashboardComponent implements OnInit {
       if (user.idProfesional) {
         console.log('Dashboard - Cargando datos para profesional ID:', user.idProfesional);
         this.loadTrabajos();
+        
+        // Verificar si se debe mostrar la vista de solicitudes desde una notificación
+        this.route.queryParams.subscribe(params => {
+          if (params['view'] === 'solicitudes') {
+            console.log('📩 Abriendo vista de solicitudes desde notificación');
+            this.verTodasLasSolicitudes();
+          }
+        });
       } else {
         console.warn('Dashboard - Usuario no tiene idProfesional asignado');
       }

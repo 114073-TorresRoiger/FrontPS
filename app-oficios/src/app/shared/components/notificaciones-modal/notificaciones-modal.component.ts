@@ -54,7 +54,22 @@ export class NotificacionesModalComponent implements OnInit {
 
     // Navegar a la URL de acción si existe
     if (notificacion.urlAccion) {
-      this.router.navigate([notificacion.urlAccion]);
+      // Separar la URL base y los query params
+      const [path, queryString] = notificacion.urlAccion.split('?');
+      
+      if (queryString) {
+        // Parsear query params
+        const queryParams: any = {};
+        queryString.split('&').forEach(param => {
+          const [key, value] = param.split('=');
+          queryParams[key] = value;
+        });
+        
+        this.router.navigate([path], { queryParams });
+      } else {
+        this.router.navigate([notificacion.urlAccion]);
+      }
+      
       this.close();
     }
   }
