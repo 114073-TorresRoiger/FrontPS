@@ -602,6 +602,33 @@
           border-radius: 8px;
           font-size: 0.875rem;
         }
+
+        .pago-actions {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          align-items: flex-start;
+        }
+
+        .btn-reseniar {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.5rem 1rem;
+          background-color: #fbbf24;
+          color: white;
+          border: none;
+          border-radius: 0.5rem;
+          font-size: 0.875rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s;
+
+          &:hover {
+            background-color: #f59e0b;
+            transform: translateY(-1px);
+          }
+        }
       }
     }
   }

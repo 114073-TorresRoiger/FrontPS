@@ -48,9 +48,10 @@ export interface TrabajoClienteResponse {
   idSolicitud: number;
   profesional: string;
   descripcion: string;
-  idpago: string | null;
   estado: string;
-  montoFinal: string;
   fechaFinalizacion: string;
+  montoFinal: string;
+  idpago: string;
   estadoPago: string;
+  tieneResenia?: boolean; // Opcional
 }

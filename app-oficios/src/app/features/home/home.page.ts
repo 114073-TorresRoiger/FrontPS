@@ -1,3 +1,4 @@
+// 📁 src/app/features/home/home.page.ts
 import {
   ChangeDetectionStrategy,
   Component,
@@ -50,13 +51,15 @@ import { VerificarSolicitudPendienteUseCase } from '../../domain/solicitudes/use
 import { SolicitudRequest } from '../../domain/solicitudes/solicitud.model';
 import { TrabajoService } from '../../domain/trabajo/trabajo.service';
 import { TrabajoClienteResponse } from '../../domain/trabajo/trabajo.model';
+import { SolicitudService } from '../../domain/solicitudes/solicitud.service';
 import { ProfessionalCardComponent } from './professional-card/professional-card.component';
 import { TurnoModalComponent } from './turno-modal/turno-modal.component';
+import { ReseniaModalComponent } from './resenia-modal/resenia-modal.component';
 
 interface ServiceCard {
   id: number;
   title: string;
-  oficioOriginal: string; // Original oficio name from API (uppercase)
+  oficioOriginal: string;
   image: string;
   description: string;
   professionalCount: number;
@@ -77,6 +80,7 @@ interface ServiceCard {
     ReactiveFormsModule,
     ProfessionalCardComponent,
     TurnoModalComponent,
+    ReseniaModalComponent, // ⭐ AGREGAR
   ],
   templateUrl: './home.page.html',
   styleUrl: './home.page.scss',
@@ -92,6 +96,7 @@ export class HomePage implements OnInit {
   private readonly enviarSolicitudUseCase = inject(EnviarSolicitudUseCase);
   private readonly verificarSolicitudPendienteUseCase = inject(VerificarSolicitudPendienteUseCase);
   private readonly trabajoService = inject(TrabajoService);
+  private readonly solicitudService = inject(SolicitudService);
 
   // Icons
   readonly Search = Search;
@@ -151,6 +156,13 @@ export class HomePage implements OnInit {
   isLoadingTrabajos = signal(false);
   showTrabajosSection = signal(false);
 
+  // ⭐ AGREGAR: Modal de reseña
+  showReseniaModal = signal(false);
+  selectedTrabajoForResenia = signal<{
+    trabajo: TrabajoClienteResponse;
+    idProfesional: number;
+  } | null>(null);
+
   // Featured professionals
   featuredProfessionals = signal<any[]>([
     {
@@ -203,107 +215,6 @@ export class HomePage implements OnInit {
     },
   ]);
 
-  // Mock data for professionals by service
-  // professionalsByService: { [key: number]: any[] } = {
-  //   1: [ // Plomería
-  //     {
-  //       id: 101,
-  //       name: 'Juan Pérez',
-  //       rating: 4.8,
-  //       reviewCount: 127,
-  //       price: 1500,
-  //       location: 'San Miguel, Buenos Aires',
-  //       experience: '8 años',
-  //       availability: 'Disponible hoy',
-  //       specialties: ['Destapaciones', 'Instalaciones', 'Reparaciones'],
-  //       verified: true,
-  //       image: 'assets/professionals/juan-perez.jpg'
-  //     },
-  //     {
-  //       id: 102,
-  //       name: 'Roberto Silva',
-  //       rating: 4.6,
-  //       reviewCount: 89,
-  //       price: 1200,
-  //       location: 'Villa Ballester, Buenos Aires',
-  //       experience: '5 años',
-  //       availability: 'Disponible mañana',
-  //       specialties: ['Cañerías', 'Cloacas', 'Gas'],
-  //       verified: true,
-  //       image: 'assets/professionals/roberto-silva.jpg'
-  //     },
-  //     {
-  //       id: 103,
-  //       name: 'Miguel Torres',
-  //       rating: 4.9,
-  //       reviewCount: 156,
-  //       price: 1800,
-  //       location: 'San Martín, Buenos Aires',
-  //       experience: '12 años',
-  //       availability: 'Disponible esta semana',
-  //       specialties: ['Calefones', 'Calderas', 'Emergencias'],
-  //       verified: true,
-  //       image: 'assets/professionals/miguel-torres.jpg'
-  //     }
-  //   ],
-  //   2: [ // Electricidad
-  //     {
-  //       id: 201,
-  //       name: 'María González',
-  //       rating: 4.9,
-  //       reviewCount: 203,
-  //       price: 1400,
-  //       location: 'Villa Ballester, Buenos Aires',
-  //       experience: '10 años',
-  //       availability: 'Disponible hoy',
-  //       specialties: ['Instalaciones', 'Tableros', 'Iluminación'],
-  //       verified: true,
-  //       image: 'assets/professionals/maria-gonzalez.jpg'
-  //     },
-  //     {
-  //       id: 202,
-  //       name: 'Carlos Mendez',
-  //       rating: 4.7,
-  //       reviewCount: 121,
-  //       price: 1600,
-  //       location: 'San Isidro, Buenos Aires',
-  //       experience: '7 años',
-  //       availability: 'Disponible mañana',
-  //       specialties: ['Domótica', 'Portones', 'Mantenimiento'],
-  //       verified: true,
-  //       image: 'assets/professionals/carlos-mendez.jpg'
-  //     }
-  //   ],
-  //   3: [ // Pintura
-  //     {
-  //       id: 301,
-  //       name: 'Carlos Rodríguez',
-  //       rating: 4.7,
-  //       reviewCount: 245,
-  //       price: 2000,
-  //       location: 'San Martín, Buenos Aires',
-  //       experience: '15 años',
-  //       availability: 'Disponible esta semana',
-  //       specialties: ['Pintura exterior', 'Decorativa', 'Empapelado'],
-  //       verified: true,
-  //       image: 'assets/professionals/carlos-rodriguez.jpg'
-  //     },
-  //     {
-  //       id: 302,
-  //       name: 'Ana Morales',
-  //       rating: 4.8,
-  //       reviewCount: 189,
-  //       price: 1800,
-  //       location: 'Munro, Buenos Aires',
-  //       experience: '9 años',
-  //       availability: 'Disponible hoy',
-  //       specialties: ['Pintura interior', 'Restauración', 'Texturas'],
-  //       verified: true,
-  //       image: 'assets/professionals/ana-morales.jpg'
-  //     }
-  //   ]
-  // };
-
   ngOnInit(): void {
     this.loadServices();
     this.initSolicitudForm();
@@ -312,14 +223,12 @@ export class HomePage implements OnInit {
 
   @HostListener('window:focus', ['$event'])
   onWindowFocus(event: FocusEvent): void {
-    // Recargar trabajos cuando la ventana recupera el foco
     if (this.isUserAuthenticated()) {
       this.loadTrabajosFinalizados();
     }
   }
 
   private initSolicitudForm(): void {
-    // Get tomorrow's date as minimum
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     const minDate = tomorrow.toISOString().split('T')[0];
@@ -346,7 +255,6 @@ export class HomePage implements OnInit {
   }
 
   private mapOficioToServiceCard(oficio: Oficio): ServiceCard {
-    // Map service name to image
     const imageMap: { [key: string]: string } = {
       GASISTA: 'assets/services/gasista.jpg',
       ELECTRICISTA: 'assets/services/electricista.jpg',
@@ -360,10 +268,10 @@ export class HomePage implements OnInit {
     return {
       id: oficio.id,
       title: this.formatOficioName(oficio.oficio),
-      oficioOriginal: oficio.oficio, // Store original uppercase name for API calls
+      oficioOriginal: oficio.oficio,
       image: imageMap[oficio.oficio] || 'assets/logos/logo.png',
       description: oficio.descripcion,
-      professionalCount: 0, // This will be populated from another endpoint
+      professionalCount: 0,
       averageRating: 0,
       totalReviews: 0,
       priceRange: { min: 0, max: 0 },
@@ -372,7 +280,6 @@ export class HomePage implements OnInit {
   }
 
   private formatOficioName(oficio: string): string {
-    // Convert to title case
     return oficio
       .toLowerCase()
       .split(' ')
@@ -382,7 +289,6 @@ export class HomePage implements OnInit {
 
   onSearch() {
     console.log('Searching for:', this.searchQuery());
-    // Implementar lógica de búsqueda aquí
   }
 
   toggleFavorite(serviceId: number) {
@@ -390,7 +296,7 @@ export class HomePage implements OnInit {
     const service = currentServices.find((s) => s.id === serviceId);
     if (service) {
       service.isFavorite = !service.isFavorite;
-      this.services.set([...currentServices]); // Trigger change detection
+      this.services.set([...currentServices]);
     }
   }
 
@@ -404,14 +310,12 @@ export class HomePage implements OnInit {
     this.isLoadingProfessionals.set(true);
     this.noProfessionalsFound.set(false);
 
-    // Use the original oficio name from the API (already in correct format)
     this.getProfesionalesByOficioUseCase.execute(oficio).subscribe({
       next: (profesionales: PerfilProfesional[]) => {
         this.currentProfessionals.set(profesionales);
         this.noProfessionalsFound.set(profesionales.length === 0);
         this.isLoadingProfessionals.set(false);
 
-        // Update service card with professional count
         const currentServices = this.services();
         const selectedService = this.selectedService();
         if (selectedService) {
@@ -444,27 +348,23 @@ export class HomePage implements OnInit {
     return this.currentProfessionals();
   }
 
-  // Helper method to map PerfilProfesional to display format
   getProfessionalDisplayName(professional: PerfilProfesional): string {
     return `${professional.nombre} ${professional.apellido}`;
   }
 
   contactProfessional(professional: PerfilProfesional) {
-    // Check if user is authenticated
     if (!this.authService.isLoggedIn()) {
       alert('Debes iniciar sesión para contactar a un profesional');
       this.router.navigate(['/auth/login']);
       return;
     }
 
-    // Get current user ID
     const currentUser = this.authService.currentUser();
     if (!currentUser?.id) {
       alert('Error al obtener la información del usuario');
       return;
     }
 
-    // Abrir modal de turnos directamente
     this.selectedProfessional.set(professional);
     this.showTurnoModal.set(true);
   }
@@ -476,8 +376,6 @@ export class HomePage implements OnInit {
 
   onTurnoConfirmado(response: any) {
     console.log('Turno confirmado:', response);
-    // Aquí puedes agregar lógica adicional después de confirmar el turno
-    // Por ejemplo, mostrar un mensaje de éxito o redirigir
   }
 
   getMinDate(): string {
@@ -534,37 +432,30 @@ export class HomePage implements OnInit {
       },
     });
   }
-
   private getProfessionalId(professional: PerfilProfesional): number {
     return professional.idProfesional;
   }
-
   toggleDropdown() {
     this.isDropdownOpen.set(!this.isDropdownOpen());
   }
-
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event) {
     const target = event.target as HTMLElement;
     const dropdown = target.closest('.user-dropdown');
-
     if (!dropdown && this.isDropdownOpen()) {
       this.isDropdownOpen.set(false);
     }
   }
-
   goToChat() {
     console.log('Navigating to chat');
     this.router.navigate(['/chat']);
   }
-
   loadTrabajosFinalizados(): void {
     const user = this.authService.getCurrentUser();
     if (!user?.id) {
       console.log('Usuario no autenticado, no se cargan trabajos');
       return;
     }
-
     this.isLoadingTrabajos.set(true);
     this.trabajoService.obtenerTrabajosFinalizadosPorCliente(user.id).subscribe({
       next: (trabajos) => {
@@ -579,11 +470,9 @@ export class HomePage implements OnInit {
       },
     });
   }
-
   toggleTrabajosSection(): void {
     this.showTrabajosSection.set(!this.showTrabajosSection());
   }
-
   formatMoneda(monto: string): string {
     const montoNumero = parseFloat(monto);
     if (isNaN(montoNumero)) return '-';
@@ -592,7 +481,6 @@ export class HomePage implements OnInit {
       currency: 'ARS',
     }).format(montoNumero);
   }
-
   getEstadoBadgeClass(estado: string): string {
     const classes: Record<string, string> = {
       PENDIENTE: 'badge-pendiente',
@@ -603,7 +491,6 @@ export class HomePage implements OnInit {
     };
     return classes[estado] || 'badge-default';
   }
-
   formatDate(dateString: string): string {
     if (!dateString) return '-';
     const date = new Date(dateString);
@@ -615,53 +502,72 @@ export class HomePage implements OnInit {
       minute: '2-digit',
     });
   }
-
   irAPago(urlPago: string): void {
     if (urlPago) {
       window.open(urlPago, '_blank');
     }
   }
-
+  // ⭐ AGREGAR: Método para abrir modal de reseña
+  abrirModalResenia(trabajo: TrabajoClienteResponse): void {
+    this.solicitudService.getSolicitudById(trabajo.idSolicitud).subscribe({
+      next: (solicitud) => {
+        console.log('Solicitud recibida:', solicitud);
+        // Usar solo el campo correcto
+        const idProfesional = solicitud.idProfesional;
+        this.selectedTrabajoForResenia.set({
+          trabajo: trabajo,
+          idProfesional,
+        });
+        this.showReseniaModal.set(true);
+      },
+      error: (error: any) => {
+        console.error('Error al obtener solicitud:', error);
+        alert('No se pudo cargar la información del profesional');
+      },
+    });
+  }
   goToSignIn() {
     this.isDropdownOpen.set(false);
     this.router.navigate(['/auth/login']);
   }
-
   goToSignUp() {
     this.isDropdownOpen.set(false);
     this.router.navigate(['/auth/registro']);
   }
-
   goToProfile() {
     this.isDropdownOpen.set(false);
     this.router.navigate(['/usuarios/perfil']);
   }
-
   goToRegisterProfessional() {
     this.isDropdownOpen.set(false);
     this.router.navigate(['/profesionales/registro']);
   }
-
   goToDashboard() {
     this.isDropdownOpen.set(false);
     this.router.navigate(['/profesionales/dashboard']);
   }
-
   logout() {
     this.isDropdownOpen.set(false);
     this.authService.logout();
   }
-
   getUserDisplayName(): string {
     return this.authService.getUserFullName();
   }
-
   isUserAuthenticated(): boolean {
     return this.authService.isLoggedIn();
   }
-
   isProfessional(): boolean {
     const user = this.authService.getCurrentUser();
     return user?.idProfesional != null;
+  }
+
+  cerrarModalResenia(): void {
+    this.showReseniaModal.set(false);
+    this.selectedTrabajoForResenia.set(null);
+  }
+
+  onReseniaEnviada(): void {
+    console.log('✅ Reseña enviada exitosamente');
+    this.loadTrabajosFinalizados();
   }
 }

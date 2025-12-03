@@ -215,7 +215,7 @@
                 <td>{{ formatDate(trabajo.fechaFinalizacion) }}</td>
                 <td>{{ formatMoneda(trabajo.montoFinal) }}</td>
                 <td>
-                  <!-- Botón "Ir a Pagar" solo si NO está pagado -->
+                  <!-- Botón "Ir a Pagar" -->
                   <button
                     *ngIf="trabajo.idpago && trabajo.estadoPago !== 'APROBADO'"
                     class="btn-pagar"
@@ -225,13 +225,19 @@
                     Ir a Pagar
                   </button>
 
-                  <!-- Badge "Pagado" si está aprobado -->
-                  <span *ngIf="trabajo.estadoPago === 'APROBADO'" class="pago-aprobado">
-                    <lucide-angular [img]="CheckCircle" size="16"></lucide-angular>
-                    Pagado
-                  </span>
+                  <!-- Pagado + Reseñar -->
+                  <div *ngIf="trabajo.estadoPago === 'APROBADO'" class="pago-actions">
+                    <span class="pago-aprobado">
+                      <lucide-angular [img]="CheckCircle" size="16"></lucide-angular>
+                      Pagado
+                    </span>
+                    <button class="btn-reseniar" (click)="abrirModalResenia(trabajo)">
+                      <lucide-angular [img]="Star" size="16"></lucide-angular>
+                      Reseñar
+                    </button>
+                  </div>
 
-                  <!-- Badge "Pendiente" si no tiene link de pago -->
+                  <!-- Sin factura -->
                   <span
                     *ngIf="!trabajo.idpago && trabajo.estadoPago !== 'APROBADO'"
                     class="pago-pendiente"
@@ -598,3 +604,13 @@
   (close)="closeTurnoModal()"
   (turnoConfirmado)="onTurnoConfirmado($event)"
 ></app-turno-modal>
+
+<!-- Modal de Reseña -->
+<app-resenia-modal
+  *ngIf="showReseniaModal() && selectedTrabajoForResenia()"
+  [idUsuario]="authService.getCurrentUser()?.id || 0"
+  [idProfesional]="selectedTrabajoForResenia()?.idProfesional || 0"
+  [nombreProfesional]="selectedTrabajoForResenia()?.trabajo?.profesional || ''"
+  (close)="cerrarModalResenia()"
+  (reseniaEnviada)="onReseniaEnviada()"
+></app-resenia-modal>
