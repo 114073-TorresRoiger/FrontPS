@@ -327,6 +327,84 @@
   }
 }
 
+// ====== MENU DESPLEGABLE DE ACCIONES ======
+.position-relative {
+  position: relative;
+}
+
+.dropdown-menu-custom {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 1000;
+  min-width: 200px;
+  padding: 0.5rem 0;
+  margin: 0.25rem 0 0;
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  animation: slideDown 0.2s ease;
+
+  &.show {
+    display: block;
+  }
+}
+
+.dropdown-item-custom {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: none;
+  font-size: 0.875rem;
+  color: #212529;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover:not(.disabled) {
+    background: #f8f9fa;
+    color: #667eea;
+  }
+
+  &:focus {
+    outline: none;
+  }
+
+  &.text-danger {
+    color: #dc3545;
+
+    &:hover:not(.disabled) {
+      background: #fff5f5;
+      color: #c92a2a;
+    }
+  }
+
+  &.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 // ====== MODALES ======
 .modal {
   &.show {
