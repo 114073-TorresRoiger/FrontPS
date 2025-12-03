@@ -248,10 +248,6 @@ export class ProfessionalDashboardComponent implements OnInit {
     // Contar trabajos completados - cada pago representa un trabajo completado
     const trabajosCompletados = pagos.length;
 
-    // Contar medios de pago únicos
-    const mediosPago = new Set(pagos.map(p => p.medioPago));
-    const cantidadMediosPago = mediosPago.size;
-
     // Formatear ingresos
     const ingresoFormateado = new Intl.NumberFormat('es-AR', {
       style: 'currency',
@@ -276,13 +272,6 @@ export class ProfessionalDashboardComponent implements OnInit {
         icon: this.CheckCircle
       },
       {
-        title: 'Medios de Pago',
-        value: cantidadMediosPago.toString(),
-        change: cantidadMediosPago > 0 ? Array.from(mediosPago).join(', ') : 'Sin datos',
-        trend: 'up',
-        icon: this.Users
-      },
-      {
         title: 'Promedio por Trabajo',
         value: trabajosCompletados > 0 ?
           new Intl.NumberFormat('es-AR', {
@@ -301,8 +290,6 @@ export class ProfessionalDashboardComponent implements OnInit {
     console.log('✅ Métricas calculadas:', {
       ingresoTotal,
       trabajosCompletados,
-      cantidadMediosPago,
-      mediosPago: Array.from(mediosPago),
       promedio: trabajosCompletados > 0 ? ingresoTotal / trabajosCompletados : 0
     });
   }
