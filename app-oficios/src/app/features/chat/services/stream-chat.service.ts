@@ -13,20 +13,31 @@ export class StreamChatService {
   private currentUserId: string = '';
   private http = inject(HttpClient);
   private solicitudRepository = inject(SolicitudRepository);
+  private isProfessional: boolean = false; // ✅ Nuevo: guardar si es profesional
+  private realUserId: string = ''; // ✅ Nuevo: ID real del usuario (no el del profesional)
 
-  async initializeChat(userId: string, userName: string): Promise<StreamChat> {
+  get userId(): string {
+    return this.currentUserId;
+  }
+
+  async initializeChat(
+    userId: string, 
+    userName: string, 
+    isProfessional: boolean = false,
+    realUserId?: string
+  ): Promise<StreamChat> {
     try {
-      // 1. Obtener API Key, Token y nombre completo desde tu backend
+      this.isProfessional = isProfessional;
+      this.realUserId = realUserId || userId;
+
       const initData = await firstValueFrom(
         this.http.get<any>(`${environment.apiUrl}/api/v1/chat/init?userId=${userId}`)
       );
 
       console.log('📥 Datos de inicialización:', initData);
 
-      // 2. Crear instancia de Stream Chat
       this.chatClient = StreamChat.getInstance(initData.apiKey);
 
-      // 3. Conectar usuario con el nombre completo del backend
       const fullName = initData.fullName || userName;
       await this.chatClient.connectUser(
         {
@@ -37,7 +48,7 @@ export class StreamChatService {
       );
 
       this.currentUserId = userId;
-      console.log('✅ Chat inicializado correctamente con nombre:', fullName);
+      console.log('✅ Chat inicializado con nombre:', fullName);
       
       return this.chatClient;
     } catch (error) {
@@ -54,6 +65,29 @@ export class StreamChatService {
     return this.currentUserId;
   }
 
+  async getUserChannels(): Promise<Channel[]> {
+    if (!this.chatClient) {
+      console.error('❌ Chat client no inicializado');
+      return [];
+    }
+
+    try {
+      const filter = { members: { $in: [this.currentUserId] } };
+      const sort = [{ last_message_at: -1 as const }];
+      
+      const channels = await this.chatClient.queryChannels(filter, sort, {
+        watch: true,
+        state: true,
+      });
+
+      console.log('✅ Canales obtenidos:', channels.length);
+      return channels;
+    } catch (error) {
+      console.error('❌ Error al obtener canales:', error);
+      return [];
+    }
+  }
+
   async createConversationWithProfessional(
     userId: string,
     professionalId: string
@@ -61,7 +95,6 @@ export class StreamChatService {
     try {
       console.log('📤 Creando conversación:', { userId, professionalId });
       
-      // Llamar a tu endpoint para crear la conversación
       const response = await firstValueFrom(
         this.http.post<any>(`${environment.apiUrl}/api/v1/chat/conversations/with-professional`, {
           userId,
@@ -70,10 +103,7 @@ export class StreamChatService {
       );
 
       console.log('📥 Respuesta del backend:', response);
-      console.log('📋 channelType:', response.channelType);
-      console.log('📋 channelId:', response.channelId);
 
-      // Obtener el canal creado
       const channel = this.chatClient.channel(
         response.channelType,
         response.channelId
@@ -81,7 +111,7 @@ export class StreamChatService {
 
       await channel.watch();
       
-      console.log('✅ Canal creado y watching:', {
+      console.log('✅ Canal creado:', {
         id: channel.id,
         type: channel.type,
         members: Object.keys(channel.state.members)
@@ -95,15 +125,24 @@ export class StreamChatService {
   }
 
   async getProfessionals(): Promise<any[]> {
+    // ✅ Si es profesional, retornar array vacío sin hacer la llamada
+    if (this.isProfessional) {
+      console.log('⚠️ Usuario es profesional, no puede ver lista de profesionales');
+      return [];
+    }
+
     try {
-      // Obtener solicitudes del usuario actual
+      // ✅ Usar realUserId en lugar de currentUserId
+      const userIdForRequest = this.realUserId || this.currentUserId;
+      
+      console.log('🔍 Obteniendo solicitudes para usuario:', userIdForRequest);
+      
       const solicitudes = await firstValueFrom(
-        this.solicitudRepository.getSolicitudesByUsuario(parseInt(this.currentUserId))
+        this.solicitudRepository.getSolicitudesByUsuario(parseInt(userIdForRequest))
       );
 
       console.log('✅ Solicitudes del usuario:', solicitudes);
 
-      // Mapear solicitudes a formato de profesionales
       return solicitudes.map(solicitud => ({
         id: solicitud.idProfesional.toString(),
         name: `${solicitud.nombreProfesional} ${solicitud.apellidoProfesional}`,
@@ -115,9 +154,8 @@ export class StreamChatService {
     } catch (error: any) {
       console.error('❌ Error al obtener profesionales:', error);
       
-      // Si es error 403, probablemente es un profesional
       if (error?.status === 403) {
-        console.log('⚠️ Usuario sin permisos para ver solicitudes (probablemente es profesional)');
+        console.log('⚠️ Usuario sin permisos para ver solicitudes');
         return [];
       }
       

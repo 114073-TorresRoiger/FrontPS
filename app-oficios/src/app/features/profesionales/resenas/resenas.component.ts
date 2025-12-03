@@ -1,25 +1,19 @@
-import { Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
+import { Component, inject, OnInit } from '@angular/core';
+import { CommonModule, NgIf, NgFor } from '@angular/common';
 import { Router } from '@angular/router';
 import { LucideAngularModule, ArrowLeft, Star, User, Calendar, ThumbsUp } from 'lucide-angular';
-
-interface Resena {
-  id: number;
-  cliente: string;
-  calificacion: number;
-  comentario: string;
-  fecha: string;
-  servicio: string;
-}
+import { ResenaHttpRepository, Resena } from '../../../data/profesionales/resena.http.repository';
+import { AuthService } from '../../../domain/auth/auth.service';
 
 @Component({
   selector: 'app-resenas',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule],
+  imports: [CommonModule, NgIf, NgFor, LucideAngularModule],
   templateUrl: './resenas.component.html',
   styleUrl: './resenas.component.scss'
 })
-export class ResenasComponent {
+export class ResenasComponent implements OnInit {
   readonly ArrowLeft = ArrowLeft;
   readonly Star = Star;
   readonly User = User;
@@ -28,43 +22,44 @@ export class ResenasComponent {
 
   private readonly router = inject(Router);
 
-  promedioCalificacion = 4.8;
-  totalResenas = 47;
+  promedioCalificacion: number = 0;
+  totalResenas: number = 0;
+  resenas: Resena[] = [];
+  loading: boolean = true;
+  error: string | null = null;
 
-  resenas: Resena[] = [
-    {
-      id: 1,
-      cliente: 'María García',
-      calificacion: 5,
-      comentario: 'Excelente trabajo, muy profesional y puntual. Totalmente recomendado.',
-      fecha: '2025-11-02',
-      servicio: 'Plomería'
-    },
-    {
-      id: 2,
-      cliente: 'Juan Pérez',
-      calificacion: 5,
-      comentario: 'Muy satisfecho con el resultado. Trabajo de calidad y buen precio.',
-      fecha: '2025-10-28',
-      servicio: 'Electricidad'
-    },
-    {
-      id: 3,
-      cliente: 'Carlos López',
-      calificacion: 4,
-      comentario: 'Buen servicio, aunque tardó un poco más de lo esperado.',
-      fecha: '2025-10-25',
-      servicio: 'Pintura'
-    },
-    {
-      id: 4,
-      cliente: 'Ana Martínez',
-      calificacion: 5,
-      comentario: 'Impecable. Resolvió el problema rápidamente y dejó todo limpio.',
-      fecha: '2025-10-20',
-      servicio: 'Carpintería'
+  private readonly resenaRepo = inject(ResenaHttpRepository);
+  private readonly authService = inject(AuthService);
+
+
+  ngOnInit(): void {
+    const user = this.authService.getCurrentUser();
+    const idProfesional = user?.idProfesional;
+    if (!idProfesional) {
+      this.error = 'No se encontró el profesional.';
+      this.loading = false;
+      return;
     }
-  ];
+    this.resenaRepo.getPromedioProfesional(idProfesional).subscribe({
+      next: promedio => {
+        this.promedioCalificacion = promedio;
+      },
+      error: () => {
+        this.error = 'Error al obtener el promedio de calificaciones.';
+      }
+    });
+    this.resenaRepo.getReseniasDeProfesional(idProfesional).subscribe({
+      next: resenas => {
+        this.resenas = resenas;
+        this.totalResenas = resenas.length;
+        this.loading = false;
+      },
+      error: () => {
+        this.error = 'Error al obtener las reseñas.';
+        this.loading = false;
+      }
+    });
+  }
 
   goBack() {
     this.router.navigate(['/profesionales/dashboard']);
