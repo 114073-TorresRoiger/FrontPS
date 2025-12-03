@@ -1,11 +1,12 @@
 <!-- Navbar -->
 <nav class="navbar">
   <div class="navbar-container">
-    <!-- Chat Button (Left) -->
+    <!-- Sidebar Toggle (Left) -->
     <div class="navbar-left">
-      <button class="btn-chat" (click)="goToChat()">
-        <lucide-angular [img]="MessageCircle" size="20"></lucide-angular>
-        <span>Chats</span>
+      <button class="sidebar-toggle" (click)="toggleSidebar()">
+        <lucide-angular [img]="User" size="20"></lucide-angular>
+        <span *ngIf="isUserAuthenticated()">{{ getUserDisplayName() }}</span>
+        <span *ngIf="!isUserAuthenticated()">Cuenta</span>
       </button>
     </div>
 
@@ -25,77 +26,84 @@
         <button class="search-btn" (click)="onSearch()">Buscar</button>
       </div>
     </div>
-
-    <!-- User Dropdown (Right) -->
-    <div class="navbar-right">
-      <div class="user-dropdown">
-        <!-- Authenticated User -->
-        <button
-          *ngIf="isUserAuthenticated()"
-          class="dropdown-btn authenticated"
-          [class.active]="isDropdownOpen()"
-          (click)="toggleDropdown()"
-        >
-          <lucide-angular [img]="User" size="18"></lucide-angular>
-          <span>{{ getUserDisplayName() }}</span>
-          <lucide-angular [img]="ChevronDown" size="16"></lucide-angular>
-        </button>
-
-        <!-- Guest User -->
-        <button
-          *ngIf="!isUserAuthenticated()"
-          class="dropdown-btn"
-          [class.active]="isDropdownOpen()"
-          (click)="toggleDropdown()"
-        >
-          <lucide-angular [img]="User" size="18"></lucide-angular>
-          <span>Cuenta</span>
-          <lucide-angular [img]="ChevronDown" size="16"></lucide-angular>
-        </button>
-
-        <!-- Authenticated Dropdown Menu -->
-        <div *ngIf="isUserAuthenticated()" class="dropdown-menu" [class.show]="isDropdownOpen()">
-          <button class="dropdown-item profile" (click)="goToProfile()">
-            <lucide-angular [img]="Settings" size="16"></lucide-angular>
-            <span>Perfil</span>
-          </button>
-          <button
-            *ngIf="isProfessional()"
-            class="dropdown-item dashboard"
-            (click)="goToDashboard()"
-          >
-            <lucide-angular [img]="Briefcase" size="16"></lucide-angular>
-            <span>Dashboard Profesional</span>
-          </button>
-          <button
-            *ngIf="!isProfessional()"
-            class="dropdown-item register-professional"
-            (click)="goToRegisterProfessional()"
-          >
-            <lucide-angular [img]="Briefcase" size="16"></lucide-angular>
-            <span>Registrarse como Profesional</span>
-          </button>
-          <button class="dropdown-item logout" (click)="logout()">
-            <lucide-angular [img]="LogOut" size="16"></lucide-angular>
-            <span>Cerrar Sesión</span>
-          </button>
-        </div>
-
-        <!-- Guest Dropdown Menu -->
-        <div *ngIf="!isUserAuthenticated()" class="dropdown-menu" [class.show]="isDropdownOpen()">
-          <button class="dropdown-item signin" (click)="goToSignIn()">
-            <lucide-angular [img]="LogIn" size="16"></lucide-angular>
-            <span>Iniciar Sesión</span>
-          </button>
-          <button class="dropdown-item signup" (click)="goToSignUp()">
-            <lucide-angular [img]="UserPlus" size="16"></lucide-angular>
-            <span>Registrarse</span>
-          </button>
-        </div>
-      </div>
-    </div>
   </div>
 </nav>
+
+<!-- Floating Chat Button -->
+<button class="floating-chat-btn" (click)="goToChat()">
+  <lucide-angular [img]="MessageCircle" size="24"></lucide-angular>
+</button>
+
+<!-- Sidebar -->
+<div class="sidebar-overlay" [class.active]="isSidebarOpen()" (click)="closeSidebar()"></div>
+<aside class="sidebar" [class.active]="isSidebarOpen()">
+  <!-- Logo -->
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <lucide-angular [img]="Briefcase" size="32" class="logo-icon"></lucide-angular>
+      <span class="logo-text">Tu Oficio</span>
+    </div>
+  </div>
+
+  <!-- Menu Items -->
+  <nav class="sidebar-nav">
+    <!-- Authenticated Menu -->
+    <div *ngIf="isUserAuthenticated()" class="nav-section">
+      <div class="nav-section-title">Principal</div>
+      <button class="nav-item" (click)="goToProfile()">
+        <lucide-angular [img]="User" size="20"></lucide-angular>
+        <span>Mi Perfil</span>
+      </button>
+      <button class="nav-item" (click)="closeSidebar()">
+        <lucide-angular [img]="CalendarCheck" size="20"></lucide-angular>
+        <span>Mis Trabajos</span>
+      </button>
+    </div>
+
+    <!-- Professional Section -->
+    <div *ngIf="isUserAuthenticated()" class="nav-section">
+      <div class="nav-section-title">Profesional</div>
+      <button *ngIf="isProfessional()" class="nav-item" (click)="goToDashboard()">
+        <lucide-angular [img]="Briefcase" size="20"></lucide-angular>
+        <span>Dashboard</span>
+      </button>
+      <button *ngIf="!isProfessional()" class="nav-item" (click)="goToRegisterProfessional()">
+        <lucide-angular [img]="UserPlus" size="20"></lucide-angular>
+        <span>Registrarse</span>
+      </button>
+    </div>
+
+    <!-- Guest Menu -->
+    <div *ngIf="!isUserAuthenticated()" class="nav-section">
+      <div class="nav-section-title">Cuenta</div>
+      <button class="nav-item" (click)="goToSignIn()">
+        <lucide-angular [img]="LogIn" size="20"></lucide-angular>
+        <span>Iniciar Sesión</span>
+      </button>
+      <button class="nav-item" (click)="goToSignUp()">
+        <lucide-angular [img]="UserPlus" size="20"></lucide-angular>
+        <span>Registrarse</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- User Profile & Logout (Bottom) -->
+  <div class="sidebar-footer">
+    <div *ngIf="isUserAuthenticated()" class="user-profile">
+      <div class="user-avatar">
+        <lucide-angular [img]="User" size="24"></lucide-angular>
+      </div>
+      <div class="user-info">
+        <div class="user-name">{{ getUserDisplayName() }}</div>
+        <div class="user-role">{{ isProfessional() ? 'Profesional' : 'Cliente' }}</div>
+      </div>
+    </div>
+    <button *ngIf="isUserAuthenticated()" class="logout-btn" (click)="logout()">
+      <lucide-angular [img]="LogOut" size="20"></lucide-angular>
+      <span>Cerrar Sesión</span>
+    </button>
+  </div>
+</aside>
 
 <!-- Main Content -->
 <div class="home-container">
@@ -201,6 +209,7 @@
                 <th>Fecha Finalización</th>
                 <th>Monto</th>
                 <th>Pago</th>
+                <th>Reseña</th>
               </tr>
             </thead>
             <tbody>
@@ -214,7 +223,7 @@
                 </td>
                 <td>{{ formatDate(trabajo.fechaFinalizacion) }}</td>
                 <td>{{ formatMoneda(trabajo.montoFinal) }}</td>
-                <td>
+                <td class="pago-cell">
                   <!-- Botón "Ir a Pagar" -->
                   <button
                     *ngIf="trabajo.idpago && trabajo.estadoPago !== 'APROBADO'"
@@ -225,17 +234,14 @@
                     Ir a Pagar
                   </button>
 
-                  <!-- Pagado + Reseñar -->
-                  <div *ngIf="trabajo.estadoPago === 'APROBADO'" class="pago-actions">
-                    <span class="pago-aprobado">
-                      <lucide-angular [img]="CheckCircle" size="16"></lucide-angular>
-                      Pagado
-                    </span>
-                    <button class="btn-reseniar" (click)="abrirModalResenia(trabajo)">
-                      <lucide-angular [img]="Star" size="16"></lucide-angular>
-                      Reseñar
-                    </button>
-                  </div>
+                  <!-- Pagado -->
+                  <span
+                    *ngIf="trabajo.estadoPago === 'APROBADO'"
+                    class="pago-aprobado"
+                  >
+                    <lucide-angular [img]="CheckCircle" size="16"></lucide-angular>
+                    Pagado
+                  </span>
 
                   <!-- Sin factura -->
                   <span
@@ -244,6 +250,34 @@
                   >
                     <lucide-angular [img]="AlertCircle" size="16"></lucide-angular>
                     Sin Factura
+                  </span>
+                </td>
+                <td class="resenia-cell">
+                  <!-- Botón Reseñar -->
+                  <button
+                    *ngIf="trabajo.estadoPago === 'APROBADO' && !trabajo.tieneResenia"
+                    class="btn-reseniar"
+                    (click)="abrirModalResenia(trabajo)"
+                  >
+                    <lucide-angular [img]="Star" size="16"></lucide-angular>
+                    Reseñar
+                  </button>
+
+                  <!-- Ya reseñado -->
+                  <span
+                    *ngIf="trabajo.estadoPago === 'APROBADO' && trabajo.tieneResenia"
+                    class="trabajo-reseniado"
+                  >
+                    <lucide-angular [img]="CheckCircle" size="16"></lucide-angular>
+                    Ya Reseñado
+                  </span>
+
+                  <!-- Pendiente de pago -->
+                  <span
+                    *ngIf="trabajo.estadoPago !== 'APROBADO'"
+                    class="resenia-pendiente"
+                  >
+                    -
                   </span>
                 </td>
               </tr>
@@ -609,8 +643,9 @@
 <app-resenia-modal
   *ngIf="showReseniaModal() && selectedTrabajoForResenia()"
   [idUsuario]="authService.getCurrentUser()?.id || 0"
-  [idProfesional]="selectedTrabajoForResenia()?.idProfesional || 0"
-  [nombreProfesional]="selectedTrabajoForResenia()?.trabajo?.profesional || ''"
+  [idProfesional]="selectedTrabajoForResenia()!.idProfesional || 0"
+  [idTrabajo]="selectedTrabajoForResenia()!.trabajo.idTrabajo"
+  [nombreProfesional]="selectedTrabajoForResenia()!.trabajo.profesional || ''"
   (close)="cerrarModalResenia()"
   (reseniaEnviada)="onReseniaEnviada()"
 ></app-resenia-modal>

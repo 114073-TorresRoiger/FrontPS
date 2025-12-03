@@ -129,6 +129,7 @@ export class HomePage implements OnInit {
   showProfessionals = signal(false);
   selectedService = signal<ServiceCard | null>(null);
   isDropdownOpen = signal(false);
+  isSidebarOpen = signal(false);
 
   // Services from API
   services = signal<ServiceCard[]>([]);
@@ -509,15 +510,18 @@ export class HomePage implements OnInit {
   }
   // ⭐ AGREGAR: Método para abrir modal de reseña
   abrirModalResenia(trabajo: TrabajoClienteResponse): void {
+    console.log('🔍 Abriendo modal para trabajo:', trabajo);
     this.solicitudService.getSolicitudById(trabajo.idSolicitud).subscribe({
       next: (solicitud) => {
         console.log('Solicitud recibida:', solicitud);
         // Usar solo el campo correcto
         const idProfesional = solicitud.idProfesional;
-        this.selectedTrabajoForResenia.set({
+        const dataParaModal = {
           trabajo: trabajo,
           idProfesional,
-        });
+        };
+        console.log('🔍 Datos que se pasarán al modal:', dataParaModal);
+        this.selectedTrabajoForResenia.set(dataParaModal);
         this.showReseniaModal.set(true);
       },
       error: (error: any) => {
@@ -528,26 +532,32 @@ export class HomePage implements OnInit {
   }
   goToSignIn() {
     this.isDropdownOpen.set(false);
+    this.isSidebarOpen.set(false);
     this.router.navigate(['/auth/login']);
   }
   goToSignUp() {
     this.isDropdownOpen.set(false);
+    this.isSidebarOpen.set(false);
     this.router.navigate(['/auth/registro']);
   }
   goToProfile() {
     this.isDropdownOpen.set(false);
+    this.isSidebarOpen.set(false);
     this.router.navigate(['/usuarios/perfil']);
   }
   goToRegisterProfessional() {
     this.isDropdownOpen.set(false);
+    this.isSidebarOpen.set(false);
     this.router.navigate(['/profesionales/registro']);
   }
   goToDashboard() {
     this.isDropdownOpen.set(false);
+    this.isSidebarOpen.set(false);
     this.router.navigate(['/profesionales/dashboard']);
   }
   logout() {
     this.isDropdownOpen.set(false);
+    this.isSidebarOpen.set(false);
     this.authService.logout();
   }
   getUserDisplayName(): string {
@@ -559,6 +569,14 @@ export class HomePage implements OnInit {
   isProfessional(): boolean {
     const user = this.authService.getCurrentUser();
     return user?.idProfesional != null;
+  }
+
+  toggleSidebar(): void {
+    this.isSidebarOpen.set(!this.isSidebarOpen());
+  }
+
+  closeSidebar(): void {
+    this.isSidebarOpen.set(false);
   }
 
   cerrarModalResenia(): void {

@@ -7,6 +7,7 @@ import { environment } from '../../../environments/environment';
 export interface ReseniaRequest {
   idUsuario: number;
   idProfesional: number;
+  idTrabajo: number;
   puntuacion: number;
   comentario: string;
 }
