@@ -615,9 +615,12 @@ export class HomePage implements OnInit {
 
     const userAny = user as any;
     const isProfessional = !!userAny.idProfesional;
-    const userId = isProfessional ? userAny.idProfesional : user.id;
+    // ✅ Siempre usar el ID del profesional cuando es profesional
+    const professionalId = isProfessional ? userAny.idProfesional : user.id;
 
-    this.notificacionService.cargarNotificaciones(userId, isProfessional).subscribe({
+    console.log('🔔 Cargando notificaciones para:', { isProfessional, professionalId });
+
+    this.notificacionService.cargarNotificaciones(professionalId, isProfessional).subscribe({
       next: () => {
         console.log('✅ Notificaciones cargadas');
       },

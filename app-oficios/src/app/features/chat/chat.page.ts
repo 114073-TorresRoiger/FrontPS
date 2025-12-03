@@ -25,13 +25,13 @@ export class ChatPage implements OnInit, OnDestroy {
   selectedMessageToDelete: any = null;
   deleteModal: any;
 
-  // Modal profesionales
+  // Modal profesionales/clientes
   professionalModal: any;
   professionals: any[] = [];
   
   // Estados
   private currentUserId: string = '';
-  private isProfessional: boolean = false;
+  isProfessional: boolean = false; // ✅ Público para usar en template
   isLoading: boolean = true;
   error: string | null = null;
 
@@ -95,10 +95,8 @@ export class ChatPage implements OnInit, OnDestroy {
       // Cargar canales
       await this.loadChannels();
       
-      // Cargar profesionales solo si no es profesional
-      if (!this.isProfessional) {
-        await this.loadProfessionals();
-      }
+      // Cargar profesionales (para clientes) o clientes (para profesionales)
+      await this.loadProfessionals();
 
       this.isLoading = false;
       console.log('✅ Chat inicializado correctamente');
@@ -120,10 +118,16 @@ export class ChatPage implements OnInit, OnDestroy {
 
   async loadProfessionals(): Promise<void> {
     try {
-      this.professionals = await this.chatService.getProfessionals();
-      console.log('✅ Profesionales cargados:', this.professionals.length);
+      // ✅ Si es profesional, cargar clientes. Si es cliente, cargar profesionales
+      if (this.isProfessional) {
+        this.professionals = await this.chatService.getClients();
+        console.log('✅ Clientes cargados:', this.professionals.length);
+      } else {
+        this.professionals = await this.chatService.getProfessionals();
+        console.log('✅ Profesionales cargados:', this.professionals.length);
+      }
     } catch (error) {
-      console.error('❌ Error cargando profesionales:', error);
+      console.error('❌ Error cargando lista:', error);
       this.professionals = [];
     }
   }
@@ -219,14 +223,8 @@ export class ChatPage implements OnInit, OnDestroy {
     }
   }
 
-  // Modal profesionales
+  // Modal profesionales/clientes
   showProfessionalModal(): void {
-    // ✅ No mostrar si es profesional
-    if (this.isProfessional) {
-      console.log('⚠️ Los profesionales no pueden iniciar conversaciones');
-      return;
-    }
-
     const modalElement = document.getElementById('professionalModal');
     if (!modalElement) {
       console.error('❌ Modal element not found');
@@ -271,13 +269,24 @@ export class ChatPage implements OnInit, OnDestroy {
   }
 
   async selectProfessional(prof: any): Promise<void> {
-    console.log('Profesional seleccionado:', prof);
+    console.log('📤 Persona seleccionada:', prof);
     
     try {
-      const channel = await this.chatService.createConversationWithProfessional(
-        this.currentUserId,
-        prof.id
-      );
+      let channel: Channel;
+      
+      // ✅ Si es profesional, crear conversación con cliente
+      if (this.isProfessional) {
+        channel = await this.chatService.createConversationWithClient(
+          this.currentUserId,
+          prof.id
+        );
+      } else {
+        // ✅ Si es cliente, crear conversación con profesional
+        channel = await this.chatService.createConversationWithProfessional(
+          this.currentUserId,
+          prof.id
+        );
+      }
       
       this.closeProfessionalModal();
       await this.loadChannels();

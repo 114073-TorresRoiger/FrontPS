@@ -56,9 +56,14 @@ export class NotificacionService {
           return notificaciones;
         }),
         catchError(error => {
-          console.error('Error cargando notificaciones de profesional:', error);
-          // En caso de error 403/404 o cualquier otro, simplemente retornar array vacío
-          // No es crítico, las notificaciones son una feature nice-to-have
+          // El backend devuelve 404 cuando no hay solicitudes pendientes
+          if (error.status === 404) {
+            console.log('ℹ️ No hay solicitudes pendientes para el profesional');
+          } else {
+            console.error('Error cargando notificaciones de profesional:', error);
+          }
+          
+          // Retornar array vacío - esto no es un error crítico
           this.notificaciones.set([]);
           this.actualizarContadorNoLeidas();
           return of([]);
