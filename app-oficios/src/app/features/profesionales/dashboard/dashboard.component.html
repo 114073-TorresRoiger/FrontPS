@@ -136,62 +136,79 @@
                     <span *ngIf="!trabajo.estadoPago">-</span>
                   </td>
                   <td>
-                    <div class="d-flex gap-1 justify-content-center flex-wrap">
-                      <!-- Iniciar -->
+                    <div class="position-relative">
+                      <!-- Botón de tres puntos -->
                       <button
-                        *ngIf="trabajo.estado === 'PENDIENTE'"
-                        class="btn btn-sm btn-outline-success"
-                        (click)="iniciarTrabajoManual(trabajo.idTrabajo)"
-                        [disabled]="actionLoading() === trabajo.idTrabajo"
-                        title="Iniciar trabajo">
-                        <lucide-angular [img]="Play" [size]="16"></lucide-angular>
+                        class="btn btn-sm btn-outline-secondary"
+                        (click)="toggleMenuAcciones(trabajo.idTrabajo, $event)"
+                        title="Acciones"
+                        [disabled]="actionLoading() === trabajo.idTrabajo">
+                        <lucide-angular [img]="MoreVertical" [size]="16"></lucide-angular>
                       </button>
 
-                      <!-- Pausar -->
-                      <button
-                        *ngIf="trabajo.estado === 'EN_CURSO'"
-                        class="btn btn-sm btn-outline-warning"
-                        (click)="pausarTrabajoManual(trabajo.idTrabajo)"
-                        [disabled]="actionLoading() === trabajo.idTrabajo"
-                        title="Pausar trabajo">
-                        <lucide-angular [img]="Pause" [size]="16"></lucide-angular>
-                      </button>
+                      <!-- Menú desplegable -->
+                      <div
+                        *ngIf="menuAccionesAbierto() === trabajo.idTrabajo"
+                        class="dropdown-menu-custom show"
+                        (click)="$event.stopPropagation()">
+                        
+                        <!-- Iniciar -->
+                        <button
+                          *ngIf="trabajo.estado === 'PENDIENTE'"
+                          class="dropdown-item-custom"
+                          (click)="iniciarTrabajoManual(trabajo.idTrabajo); cerrarMenuAcciones()"
+                          [disabled]="actionLoading() === trabajo.idTrabajo">
+                          <lucide-angular [img]="Play" [size]="16" class="me-2"></lucide-angular>
+                          Iniciar trabajo
+                        </button>
 
-                      <!-- Reanudar -->
-                      <button
-                        *ngIf="trabajo.estado === 'PAUSADO'"
-                        class="btn btn-sm btn-outline-success"
-                        (click)="reanudarTrabajoManual(trabajo.idTrabajo)"
-                        [disabled]="actionLoading() === trabajo.idTrabajo"
-                        title="Reanudar trabajo">
-                        <lucide-angular [img]="Play" [size]="16"></lucide-angular>
-                      </button>
+                        <!-- Pausar -->
+                        <button
+                          *ngIf="trabajo.estado === 'EN_CURSO'"
+                          class="dropdown-item-custom"
+                          (click)="pausarTrabajoManual(trabajo.idTrabajo); cerrarMenuAcciones()"
+                          [disabled]="actionLoading() === trabajo.idTrabajo">
+                          <lucide-angular [img]="Pause" [size]="16" class="me-2"></lucide-angular>
+                          Pausar trabajo
+                        </button>
 
-                      <!-- Finalizar -->
-                      <button
-                        *ngIf="trabajo.estado === 'EN_CURSO' || trabajo.estado === 'PAUSADO'"
-                        class="btn btn-sm btn-outline-primary"
-                        (click)="openFinalizarModal(trabajo.idTrabajo)"
-                        [disabled]="actionLoading() === trabajo.idTrabajo"
-                        title="Finalizar trabajo">
-                        <lucide-angular [img]="Square" [size]="16"></lucide-angular>
-                      </button>
+                        <!-- Reanudar -->
+                        <button
+                          *ngIf="trabajo.estado === 'PAUSADO'"
+                          class="dropdown-item-custom"
+                          (click)="reanudarTrabajoManual(trabajo.idTrabajo); cerrarMenuAcciones()"
+                          [disabled]="actionLoading() === trabajo.idTrabajo">
+                          <lucide-angular [img]="Play" [size]="16" class="me-2"></lucide-angular>
+                          Reanudar trabajo
+                        </button>
 
-                      <!-- Cancelar -->
-                      <button
-                        *ngIf="trabajo.estado !== 'FINALIZADO' && trabajo.estado !== 'CANCELADO'"
-                        class="btn btn-sm btn-outline-danger"
-                        (click)="openCancelarModal(trabajo.idTrabajo)"
-                        [disabled]="actionLoading() === trabajo.idTrabajo"
-                        title="Cancelar trabajo">
-                        <lucide-angular [img]="Ban" [size]="16"></lucide-angular>
-                      </button>
+                        <!-- Finalizar -->
+                        <button
+                          *ngIf="trabajo.estado === 'EN_CURSO' || trabajo.estado === 'PAUSADO'"
+                          class="dropdown-item-custom"
+                          (click)="openFinalizarModal(trabajo.idTrabajo); cerrarMenuAcciones()"
+                          [disabled]="actionLoading() === trabajo.idTrabajo">
+                          <lucide-angular [img]="Square" [size]="16" class="me-2"></lucide-angular>
+                          Finalizar trabajo
+                        </button>
 
-                      <span
-                        *ngIf="trabajo.estado === 'FINALIZADO' || trabajo.estado === 'CANCELADO'"
-                        class="text-muted fst-italic">
-                        -
-                      </span>
+                        <!-- Cancelar -->
+                        <button
+                          *ngIf="trabajo.estado !== 'FINALIZADO' && trabajo.estado !== 'CANCELADO'"
+                          class="dropdown-item-custom text-danger"
+                          (click)="openCancelarModal(trabajo.idTrabajo); cerrarMenuAcciones()"
+                          [disabled]="actionLoading() === trabajo.idTrabajo">
+                          <lucide-angular [img]="Ban" [size]="16" class="me-2"></lucide-angular>
+                          Cancelar trabajo
+                        </button>
+
+                        <!-- Sin acciones disponibles -->
+                        <div
+                          *ngIf="trabajo.estado === 'FINALIZADO' || trabajo.estado === 'CANCELADO'"
+                          class="dropdown-item-custom text-muted disabled">
+                          Sin acciones disponibles
+                        </div>
+                      </div>
                     </div>
                   </td>
                 </tr>

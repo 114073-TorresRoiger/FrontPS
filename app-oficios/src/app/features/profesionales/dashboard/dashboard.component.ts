@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
+import { Component, signal, inject, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { LucideAngularModule,
@@ -24,7 +24,8 @@ import { LucideAngularModule,
   Ban,
   Inbox,
   MapPin,
-  Filter
+  Filter,
+  MoreVertical
 } from 'lucide-angular';
 import { AuthService } from '../../../domain/auth';
 import { GetSolicitudesUseCase } from '../../../domain/solicitudes/use-cases/get-solicitudes.usecase';
@@ -87,6 +88,7 @@ export class ProfessionalDashboardComponent implements OnInit {
   readonly Inbox = Inbox;
   readonly MapPin = MapPin;
   readonly Filter = Filter;
+  readonly MoreVertical = MoreVertical;
 
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
@@ -122,6 +124,9 @@ export class ProfessionalDashboardComponent implements OnInit {
 
   // Loading states para acciones
   actionLoading = signal<number | null>(null);
+
+  // Menu desplegable de acciones
+  menuAccionesAbierto = signal<number | null>(null);
 
   // ====== NUEVA FUNCIONALIDAD: Vista de Solicitudes con Mapa ======
   mostrarVistaSolicitudes = signal(false);
@@ -606,7 +611,8 @@ export class ProfessionalDashboardComponent implements OnInit {
     this.trabajoService.obtenerTrabajosPorProfesional(user.idProfesional).subscribe({
       next: (trabajos) => {
         console.log('✅ Trabajos cargados:', trabajos);
-        this.trabajos.set(trabajos);
+        const trabajosOrdenados = this.ordenarTrabajos(trabajos);
+        this.trabajos.set(trabajosOrdenados);
         this.isLoadingTrabajos.set(false);
       },
       error: (error) => {
@@ -614,6 +620,33 @@ export class ProfessionalDashboardComponent implements OnInit {
         this.trabajos.set([]);
         this.isLoadingTrabajos.set(false);
       }
+    });
+  }
+
+  private ordenarTrabajos(trabajos: any[]): any[] {
+    // Definir orden de prioridad de estados
+    const ordenEstados: { [key: string]: number } = {
+      'EN_CURSO': 1,
+      'PAUSADO': 2,
+      'PENDIENTE': 3,
+      'FINALIZADO': 4,
+      'CANCELADO': 5
+    };
+
+    return trabajos.sort((a, b) => {
+      // Primero ordenar por estado
+      const prioridadA = ordenEstados[a.estado] || 999;
+      const prioridadB = ordenEstados[b.estado] || 999;
+
+      if (prioridadA !== prioridadB) {
+        return prioridadA - prioridadB;
+      }
+
+      // Si tienen el mismo estado, ordenar por fecha (más recientes primero)
+      const fechaA = new Date(a.fechaInicio || a.fechaCreacion || 0).getTime();
+      const fechaB = new Date(b.fechaInicio || b.fechaCreacion || 0).getTime();
+
+      return fechaB - fechaA; // Descendente (más recientes primero)
     });
   }
 
@@ -692,6 +725,30 @@ export class ProfessionalDashboardComponent implements OnInit {
 
   goBack() {
     this.router.navigate(['/']);
+  }
+
+  toggleMenuAcciones(idTrabajo: number, event?: Event) {
+    if (event) {
+      event.stopPropagation();
+    }
+    if (this.menuAccionesAbierto() === idTrabajo) {
+      this.menuAccionesAbierto.set(null);
+    } else {
+      this.menuAccionesAbierto.set(idTrabajo);
+    }
+  }
+
+  cerrarMenuAcciones() {
+    this.menuAccionesAbierto.set(null);
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent) {
+    // Cerrar menú cuando se haga clic fuera
+    const target = event.target as HTMLElement;
+    if (!target.closest('.position-relative')) {
+      this.cerrarMenuAcciones();
+    }
   }
 
   logout() {
