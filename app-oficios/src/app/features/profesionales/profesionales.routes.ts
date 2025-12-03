@@ -9,22 +9,22 @@ export const PROFESIONALES_ROUTES: Routes = [
   },
   {
     path: 'dashboard',
-    loadComponent: () => import('./dashboard').then(m => m.ProfessionalDashboardComponent),
+    loadComponent: () => import('./dashboard/dashboard.component').then(m => m.ProfessionalDashboardComponent),
     canActivate: [noAdminGuard, profesionalGuard]
   },
   {
     path: 'facturas',
-    loadComponent: () => import('./facturas').then(m => m.FacturasComponent),
+    loadComponent: () => import('./facturas/facturas.component').then(m => m.FacturasComponent),
     canActivate: [noAdminGuard, profesionalGuard]
   },
   {
     path: 'resenas',
-    loadComponent: () => import('./resenas').then(m => m.ResenasComponent),
+    loadComponent: () => import('./resenas/resenas.component').then(m => m.ResenasComponent),
     canActivate: [noAdminGuard, profesionalGuard]
   },
   {
     path: 'metodos-pago',
-    loadComponent: () => import('./metodos-pago').then(m => m.MetodosPagoComponent),
+    loadComponent: () => import('./metodos-pago/metodos-pago.component').then(m => m.MetodosPagoComponent),
     canActivate: [noAdminGuard, profesionalGuard]
   }
 ];

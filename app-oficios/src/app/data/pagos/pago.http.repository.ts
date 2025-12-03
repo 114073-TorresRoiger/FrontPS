@@ -19,9 +19,13 @@ export class PagoHttpRepository implements PagoRepository {
   }
 
   historialIngresos(desde: string, hasta: string, idProfesional?: number): Observable<PagoFactura[]> {
+    // Convertir fechas a formato ISO 8601 completo (Instant)
+    const desdeISO = `${desde}T00:00:00Z`;
+    const hastaISO = `${hasta}T23:59:59Z`;
+    
     let params = new HttpParams()
-      .set('desde', desde)
-      .set('hasta', hasta);
+      .set('desde', desdeISO)
+      .set('hasta', hastaISO);
 
     if (idProfesional) {
       params = params.set('idProfesional', idProfesional.toString());
