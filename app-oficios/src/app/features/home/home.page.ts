@@ -40,6 +40,7 @@ import {
   X,
   Send,
   AlertCircle,
+  Bell,
 } from 'lucide-angular';
 import { AuthService } from '../../domain/auth';
 import { ListOficiosUseCase } from '../../domain/oficios/use-cases/list-oficios.usecase';
@@ -55,6 +56,9 @@ import { SolicitudService } from '../../domain/solicitudes/solicitud.service';
 import { ProfessionalCardComponent } from './professional-card/professional-card.component';
 import { TurnoModalComponent } from './turno-modal/turno-modal.component';
 import { ReseniaModalComponent } from './resenia-modal/resenia-modal.component';
+import { NotificacionesModalComponent } from '../../shared/components/notificaciones-modal/notificaciones-modal.component';
+import { NotificacionService } from '../../data/notificaciones/notificacion.service';
+import { StreamChatService } from '../chat/services/stream-chat.service';
 
 interface ServiceCard {
   id: number;
@@ -80,7 +84,8 @@ interface ServiceCard {
     ReactiveFormsModule,
     ProfessionalCardComponent,
     TurnoModalComponent,
-    ReseniaModalComponent, // ⭐ AGREGAR
+    ReseniaModalComponent,
+    NotificacionesModalComponent,
   ],
   templateUrl: './home.page.html',
   styleUrl: './home.page.scss',
@@ -97,6 +102,8 @@ export class HomePage implements OnInit {
   private readonly verificarSolicitudPendienteUseCase = inject(VerificarSolicitudPendienteUseCase);
   private readonly trabajoService = inject(TrabajoService);
   private readonly solicitudService = inject(SolicitudService);
+  readonly notificacionService = inject(NotificacionService);
+  private readonly streamChatService = inject(StreamChatService);
 
   // Icons
   readonly Search = Search;
@@ -121,6 +128,7 @@ export class HomePage implements OnInit {
   readonly CalendarCheck = CalendarCheck;
   readonly CheckCircle = CheckCircle;
   readonly AlertCircle = AlertCircle;
+  readonly Bell = Bell;
 
   // Search functionality
   searchQuery = signal('');
@@ -129,6 +137,7 @@ export class HomePage implements OnInit {
   showProfessionals = signal(false);
   selectedService = signal<ServiceCard | null>(null);
   isDropdownOpen = signal(false);
+  isSidebarOpen = signal(false);
 
   // Services from API
   services = signal<ServiceCard[]>([]);
@@ -162,6 +171,9 @@ export class HomePage implements OnInit {
     trabajo: TrabajoClienteResponse;
     idProfesional: number;
   } | null>(null);
+
+  // Notificaciones
+  mensajesNoLeidos = signal(0);
 
   // Featured professionals
   featuredProfessionals = signal<any[]>([
@@ -219,12 +231,16 @@ export class HomePage implements OnInit {
     this.loadServices();
     this.initSolicitudForm();
     this.loadTrabajosFinalizados();
+    this.loadNotificaciones();
+    this.loadMensajesNoLeidos();
   }
 
   @HostListener('window:focus', ['$event'])
   onWindowFocus(event: FocusEvent): void {
     if (this.isUserAuthenticated()) {
       this.loadTrabajosFinalizados();
+      this.loadMensajesNoLeidos();
+      this.loadNotificaciones();
     }
   }
 
@@ -509,15 +525,18 @@ export class HomePage implements OnInit {
   }
   // ⭐ AGREGAR: Método para abrir modal de reseña
   abrirModalResenia(trabajo: TrabajoClienteResponse): void {
+    console.log('🔍 Abriendo modal para trabajo:', trabajo);
     this.solicitudService.getSolicitudById(trabajo.idSolicitud).subscribe({
       next: (solicitud) => {
         console.log('Solicitud recibida:', solicitud);
         // Usar solo el campo correcto
         const idProfesional = solicitud.idProfesional;
-        this.selectedTrabajoForResenia.set({
+        const dataParaModal = {
           trabajo: trabajo,
           idProfesional,
-        });
+        };
+        console.log('🔍 Datos que se pasarán al modal:', dataParaModal);
+        this.selectedTrabajoForResenia.set(dataParaModal);
         this.showReseniaModal.set(true);
       },
       error: (error: any) => {
@@ -528,26 +547,37 @@ export class HomePage implements OnInit {
   }
   goToSignIn() {
     this.isDropdownOpen.set(false);
+    this.isSidebarOpen.set(false);
     this.router.navigate(['/auth/login']);
   }
   goToSignUp() {
     this.isDropdownOpen.set(false);
+    this.isSidebarOpen.set(false);
     this.router.navigate(['/auth/registro']);
   }
   goToProfile() {
     this.isDropdownOpen.set(false);
+    this.isSidebarOpen.set(false);
     this.router.navigate(['/usuarios/perfil']);
+  }
+  goToTrabajosFinalizados() {
+    this.isDropdownOpen.set(false);
+    this.isSidebarOpen.set(false);
+    this.router.navigate(['/trabajos/finalizados']);
   }
   goToRegisterProfessional() {
     this.isDropdownOpen.set(false);
+    this.isSidebarOpen.set(false);
     this.router.navigate(['/profesionales/registro']);
   }
   goToDashboard() {
     this.isDropdownOpen.set(false);
+    this.isSidebarOpen.set(false);
     this.router.navigate(['/profesionales/dashboard']);
   }
   logout() {
     this.isDropdownOpen.set(false);
+    this.isSidebarOpen.set(false);
     this.authService.logout();
   }
   getUserDisplayName(): string {
@@ -561,6 +591,14 @@ export class HomePage implements OnInit {
     return user?.idProfesional != null;
   }
 
+  toggleSidebar(): void {
+    this.isSidebarOpen.set(!this.isSidebarOpen());
+  }
+
+  closeSidebar(): void {
+    this.isSidebarOpen.set(false);
+  }
+
   cerrarModalResenia(): void {
     this.showReseniaModal.set(false);
     this.selectedTrabajoForResenia.set(null);
@@ -569,5 +607,118 @@ export class HomePage implements OnInit {
   onReseniaEnviada(): void {
     console.log('✅ Reseña enviada exitosamente');
     this.loadTrabajosFinalizados();
+  }
+
+  loadNotificaciones(): void {
+    const user = this.authService.getCurrentUser();
+    if (!user?.id) return;
+
+    const userAny = user as any;
+    const isProfessional = !!userAny.idProfesional;
+    // ✅ Siempre usar el ID del profesional cuando es profesional
+    const professionalId = isProfessional ? userAny.idProfesional : user.id;
+
+    console.log('🔔 Cargando notificaciones para:', { isProfessional, professionalId });
+
+    this.notificacionService.cargarNotificaciones(professionalId, isProfessional).subscribe({
+      next: () => {
+        console.log('✅ Notificaciones cargadas');
+      },
+      error: (error) => {
+        console.error('❌ Error cargando notificaciones:', error);
+      }
+    });
+  }
+
+  async loadMensajesNoLeidos(): Promise<void> {
+    try {
+      const user = this.authService.getCurrentUser();
+      if (!user?.id) {
+        this.mensajesNoLeidos.set(0);
+        this.notificacionService.actualizarMensajesNoLeidos(0);
+        return;
+      }
+
+      let chatClient = this.streamChatService.getChatClient();
+      
+      // Si no hay cliente de chat inicializado, intentar inicializarlo
+      if (!chatClient || !chatClient.user) {
+        try {
+          const userAny = user as any;
+          const isProfessional = !!userAny.idProfesional;
+          const realUserId = user.id.toString();
+          const chatUserId = isProfessional ? userAny.idProfesional.toString() : realUserId;
+          const userName = user.name && user.lastName 
+            ? `${user.name} ${user.lastName}` 
+            : user.name || 'Usuario';
+          
+          console.log('🔄 Inicializando chat para contar mensajes...');
+          await this.streamChatService.initializeChat(
+            chatUserId,
+            userName,
+            isProfessional,
+            realUserId
+          );
+          
+          chatClient = this.streamChatService.getChatClient();
+        } catch (initError) {
+          console.error('❌ Error inicializando chat:', initError);
+          this.mensajesNoLeidos.set(0);
+          this.notificacionService.actualizarMensajesNoLeidos(0);
+          return;
+        }
+      }
+
+      // Obtener el total de mensajes no leídos de todos los canales del usuario
+      const channels = await this.streamChatService.getUserChannels();
+      
+      let totalUnread = 0;
+      for (const channel of channels) {
+        const unreadCount = channel.countUnread();
+        totalUnread += unreadCount;
+      }
+
+      console.log('💬 Mensajes no leídos:', totalUnread);
+      
+      this.mensajesNoLeidos.set(totalUnread);
+      this.notificacionService.actualizarMensajesNoLeidos(totalUnread);
+
+      // Escuchar nuevos mensajes en tiempo real (solo una vez)
+      if (channels.length > 0 && !this.messageListenersSetup) {
+        this.setupMessageListeners(channels);
+        this.messageListenersSetup = true;
+      }
+      
+    } catch (error) {
+      console.error('❌ Error cargando mensajes no leídos:', error);
+      this.mensajesNoLeidos.set(0);
+      this.notificacionService.actualizarMensajesNoLeidos(0);
+    }
+  }
+
+  private messageListenersSetup = false;
+
+  private setupMessageListeners(channels: any[]): void {
+    // Escuchar eventos de nuevos mensajes en todos los canales
+    channels.forEach(channel => {
+      channel.on('message.new', (event: any) => {
+        // Solo incrementar si el mensaje no es del usuario actual
+        if (event.user?.id !== this.streamChatService.getCurrentUserId()) {
+          const currentCount = this.mensajesNoLeidos();
+          this.mensajesNoLeidos.set(currentCount + 1);
+          this.notificacionService.actualizarMensajesNoLeidos(currentCount + 1);
+        }
+      });
+
+      // Escuchar cuando se leen mensajes
+      channel.on('message.read', (event: any) => {
+        // Recalcular el total de no leídos
+        this.loadMensajesNoLeidos();
+      });
+    });
+  }
+
+  toggleNotificaciones(): void {
+    // Este método será llamado desde el template
   }
 }

@@ -308,6 +308,7 @@ import { ReseniaService, ReseniaRequest } from '../../../domain/resenias/resenia
 export class ReseniaModalComponent {
   @Input({ required: true }) idUsuario!: number;
   @Input({ required: true }) idProfesional!: number;
+  @Input({ required: true }) idTrabajo!: number;
   @Input({ required: true }) nombreProfesional!: string;
   @Output() close = new EventEmitter<void>();
   @Output() reseniaEnviada = new EventEmitter<void>();
@@ -350,12 +351,20 @@ export class ReseniaModalComponent {
       return;
     }
 
+    console.log('🔍 Inputs del componente:', {
+      idUsuario: this.idUsuario,
+      idProfesional: this.idProfesional,
+      idTrabajo: this.idTrabajo,
+      nombreProfesional: this.nombreProfesional
+    });
+
     this.isSubmitting.set(true);
     this.errorMessage.set(null);
 
     const request: ReseniaRequest = {
       idUsuario: this.idUsuario,
       idProfesional: this.idProfesional,
+      idTrabajo: this.idTrabajo,
       puntuacion: this.reseniaForm.value.puntuacion,
       comentario: this.reseniaForm.value.comentario
     };

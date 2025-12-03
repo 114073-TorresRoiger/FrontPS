@@ -308,9 +308,10 @@ import { ReseniaService, ReseniaRequest } from '../../domain/resenias/resenia.se
 export class ReseniaModalComponent {
   @Input({ required: true }) idUsuario!: number;
   @Input({ required: true }) idProfesional!: number;
+  @Input({ required: true }) idTrabajo!: number;
   @Input({ required: true }) nombreProfesional!: string;
   @Output() close = new EventEmitter<void>();
-  @Output() reseniaEnviada = new EventEmitter<void>();
+  @Output() reseniaEnviada = new EventEmitter<void>;
 
   readonly X = X;
   readonly Star = Star;
@@ -356,9 +357,11 @@ export class ReseniaModalComponent {
     const request: ReseniaRequest = {
       idUsuario: this.idUsuario,
       idProfesional: this.idProfesional,
+      idTrabajo: this.idTrabajo,
       puntuacion: this.reseniaForm.value.puntuacion,
       comentario: this.reseniaForm.value.comentario
     };
+    console.log('Enviando reseña:', request);
 
     this.reseniaService.puntuarResenia(request).subscribe({
       next: () => {
