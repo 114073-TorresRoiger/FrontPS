@@ -46,6 +46,7 @@ import { AuthService } from '../../domain/auth';
 import { ListOficiosUseCase } from '../../domain/oficios/use-cases/list-oficios.usecase';
 import { Oficio } from '../../domain/oficios/oficio.model';
 import { GetProfesionalesByOficioUseCase } from '../../domain/profesionales/use-cases/get-profesionales-by-oficio.usecase';
+import { GetProfesionalesMasSolicitadosUseCase } from '../../domain/profesionales/use-cases/get-profesionales-mas-solicitados.usecase';
 import { PerfilProfesional } from '../../domain/profesionales/models/perfil-profesional.model';
 import { EnviarSolicitudUseCase } from '../../domain/solicitudes/use-cases/enviar-solicitud.usecase';
 import { VerificarSolicitudPendienteUseCase } from '../../domain/solicitudes/use-cases/verificar-solicitud-pendiente.usecase';
@@ -59,6 +60,7 @@ import { ReseniaModalComponent } from './resenia-modal/resenia-modal.component';
 import { NotificacionesModalComponent } from '../../shared/components/notificaciones-modal/notificaciones-modal.component';
 import { NotificacionService } from '../../data/notificaciones/notificacion.service';
 import { StreamChatService } from '../chat/services/stream-chat.service';
+import { OnboardingComponent } from '../../shared/components/onboarding/onboarding.component';
 
 interface ServiceCard {
   id: number;
@@ -86,6 +88,7 @@ interface ServiceCard {
     TurnoModalComponent,
     ReseniaModalComponent,
     NotificacionesModalComponent,
+    OnboardingComponent,
   ],
   templateUrl: './home.page.html',
   styleUrl: './home.page.scss',
@@ -98,6 +101,7 @@ export class HomePage implements OnInit {
   readonly authService = inject(AuthService);
   private readonly listOficiosUseCase = inject(ListOficiosUseCase);
   private readonly getProfesionalesByOficioUseCase = inject(GetProfesionalesByOficioUseCase);
+  private readonly getProfesionalesMasSolicitadosUseCase = inject(GetProfesionalesMasSolicitadosUseCase);
   private readonly enviarSolicitudUseCase = inject(EnviarSolicitudUseCase);
   private readonly verificarSolicitudPendienteUseCase = inject(VerificarSolicitudPendienteUseCase);
   private readonly trabajoService = inject(TrabajoService);
@@ -176,56 +180,8 @@ export class HomePage implements OnInit {
   mensajesNoLeidos = signal(0);
 
   // Featured professionals
-  featuredProfessionals = signal<any[]>([
-    {
-      id: 1,
-      name: 'Carlos Rodríguez',
-      service: 'Plomería',
-      rating: 4.9,
-      reviewCount: 234,
-      price: 1500,
-      location: 'San Miguel, Buenos Aires',
-      experience: '12 años de experiencia',
-      verified: true,
-      image: 'assets/professionals/juan-perez.jpg',
-    },
-    {
-      id: 2,
-      name: 'Ana Martínez',
-      service: 'Electricidad',
-      rating: 4.8,
-      reviewCount: 189,
-      price: 1400,
-      location: 'Villa Ballester, Buenos Aires',
-      experience: '9 años de experiencia',
-      verified: true,
-      image: 'assets/professionals/roberto-silva.jpg',
-    },
-    {
-      id: 3,
-      name: 'Luis Fernández',
-      service: 'Carpintería',
-      rating: 5.0,
-      reviewCount: 156,
-      price: 2000,
-      location: 'San Martín, Buenos Aires',
-      experience: '15 años de experiencia',
-      verified: true,
-      image: 'assets/professionals/miguel-torres.jpg',
-    },
-    {
-      id: 4,
-      name: 'Patricia López',
-      service: 'Pintura',
-      rating: 4.7,
-      reviewCount: 142,
-      price: 1200,
-      location: 'José C. Paz, Buenos Aires',
-      experience: '8 años de experiencia',
-      verified: true,
-      image: 'assets/professionals/juan-perez.jpg',
-    },
-  ]);
+  featuredProfessionals = signal<PerfilProfesional[]>([]);
+  isLoadingFeaturedProfessionals = signal(true);
 
   ngOnInit(): void {
     this.loadServices();
@@ -233,6 +189,7 @@ export class HomePage implements OnInit {
     this.loadTrabajosFinalizados();
     this.loadNotificaciones();
     this.loadMensajesNoLeidos();
+    this.loadFeaturedProfessionals();
   }
 
   @HostListener('window:focus', ['$event'])
@@ -720,5 +677,22 @@ export class HomePage implements OnInit {
 
   toggleNotificaciones(): void {
     // Este método será llamado desde el template
+  }
+
+  private loadFeaturedProfessionals(): void {
+    this.isLoadingFeaturedProfessionals.set(true);
+    this.getProfesionalesMasSolicitadosUseCase.execute().subscribe({
+      next: (profesionales) => {
+        console.log('✅ Profesionales más solicitados:', profesionales);
+        // Tomar solo los primeros 3
+        this.featuredProfessionals.set(profesionales.slice(0, 3));
+        this.isLoadingFeaturedProfessionals.set(false);
+      },
+      error: (error) => {
+        console.error('❌ Error al cargar profesionales destacados:', error);
+        this.featuredProfessionals.set([]);
+        this.isLoadingFeaturedProfessionals.set(false);
+      },
+    });
   }
 }
