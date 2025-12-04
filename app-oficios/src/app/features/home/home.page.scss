@@ -12,6 +12,11 @@
   z-index: 1000;
   padding: 0.75rem 0;
 
+  // En pantallas grandes, dejar espacio para el sidebar
+  @media (min-width: 769px) {
+    left: 250px;
+  }
+
   &-container {
     width: 100%;
     margin: 0 auto;
@@ -24,6 +29,11 @@
   &-left {
     flex-shrink: 0;
     margin-right: 0;
+
+    // En pantallas grandes, ocultar el botón toggle
+    @media (min-width: 769px) {
+      display: none;
+    }
   }
 
   &-center {
@@ -280,6 +290,11 @@
   visibility: hidden;
   transition: all 0.3s ease;
 
+  // Solo mostrar el overlay en móvil
+  @media (min-width: 769px) {
+    display: none;
+  }
+
   &.active {
     opacity: 1;
     visibility: visible;
@@ -290,8 +305,8 @@
 .sidebar {
   position: fixed;
   top: 0;
-  left: -300px;
-  width: 300px;
+  left: 0;
+  width: 250px;
   height: 100vh;
   background: #1e293b; // Dark background
   z-index: 1200;
@@ -300,14 +315,27 @@
   box-shadow: 2px 0 20px rgba(0, 0, 0, 0.3);
   transition: left 0.3s ease;
 
-  &.active {
-    left: 0;
+  // En pantallas grandes, siempre visible
+  @media (min-width: 769px) {
+    left: 0 !important;
+  }
+
+  // En móvil, comportamiento toggle
+  @media (max-width: 768px) {
+    left: -250px;
+
+    &.active {
+      left: 0;
+    }
   }
 
   // Header with Logo
   &-header {
-    padding: 1.5rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0.75rem 1.5rem;
+    height: 67px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
   }
 
   &-logo {
@@ -528,6 +556,11 @@
   @extend .app-bg;
   min-height: 100vh;
   padding-top: 100px; // Account for fixed navbar
+  
+  // En pantallas grandes, dejar espacio para el sidebar fijo
+  @media (min-width: 769px) {
+    margin-left: 250px;
+  }
 
   @media (max-width: 768px) {
     padding-top: 80px;
@@ -543,7 +576,7 @@
 // Hero Section
 .hero-section {
   text-align: center;
-  padding: 5rem 2rem 4rem;
+  padding: 2.5rem 2rem 3rem;
   color: white;
 
   .hero-content {
@@ -564,6 +597,14 @@
     opacity: 0.95;
     margin-bottom: 0;
     line-height: 1.6;
+  }
+
+  .hero-divider {
+    width: 200px;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.3);
+    margin: 2rem auto 0;
+    border-radius: 2px;
   }
 }
 
@@ -951,6 +992,13 @@
 
 // Services Section
 .services-section {
+  padding: 4rem 2rem;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  margin-bottom: 3rem;
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+
   .section-header {
     text-align: center;
     margin-bottom: 3rem;
@@ -958,14 +1006,18 @@
 
     .section-title {
       font-size: 2.5rem;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     }
 
     .section-subtitle {
-      font-size: 1.1rem;
-      opacity: 0.8;
-      margin: 0;
+      font-size: 1.15rem;
+      opacity: 0.95;
+      line-height: 1.8;
+      margin: 0 auto;
+      max-width: 800px;
+      text-align: center;
     }
   }
 
@@ -1546,6 +1598,11 @@
 .app-footer {
   background: $secondary-dark;
   color: $white;
+
+  // En pantallas grandes, ajustar por el sidebar
+  @media (min-width: 769px) {
+    margin-left: 250px;
+  }
 
   .footer-container {
     max-width: 1400px;

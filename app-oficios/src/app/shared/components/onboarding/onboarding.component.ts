@@ -360,8 +360,8 @@ export class OnboardingComponent {
       id: 'sidebar',
       title: '🎯 Menú Principal',
       description: 'Accede a tu perfil, trabajos, notificaciones y más. Si eres profesional, también encontrarás tu dashboard aquí.',
-      target: '.sidebar-toggle',
-      position: 'bottom'
+      target: '.sidebar',
+      position: 'right'
     },
     {
       id: 'chat',
@@ -378,10 +378,17 @@ export class OnboardingComponent {
       position: 'bottom'
     },
     {
+      id: 'featured',
+      title: '⭐ Profesionales Destacados',
+      description: 'Conoce a los profesionales más solicitados del mes, todos con excelentes valoraciones y experiencia comprobada.',
+      target: '.featured-professionals-section .section-title',
+      position: 'bottom'
+    },
+    {
       id: 'search',
       title: '🔍 Búsqueda Rápida',
       description: 'Busca servicios, ubicaciones o profesionales específicos usando nuestra barra de búsqueda.',
-      target: '.navbar-center',
+      target: '.search-container',
       position: 'bottom'
     }
   ];
@@ -423,22 +430,24 @@ export class OnboardingComponent {
     // Calculate tooltip position based on target element and position
     let top = 0;
     let left = 0;
+    const tooltipWidth = 400;
+    const tooltipHeight = 300; // Approximate height
 
     switch (step.position) {
       case 'bottom':
         top = rect.bottom + 20;
-        left = rect.left + (rect.width / 2) - 200; // 200 is half of max-width (400px)
+        left = rect.left + (rect.width / 2) - (tooltipWidth / 2);
         break;
       case 'top':
-        top = rect.top - 20;
-        left = rect.left + (rect.width / 2) - 200;
+        top = rect.top - tooltipHeight - 20;
+        left = rect.left + (rect.width / 2) - (tooltipWidth / 2);
         break;
       case 'left':
-        top = rect.top + (rect.height / 2) - 100;
-        left = rect.left - 420; // 400px width + 20px offset
+        top = rect.top + (rect.height / 2) - (tooltipHeight / 2);
+        left = rect.left - tooltipWidth - 20;
         break;
       case 'right':
-        top = rect.top + (rect.height / 2) - 100;
+        top = rect.top + (rect.height / 2) - (tooltipHeight / 2);
         left = rect.right + 20;
         break;
     }
@@ -446,11 +455,12 @@ export class OnboardingComponent {
     // Ensure tooltip stays within viewport
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
+    const padding = 10;
     
-    if (left < 10) left = 10;
-    if (left + 400 > viewportWidth) left = viewportWidth - 410;
-    if (top < 10) top = 10;
-    if (top + 300 > viewportHeight) top = viewportHeight - 310;
+    if (left < padding) left = padding;
+    if (left + tooltipWidth > viewportWidth - padding) left = viewportWidth - tooltipWidth - padding;
+    if (top < padding) top = padding;
+    if (top + tooltipHeight > viewportHeight - padding) top = viewportHeight - tooltipHeight - padding;
 
     this.tooltipPosition.set({ top, left });
   }
