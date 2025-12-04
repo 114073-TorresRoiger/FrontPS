@@ -5,6 +5,8 @@ import { Router } from '@angular/router';
 import { PerfilService } from '../../../domain/usuario/use-cases/perfil.service';
 import { PerfilUsuario, PerfilUsuarioRequest } from '../../../domain/usuario/models/perfil.model';
 import { AuthService } from '../../../domain/auth/auth.service';
+import { FirebaseStorageService } from '../../../core/services/firebase-storage.service';
+import { finalize } from 'rxjs/operators';
 
 @Component({
   selector: 'app-perfil',
@@ -18,12 +20,15 @@ export class PerfilComponent implements OnInit {
   private readonly formBuilder = inject(FormBuilder);
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
+  private readonly firebaseStorage = inject(FirebaseStorageService);
 
   perfilForm: FormGroup;
   isEditing = false;
   isLoading = false;
+  isUploadingImage = false;
   error: string | null = null;
   success: string | null = null;
+  imagePreview: string | null = null;
 
   constructor() {
     this.perfilForm = this.createForm();
@@ -69,6 +74,7 @@ export class PerfilComponent implements OnInit {
     this.perfilService.obtenerPerfil(currentUser.id.toString()).subscribe({
       next: (perfil: PerfilUsuario) => {
         this.perfilForm.patchValue(perfil);
+        this.imagePreview = perfil.avatar || null;
         this.isLoading = false;
       },
       error: (error) => {
@@ -181,10 +187,83 @@ export class PerfilComponent implements OnInit {
     input.onchange = (event: any) => {
       const file = event.target.files[0];
       if (file) {
-        this.procesarImagen(file);
+        this.subirImagenAFirebase(file);
       }
     };
     input.click();
+  }
+
+  private subirImagenAFirebase(file: File) {
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser?.id) {
+      this.error = 'Usuario no autenticado';
+      return;
+    }
+
+    // Validar archivo
+    const validation = this.firebaseStorage.validateImageFile(file);
+    if (!validation.valid) {
+      this.error = validation.error || 'Archivo no válido';
+      return;
+    }
+
+    // Mostrar preview mientras se sube
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      this.imagePreview = e.target.result;
+    };
+    reader.readAsDataURL(file);
+
+    // Subir a Firebase
+    this.isUploadingImage = true;
+    this.error = null;
+
+    this.firebaseStorage.uploadAvatar(file, currentUser.id.toString())
+      .pipe(
+        finalize(() => {
+          this.isUploadingImage = false;
+        })
+      )
+      .subscribe({
+        next: (downloadURL) => {
+          console.log('✅ Imagen subida a Firebase:', downloadURL);
+          // Actualizar el formulario con la URL de Firebase
+          this.perfilForm.patchValue({
+            avatar: downloadURL
+          });
+          this.imagePreview = downloadURL;
+          
+          // Guardar el avatar en el backend
+          this.guardarAvatarEnBackend(downloadURL);
+        },
+        error: (error) => {
+          console.error('❌ Error al subir imagen:', error);
+          this.error = 'Error al subir la imagen. Intente nuevamente.';
+          this.imagePreview = this.perfilForm.get('avatar')?.value || null;
+        }
+      });
+  }
+
+  private guardarAvatarEnBackend(avatarUrl: string) {
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser?.id) {
+      this.error = 'Usuario no autenticado';
+      return;
+    }
+
+    this.perfilService.actualizarAvatar(currentUser.id, avatarUrl).subscribe({
+      next: () => {
+        console.log('✅ Avatar guardado en el backend');
+        this.success = 'Foto actualizada correctamente';
+        setTimeout(() => {
+          this.success = null;
+        }, 3000);
+      },
+      error: (error) => {
+        console.error('❌ Error al guardar avatar en backend:', error);
+        this.error = 'La imagen se subió pero hubo un error al guardarla. Por favor, recarga la página.';
+      }
+    });
   }
 
   private procesarImagen(file: File) {

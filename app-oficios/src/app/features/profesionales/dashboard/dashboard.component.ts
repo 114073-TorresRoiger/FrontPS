@@ -128,6 +128,13 @@ export class ProfessionalDashboardComponent implements OnInit {
   // Menu desplegable de acciones
   menuAccionesAbierto = signal<number | null>(null);
 
+  // Modal de confirmación
+  showConfirmModal = signal(false);
+  confirmModalTitle = signal('');
+  confirmModalMessage = signal('');
+  confirmModalType = signal<'aceptar' | 'rechazar'>('aceptar');
+  confirmModalAction = signal<(() => void) | null>(null);
+
   // ====== NUEVA FUNCIONALIDAD: Vista de Solicitudes con Mapa ======
   mostrarVistaSolicitudes = signal(false);
   solicitudesConMapa = signal<any[]>([]);
@@ -358,10 +365,15 @@ export class ProfessionalDashboardComponent implements OnInit {
   }
 
   async aceptarSolicitudConMapa(idSolicitud: number) {
-    if (!confirm('¿Estás seguro de que deseas aceptar esta solicitud?')) {
-      return;
-    }
+    this.confirmModalTitle.set('Aceptar Solicitud');
+    this.confirmModalMessage.set('¿Estás seguro de que deseas aceptar esta solicitud? Se creará un trabajo asociado.');
+    this.confirmModalType.set('aceptar');
+    this.confirmModalAction.set(() => this.confirmarAceptarSolicitud(idSolicitud));
+    this.showConfirmModal.set(true);
+  }
 
+  private confirmarAceptarSolicitud(idSolicitud: number) {
+    this.showConfirmModal.set(false);
     this.respondingToSolicitud.set(idSolicitud);
 
     this.responderSolicitudUseCase.execute(idSolicitud, true).subscribe({
@@ -378,10 +390,15 @@ export class ProfessionalDashboardComponent implements OnInit {
   }
 
   async rechazarSolicitudConMapa(idSolicitud: number) {
-    if (!confirm('¿Estás seguro de que deseas rechazar esta solicitud?')) {
-      return;
-    }
+    this.confirmModalTitle.set('Rechazar Solicitud');
+    this.confirmModalMessage.set('¿Estás seguro de que deseas rechazar esta solicitud? Esta acción no se puede deshacer.');
+    this.confirmModalType.set('rechazar');
+    this.confirmModalAction.set(() => this.confirmarRechazarSolicitud(idSolicitud));
+    this.showConfirmModal.set(true);
+  }
 
+  private confirmarRechazarSolicitud(idSolicitud: number) {
+    this.showConfirmModal.set(false);
     this.respondingToSolicitud.set(idSolicitud);
 
     this.responderSolicitudUseCase.execute(idSolicitud, false).subscribe({
@@ -397,6 +414,17 @@ export class ProfessionalDashboardComponent implements OnInit {
         this.showErrorModal('Error al rechazar la solicitud');
       }
     });
+  }
+
+  executeConfirmAction() {
+    const action = this.confirmModalAction();
+    if (action) {
+      action();
+    }
+  }
+
+  closeConfirmModal() {
+    this.showConfirmModal.set(false);
   }
 
   // ====== MÉTODOS EXISTENTES ======

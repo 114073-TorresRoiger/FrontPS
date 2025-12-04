@@ -431,6 +431,14 @@
     color: white;
     border-radius: 16px 16px 0 0;
 
+    &.bg-success-gradient {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    }
+
+    &.bg-danger-gradient {
+      background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+    }
+
     .modal-title {
       font-weight: 600;
       display: flex;

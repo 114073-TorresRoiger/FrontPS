@@ -50,7 +50,12 @@ export class ResenasComponent implements OnInit {
     });
     this.resenaRepo.getReseniasDeProfesional(idProfesional).subscribe({
       next: resenas => {
-        this.resenas = resenas;
+        // Ordenar por fecha descendente (más recientes primero)
+        this.resenas = resenas.sort((a, b) => {
+          const fechaA = new Date(a.fecha).getTime();
+          const fechaB = new Date(b.fecha).getTime();
+          return fechaB - fechaA;
+        });
         this.totalResenas = resenas.length;
         this.loading = false;
       },

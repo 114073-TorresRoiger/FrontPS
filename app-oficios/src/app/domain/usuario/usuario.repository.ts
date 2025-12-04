@@ -9,4 +9,6 @@ export abstract class UsuarioRepository {
   abstract updateProfile(usuario: Partial<UsuarioRequest>): Observable<any>;
   abstract getPerfilCliente(idUsuario: string): Observable<PerfilUsuario>;
   abstract updatePerfilCliente(idUsuario: string, perfil: PerfilUsuarioRequest): Observable<any>;
+  abstract updateAvatar(idAuth: number, avatarUrl: string): Observable<any>;
+  abstract getAvatar(idAuth: number): Observable<string>;
 }
