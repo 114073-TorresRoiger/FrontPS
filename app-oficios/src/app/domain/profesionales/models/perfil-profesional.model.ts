@@ -13,4 +13,6 @@ export interface PerfilProfesional {
   rangoPrecio: string;
   disponibilidad?: DisponibilidadHorario[]; // Opcional
   especialidades: string[];
+  puntuacionPromedio?: number;
+  cantidadResenias?: number;
 }

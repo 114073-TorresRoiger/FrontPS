@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LucideAngularModule, Clock, DollarSign, Phone, User, Calendar } from 'lucide-angular';
+import { LucideAngularModule, Clock, DollarSign, Phone, User, Calendar, Star } from 'lucide-angular';
 import { PerfilProfesional, DisponibilidadHorario } from '../../../domain/profesionales/models/perfil-profesional.model';
 
 @Component({
@@ -20,6 +20,7 @@ export class ProfessionalCardComponent {
   readonly Phone = Phone;
   readonly User = User;
   readonly Calendar = Calendar;
+  readonly Star = Star;
 
   showFullSchedule = false;
 
