@@ -39,11 +39,15 @@
       <!-- Columna Izquierda - Foto de Usuario -->
       <div class="perfil-avatar-section">
         <div class="avatar-container">
-          <div class="avatar-image">
+          <div class="avatar-image" [class.uploading]="isUploadingImage">
             <img 
-              [src]="perfilForm.get('avatar')?.value || 'assets/icons/user-placeholder.svg'" 
+              [src]="imagePreview || perfilForm.get('avatar')?.value || 'assets/icons/user-placeholder.svg'" 
               [alt]="(perfilForm.get('name')?.value || 'Usuario') + ' ' + (perfilForm.get('lastName')?.value || '')"
               (error)="onImageError($event)">
+            <div *ngIf="isUploadingImage" class="upload-overlay">
+              <div class="spinner-small"></div>
+              <span>Subiendo...</span>
+            </div>
           </div>
           <div class="avatar-info">
             <h3 class="user-name">
@@ -52,9 +56,13 @@
             <p class="user-email">{{ perfilForm.get('email')?.value || 'email@ejemplo.com' }}</p>
           </div>
           <div *ngIf="isEditing" class="avatar-actions">
-            <button type="button" class="btn btn-outline change-photo-btn" (click)="cambiarFoto()">
+            <button 
+              type="button" 
+              class="btn btn-outline change-photo-btn" 
+              (click)="cambiarFoto()"
+              [disabled]="isUploadingImage">
               <i class="icon-camera"></i>
-              Cambiar Foto
+              {{ isUploadingImage ? 'Subiendo...' : 'Cambiar Foto' }}
             </button>
           </div>
         </div>

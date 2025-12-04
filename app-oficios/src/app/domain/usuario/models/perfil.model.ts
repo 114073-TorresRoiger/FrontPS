@@ -9,6 +9,7 @@ export interface Domicilio {
 }
 
 export interface PerfilUsuario {
+  avatar?: string;
   name: string;
   lastName: string;
   email: string;
@@ -20,6 +21,7 @@ export interface PerfilUsuario {
 }
 
 export interface PerfilUsuarioRequest {
+  avatar?: string;
   name: string;
   lastName: string;
   telefono: string;

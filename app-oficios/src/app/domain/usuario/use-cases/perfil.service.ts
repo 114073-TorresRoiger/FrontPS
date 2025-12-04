@@ -14,4 +14,12 @@ export class PerfilService {
   actualizarPerfil(idUsuario: string, perfil: PerfilUsuarioRequest): Observable<any> {
     return this.usuarioRepository.updatePerfilCliente(idUsuario, perfil);
   }
+
+  actualizarAvatar(idAuth: number, avatarUrl: string): Observable<any> {
+    return this.usuarioRepository.updateAvatar(idAuth, avatarUrl);
+  }
+
+  obtenerAvatar(idAuth: number): Observable<string> {
+    return this.usuarioRepository.getAvatar(idAuth);
+  }
 }

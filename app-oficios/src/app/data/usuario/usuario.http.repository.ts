@@ -32,6 +32,16 @@ export class UsuarioHttpRepository implements UsuarioRepository {
   }
 
   updatePerfilCliente(idUsuario: string, perfil: PerfilUsuarioRequest): Observable<any> {
-    return this.http.put(`${this.baseUrl}/perfil/cliente/${idUsuario}`, perfil);
+    return this.http.put(`${this.baseUrl}/perfil/cliente`, perfil);
+  }
+
+  updateAvatar(idAuth: number, avatarUrl: string): Observable<any> {
+    return this.http.put(`${this.baseUrl}/perfil/avatar/${idAuth}`, avatarUrl, {
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
+  getAvatar(idAuth: number): Observable<string> {
+    return this.http.get(`${this.baseUrl}/perfil/avatar/${idAuth}`, { responseType: 'text' });
   }
 }
