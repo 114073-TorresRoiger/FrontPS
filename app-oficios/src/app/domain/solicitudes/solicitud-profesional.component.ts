@@ -173,7 +173,8 @@ import { environment } from '../../../environments/environment';
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      border-bottom: 1px solid #e9ecef;
+      background: linear-gradient(135deg, rgba(13, 110, 253, 0.05) 0%, rgba(10, 88, 202, 0.05) 100%);
+      border-bottom: 1px solid rgba(13, 110, 253, 0.2);
 
       .solicitud-info {
         flex: 1;
