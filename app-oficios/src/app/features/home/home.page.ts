@@ -1,6 +1,7 @@
 // 📁 src/app/features/home/home.page.ts
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   signal,
   inject,
@@ -98,6 +99,7 @@ export class HomePage implements OnInit {
   // Dependencies
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
+  private readonly cdr = inject(ChangeDetectorRef);
   readonly authService = inject(AuthService);
   private readonly listOficiosUseCase = inject(ListOficiosUseCase);
   private readonly getProfesionalesByOficioUseCase = inject(GetProfesionalesByOficioUseCase);
@@ -557,8 +559,12 @@ export class HomePage implements OnInit {
   }
 
   cerrarModalResenia(): void {
+    console.log('🔴 Método cerrarModalResenia() llamado');
+    console.log('🔴 Estado actual showReseniaModal:', this.showReseniaModal());
     this.showReseniaModal.set(false);
     this.selectedTrabajoForResenia.set(null);
+    this.cdr.markForCheck();
+    console.log('🔴 Nuevo estado showReseniaModal:', this.showReseniaModal());
   }
 
   onReseniaEnviada(): void {

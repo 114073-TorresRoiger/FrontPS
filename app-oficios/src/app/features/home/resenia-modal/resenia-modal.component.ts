@@ -10,11 +10,11 @@ import { ReseniaService, ReseniaRequest } from '../../../domain/resenias/resenia
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule],
   template: `
-    <div class="modal-overlay" (click)="close.emit()">
+    <div class="modal-overlay" (click)="cerrarModal()">
       <div class="modal-content resenia-modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h2>Califica tu experiencia</h2>
-          <button class="close-btn" (click)="close.emit()">
+          <button type="button" class="close-btn" (click)="cerrarModal(); $event.stopPropagation()">
             <lucide-angular [img]="X" size="24"></lucide-angular>
           </button>
         </div>
@@ -77,7 +77,7 @@ import { ReseniaService, ReseniaRequest } from '../../../domain/resenias/resenia
               <button
                 type="button"
                 class="btn btn-secondary"
-                (click)="close.emit()"
+                (click)="cerrarModal(); $event.stopPropagation()"
                 [disabled]="isSubmitting()"
               >
                 Cancelar
@@ -107,7 +107,7 @@ import { ReseniaService, ReseniaRequest } from '../../../domain/resenias/resenia
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 1000;
+      z-index: 2001;
       padding: 1rem;
     }
 
@@ -128,32 +128,43 @@ import { ReseniaService, ReseniaRequest } from '../../../domain/resenias/resenia
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 1.5rem;
-      border-bottom: 1px solid #e5e7eb;
+      padding: 1.25rem 1.5rem;
+      background: #0d6efd;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
     }
 
     .modal-header h2 {
       font-size: 1.5rem;
       font-weight: 600;
-      color: #1f2937;
+      color: #ffffff;
       margin: 0;
     }
 
     .close-btn {
-      background: none;
+      background: rgba(255, 255, 255, 0.15);
       border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
-      color: #6b7280;
-      transition: color 0.2s;
-      padding: 0.25rem;
+      color: #ffffff;
+      transition: all 0.2s;
+      padding: 0;
+      pointer-events: auto;
+      z-index: 10;
     }
 
     .close-btn:hover {
-      color: #1f2937;
+      background: rgba(255, 255, 255, 0.25);
+      transform: scale(1.1);
     }
 
     .modal-body {
       padding: 1.5rem;
+      background: rgba(26, 32, 44, 0.02);
     }
 
     .professional-info {
@@ -279,11 +290,13 @@ import { ReseniaService, ReseniaRequest } from '../../../domain/resenias/resenia
       align-items: center;
       gap: 0.5rem;
       border: none;
+      pointer-events: auto;
     }
 
     .btn-secondary {
       background-color: #f3f4f6;
       color: #374151;
+      pointer-events: auto;
     }
 
     .btn-secondary:hover:not(:disabled) {
@@ -336,6 +349,13 @@ export class ReseniaModalComponent {
   seleccionarPuntuacion(puntuacion: number): void {
     this.puntuacionSeleccionada.set(puntuacion);
     this.reseniaForm.patchValue({ puntuacion });
+  }
+
+  cerrarModal(): void {
+    console.log('🔴 Cerrando modal de reseña');
+    console.log('🔴 Emitiendo evento close...');
+    this.close.emit();
+    console.log('🔴 Evento close emitido');
   }
 
   getRatingText(): string {

@@ -99,21 +99,21 @@ interface OnboardingStep {
       width: 40px;
       height: 40px;
       border-radius: 8px;
-      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+      background: #0d6efd;
       border: none;
       color: white;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+      box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);
       transition: all 0.3s ease;
       margin-left: 12px;
 
       &:hover {
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5);
-        background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.5);
+        background: #0b5ed7;
       }
 
       &.active {
@@ -136,23 +136,24 @@ interface OnboardingStep {
 
     .highlight-overlay {
       position: fixed;
-      border: 3px solid #3b82f6;
+      border: 3px solid #0d6efd;
       border-radius: 8px;
-      background: rgba(59, 130, 246, 0.1);
+      background: rgba(13, 110, 253, 0.1);
       z-index: 1000;
       pointer-events: none;
       box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.75);
       animation: pulse 2s infinite;
+      transform: translateZ(0);
     }
 
     @keyframes pulse {
       0%, 100% {
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.75), 0 0 20px rgba(59, 130, 246, 0.5);
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.75), 0 0 20px rgba(13, 110, 253, 0.5);
       }
       50% {
-        border-color: #2563eb;
-        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.75), 0 0 30px rgba(37, 99, 235, 0.7);
+        border-color: #0b5ed7;
+        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.75), 0 0 30px rgba(11, 94, 215, 0.7);
       }
     }
 
@@ -174,9 +175,9 @@ interface OnboardingStep {
         justify-content: space-between;
         align-items: center;
         padding: 16px 20px;
-        background: linear-gradient(135deg, rgba(59, 130, 246, 0.9) 0%, rgba(29, 78, 216, 0.9) 100%);
+        background: #0d6efd;
         color: white;
-        border-bottom: 1px solid rgba(59, 130, 246, 0.3);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
 
         .step-counter {
           font-size: 12px;
@@ -242,7 +243,7 @@ interface OnboardingStep {
           margin-right: auto;
 
           &:hover {
-            background: rgba(59, 130, 246, 0.1);
+            background: rgba(13, 110, 253, 0.1);
             color: #cbd5e0;
           }
         }
@@ -269,12 +270,13 @@ interface OnboardingStep {
           }
 
           &.primary {
-            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            background: #0d6efd;
             color: white;
 
             &:hover {
+              background: #0b5ed7;
               transform: translateY(-1px);
-              box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+              box-shadow: 0 4px 12px rgba(13, 110, 253, 0.4);
             }
           }
         }
@@ -374,21 +376,21 @@ export class OnboardingComponent {
       id: 'services',
       title: '🛠️ Servicios Populares',
       description: 'Explora nuestra amplia variedad de servicios. Haz clic en cualquier categoría para ver profesionales disponibles.',
-      target: '.services-section .section-title',
-      position: 'bottom'
+      target: '.services-section',
+      position: 'top'
     },
     {
       id: 'featured',
       title: '⭐ Profesionales Destacados',
       description: 'Conoce a los profesionales más solicitados del mes, todos con excelentes valoraciones y experiencia comprobada.',
-      target: '.featured-professionals-section .section-title',
-      position: 'bottom'
+      target: '.featured-professionals-section',
+      position: 'top'
     },
     {
       id: 'search',
       title: '🔍 Búsqueda Rápida',
       description: 'Busca servicios, ubicaciones o profesionales específicos usando nuestra barra de búsqueda.',
-      target: '.search-container',
+      target: '.search-input-wrapper',
       position: 'bottom'
     }
   ];
@@ -414,53 +416,92 @@ export class OnboardingComponent {
     const step = this.steps[index];
     this.currentStep.set(step);
     
-    // Wait for DOM to update
+    // Wait for DOM to update and recalculate on scroll
     setTimeout(() => {
       this.calculatePositions(step);
+      
+      // Scroll element into view if needed
+      const targetElement = document.querySelector(step.target);
+      if (targetElement) {
+        targetElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Recalcular después del scroll
+        setTimeout(() => {
+          this.calculatePositions(step);
+        }, 500);
+      }
     }, 100);
   }
 
   calculatePositions(step: OnboardingStep) {
     const targetElement = document.querySelector(step.target);
-    if (!targetElement) return;
+    if (!targetElement) {
+      console.warn(`Target element not found: ${step.target}`);
+      return;
+    }
 
+    // Obtener posición del elemento relativo al viewport
     const rect = targetElement.getBoundingClientRect();
-    this.highlightRect.set(rect);
+    
+    // Establecer el highlight en la posición exacta del elemento
+    this.highlightRect.set({
+      top: rect.top,
+      left: rect.left,
+      width: rect.width,
+      height: rect.height,
+      right: rect.right,
+      bottom: rect.bottom,
+      x: rect.x,
+      y: rect.y,
+      toJSON: rect.toJSON
+    } as DOMRect);
 
-    // Calculate tooltip position based on target element and position
+    // Calculate tooltip position
+    const tooltipWidth = 400;
+    const tooltipHeight = 280;
+    const offset = 20;
+    const sidebarWidth = window.innerWidth > 768 ? 250 : 0;
+    
     let top = 0;
     let left = 0;
-    const tooltipWidth = 400;
-    const tooltipHeight = 300; // Approximate height
 
     switch (step.position) {
       case 'bottom':
-        top = rect.bottom + 20;
-        left = rect.left + (rect.width / 2) - (tooltipWidth / 2);
+        top = rect.bottom + offset;
+        // Usar la posición left del contenedor principal (home-container)
+        left = rect.left;
         break;
       case 'top':
-        top = rect.top - tooltipHeight - 20;
-        left = rect.left + (rect.width / 2) - (tooltipWidth / 2);
+        top = rect.top - tooltipHeight - offset;
+        // Usar la posición left del contenedor principal (home-container)
+        left = rect.left;
         break;
       case 'left':
         top = rect.top + (rect.height / 2) - (tooltipHeight / 2);
-        left = rect.left - tooltipWidth - 20;
+        left = rect.left - tooltipWidth - offset;
         break;
       case 'right':
+        // Para el sidebar, posicionar justo a la derecha
         top = rect.top + (rect.height / 2) - (tooltipHeight / 2);
-        left = rect.right + 20;
+        left = rect.right + offset;
         break;
     }
 
-    // Ensure tooltip stays within viewport
+    // Ajustar para que no salga del viewport
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
-    const padding = 10;
+    const padding = 20;
     
-    if (left < padding) left = padding;
-    if (left + tooltipWidth > viewportWidth - padding) left = viewportWidth - tooltipWidth - padding;
-    if (top < padding) top = padding;
-    if (top + tooltipHeight > viewportHeight - padding) top = viewportHeight - tooltipHeight - padding;
+    const maxLeft = viewportWidth - tooltipWidth - padding;
+    const minTop = padding;
+    const maxTop = viewportHeight - tooltipHeight - padding;
+    
+    // Solo ajustar si se sale por la derecha
+    if (left > maxLeft) {
+      left = maxLeft;
+    }
+    
+    top = Math.max(minTop, Math.min(top, maxTop));
 
     this.tooltipPosition.set({ top, left });
   }
