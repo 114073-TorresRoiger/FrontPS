@@ -100,32 +100,45 @@
                   </span>
                 </td>
                 <td class="text-center resenia-cell">
-                  <!-- Botón Reseñar solo si está pagado y NO tiene reseña -->
-                  <button
-                    *ngIf="trabajo.estadoPago === 'APROBADO' && !trabajo.tieneResenia"
-                    class="btn btn-primary btn-sm resenia-pendiente"
-                    (click)="abrirModalResenia(trabajo)"
-                  >
-                    <lucide-angular [img]="Star" size="16"></lucide-angular>
-                    <span class="ms-1">Reseñar</span>
-                  </button>
+                  <div class="d-flex align-items-center justify-content-center gap-2">
+                    <!-- Botón Reseñar solo si está pagado y NO tiene reseña -->
+                    <button
+                      *ngIf="trabajo.estadoPago === 'APROBADO' && !trabajo.tieneResenia"
+                      class="btn btn-primary btn-sm resenia-pendiente"
+                      (click)="abrirModalResenia(trabajo)"
+                    >
+                      <lucide-angular [img]="Star" size="16"></lucide-angular>
+                      <span class="ms-1">Reseñar</span>
+                    </button>
 
-                  <!-- Badge Ya Reseñado si está pagado y TIENE reseña -->
-                  <span
-                    *ngIf="trabajo.estadoPago === 'APROBADO' && trabajo.tieneResenia"
-                    class="badge bg-success trabajo-reseniado"
-                  >
-                    <lucide-angular [img]="CheckCircle" size="14"></lucide-angular>
-                    Ya Reseñado
-                  </span>
+                    <!-- Badge Ya Reseñado si está pagado y TIENE reseña -->
+                    <span
+                      *ngIf="trabajo.estadoPago === 'APROBADO' && trabajo.tieneResenia"
+                      class="badge bg-success trabajo-reseniado"
+                    >
+                      <lucide-angular [img]="CheckCircle" size="14"></lucide-angular>
+                      Ya Reseñado
+                    </span>
 
-                  <!-- Guion si no está pagado -->
-                  <span
-                    *ngIf="trabajo.estadoPago !== 'APROBADO'"
-                    class="text-muted"
-                  >
-                    -
-                  </span>
+                    <!-- Botón Descargar Comprobante si está pagado -->
+                    <button
+                      *ngIf="trabajo.estadoPago === 'APROBADO'"
+                      class="btn btn-outline-primary btn-sm"
+                      (click)="trabajo.nroFactura ? descargarComprobante(trabajo.nroFactura!) : null"
+                      [disabled]="!trabajo.nroFactura"
+                      title="Descargar Comprobante"
+                    >
+                      <lucide-angular [img]="Download" size="16"></lucide-angular>
+                    </button>
+
+                    <!-- Guion si no está pagado -->
+                    <span
+                      *ngIf="trabajo.estadoPago !== 'APROBADO'"
+                      class="text-muted"
+                    >
+                      -
+                    </span>
+                  </div>
                 </td>
               </tr>
             </tbody>
