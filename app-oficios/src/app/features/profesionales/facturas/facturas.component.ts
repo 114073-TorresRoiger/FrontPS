@@ -60,19 +60,18 @@ export class FacturasComponent implements OnInit {
 
     this.loading = true;
     
-    let params = new HttpParams()
-      .set('idProfesional', this.idProfesional.toString());
-
-    // Agregar fechas solo si están definidas
-    if (this.fechaDesde) {
-      const desdeISO = new Date(this.fechaDesde).toISOString();
-      params = params.set('desde', desdeISO);
-    }
+    // Si no hay fechas, usar rango de los últimos 30 días
+    const ahora = new Date();
+    const hace30Dias = new Date();
+    hace30Dias.setDate(ahora.getDate() - 30);
     
-    if (this.fechaHasta) {
-      const hastaISO = new Date(this.fechaHasta).toISOString();
-      params = params.set('hasta', hastaISO);
-    }
+    const desde = this.fechaDesde ? new Date(this.fechaDesde) : hace30Dias;
+    const hasta = this.fechaHasta ? new Date(this.fechaHasta) : ahora;
+    
+    let params = new HttpParams()
+      .set('idProfesional', this.idProfesional.toString())
+      .set('desde', desde.toISOString())
+      .set('hasta', hasta.toISOString());
 
     const url = 'http://localhost:8081/api/v1/pagos/historial-ingresos';
     
