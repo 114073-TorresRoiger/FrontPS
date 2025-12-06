@@ -15,12 +15,14 @@ import {
   Star,
   AlertCircle,
   CheckCircle,
+  Download,
 } from 'lucide-angular';
 import { TrabajoService } from '../../domain/trabajo/trabajo.service';
 import { TrabajoClienteResponse } from '../../domain/trabajo/trabajo.model';
 import { SolicitudService } from '../../domain/solicitudes/solicitud.service';
 import { AuthService } from '../../domain/auth';
 import { ReseniaModalComponent } from '../home/resenia-modal/resenia-modal.component';
+import { PDFGeneratorService } from '../../domain/pago/pdf-generator.service';
 
 @Component({
   selector: 'app-trabajos-finalizados',
@@ -34,6 +36,7 @@ export class TrabajosFinalizadosPage implements OnInit {
   private readonly router = inject(Router);
   private readonly trabajoService = inject(TrabajoService);
   private readonly solicitudService = inject(SolicitudService);
+  private readonly pdfGenerator = inject(PDFGeneratorService);
   readonly authService = inject(AuthService);
 
   // Icons
@@ -43,6 +46,7 @@ export class TrabajosFinalizadosPage implements OnInit {
   readonly Star = Star;
   readonly AlertCircle = AlertCircle;
   readonly CheckCircle = CheckCircle;
+  readonly Download = Download;
 
   // State
   trabajosFinalizados = signal<TrabajoClienteResponse[]>([]);
@@ -149,6 +153,10 @@ export class TrabajosFinalizadosPage implements OnInit {
   onReseniaEnviada(): void {
     this.cerrarModalResenia();
     this.loadTrabajosFinalizados();
+  }
+
+  descargarComprobante(nroFactura: number): void {
+    this.pdfGenerator.descargarComprobante(nroFactura);
   }
 
   goBack(): void {

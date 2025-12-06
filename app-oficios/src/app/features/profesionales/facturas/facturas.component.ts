@@ -5,8 +5,10 @@ import { Router } from '@angular/router';
 import { LucideAngularModule, ArrowLeft, FileText, Download, Eye, Calendar } from 'lucide-angular';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { AuthService } from 'src/app/domain/auth/auth.service';
+import { PDFGeneratorService } from 'src/app/domain/pago/pdf-generator.service';
 
 interface Factura {
+  nroFactura: number;
   fecha: string;
   monto: number;
   cliente: string;
@@ -29,6 +31,7 @@ export class FacturasComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly http = inject(HttpClient);
   private readonly authService = inject(AuthService);
+  private readonly pdfGenerator = inject(PDFGeneratorService);
 
   facturas: Factura[] = [];
   fechaDesde: string = '';
@@ -97,5 +100,9 @@ export class FacturasComponent implements OnInit {
 
   descargarFactura(factura: Factura) {
     console.log('Descargar factura:', factura);
+  }
+
+  descargarComprobante(nroFactura: number): void {
+    this.pdfGenerator.descargarComprobante(nroFactura);
   }
 }

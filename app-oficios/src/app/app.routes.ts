@@ -41,15 +41,15 @@ export const routes: Routes = [
 	},
 	{
 		path: 'pago-exitoso',
-		loadComponent: () => import('./features/pagos/pago-exitoso/pago-exitoso.component').then((m) => m.PagoExitosoComponent),
+		loadComponent: () => import('./features/pago/pago-exitoso.page').then((m) => m.PagoExitosoPage),
 	},
 	{
 		path: 'pago-fallido',
-		loadComponent: () => import('./features/pagos/pago-fallido/pago-fallido.component').then((m) => m.PagoFallidoComponent),
+		loadComponent: () => import('./features/pago/pago-fallido.page').then((m) => m.PagoFallidoPage),
 	},
 	{
 		path: 'pago-pendiente',
-		loadComponent: () => import('./features/pagos/pago-pendiente/pago-pendiente.component').then((m) => m.PagoPendienteComponent),
+		loadComponent: () => import('./features/pago/pago-pendiente.page').then((m) => m.PagoPendientePage),
 	},
 	{
 		path: 'admin',

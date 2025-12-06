@@ -4,7 +4,7 @@
     <!-- Header -->
     <header class="dashboard-header mb-4">
       <div class="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
-        <button class="btn btn-outline-secondary back-btn" (click)="goBack()">
+        <button class="btn btn-outline-light back-btn" (click)="goBack()">
           <lucide-angular [img]="ArrowLeft" size="20"></lucide-angular>
           <span class="ms-2">Volver al Inicio</span>
         </button>
@@ -228,7 +228,7 @@
           <div class="card action-card h-100" (click)="verTodasLasSolicitudes()">
             <div class="card-body text-center">
               <div class="action-icon solicitudes mx-auto mb-3">
-                <lucide-angular [img]="MapPin" size="32"></lucide-angular>
+                <lucide-angular [img]="Inbox" size="28"></lucide-angular>
               </div>
               <h3 class="h5 mb-2">Solicitudes</h3>
               <p class="text-white small mb-0">Ver solicitudes del profesional</p>
@@ -240,7 +240,7 @@
           <div class="card action-card h-100" (click)="goToInvoices()">
             <div class="card-body text-center">
               <div class="action-icon invoices mx-auto mb-3">
-                <lucide-angular [img]="FileText" size="32"></lucide-angular>
+                <lucide-angular [img]="File" size="28"></lucide-angular>
               </div>
               <h3 class="h5 mb-2">Facturas</h3>
               <p class="text-white small mb-0">Ver y gestionar tus facturas generadas</p>
@@ -252,7 +252,7 @@
           <div class="card action-card h-100" (click)="goToReviews()">
             <div class="card-body text-center">
               <div class="action-icon reviews mx-auto mb-3">
-                <lucide-angular [img]="Star" size="32"></lucide-angular>
+                <lucide-angular [img]="Star" size="28"></lucide-angular>
               </div>
               <h3 class="h5 mb-2">Reseñas</h3>
               <p class="text-white small mb-0">Consultar valoraciones y comentarios de clientes</p>
@@ -264,7 +264,7 @@
           <div class="card action-card h-100" (click)="goToMessages()">
             <div class="card-body text-center">
               <div class="action-icon messages mx-auto mb-3">
-                <lucide-angular [img]="MessageSquare" size="32"></lucide-angular>
+                <lucide-angular [img]="Mail" size="28"></lucide-angular>
               </div>
               <h3 class="h5 mb-2">Mensajería</h3>
               <p class="text-white small mb-0">Chat con clientes y gestión de conversaciones</p>
@@ -280,7 +280,7 @@
     <!-- Header de Vista de Solicitudes -->
     <header class="dashboard-header mb-4">
       <div class="d-flex justify-content-between align-items-center mb-3 gap-2 flex-wrap">
-        <button class="btn btn-outline-secondary back-btn" (click)="volverAlDashboard()">
+        <button class="btn btn-outline-light back-btn" (click)="volverAlDashboard()">
           <lucide-angular [img]="ArrowLeft" size="20"></lucide-angular>
           <span class="ms-2">Volver al Dashboard</span>
         </button>
@@ -333,7 +333,7 @@
             </div>
             <div class="info-item">
               <lucide-angular [img]="Clock" size="20" class="text-primary"></lucide-angular>
-              <span><strong>Hora:</strong> {{ solicitud.horaReserva || 'No especificada' }}</span>
+              <span><strong>Hora:</strong> {{ getHoraReserva(solicitud.horaReserva) }}</span>
             </div>
             <div class="info-item">
               <lucide-angular [img]="MapPin" size="20" class="text-primary"></lucide-angular>
@@ -427,7 +427,7 @@
               <div class="card-body">
                 <p><strong>Oficio:</strong> {{ solicitudSeleccionadaMapa().oficio }}</p>
                 <p><strong>Fecha solicitada:</strong> {{ formatDate(solicitudSeleccionadaMapa().fechaServicio) }}</p>
-                <p><strong>Hora:</strong> {{ solicitudSeleccionadaMapa().horaReserva || 'No especificada' }}</p>
+                <p><strong>Hora:</strong> {{ getHoraReserva(solicitudSeleccionadaMapa().horaReserva) }}</p>
                 <p *ngIf="solicitudSeleccionadaMapa().descripcion">
                   <strong>Descripción:</strong><br>
                   {{ solicitudSeleccionadaMapa().descripcion }}
