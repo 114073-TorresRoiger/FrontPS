@@ -333,7 +333,7 @@
             </div>
             <div class="info-item">
               <lucide-angular [img]="Clock" size="20" class="text-primary"></lucide-angular>
-              <span><strong>Hora:</strong> {{ solicitud.horaReserva || 'No especificada' }}</span>
+              <span><strong>Hora:</strong> {{ getHoraReserva(solicitud.horaReserva) }}</span>
             </div>
             <div class="info-item">
               <lucide-angular [img]="MapPin" size="20" class="text-primary"></lucide-angular>
@@ -427,7 +427,7 @@
               <div class="card-body">
                 <p><strong>Oficio:</strong> {{ solicitudSeleccionadaMapa().oficio }}</p>
                 <p><strong>Fecha solicitada:</strong> {{ formatDate(solicitudSeleccionadaMapa().fechaServicio) }}</p>
-                <p><strong>Hora:</strong> {{ solicitudSeleccionadaMapa().horaReserva || 'No especificada' }}</p>
+                <p><strong>Hora:</strong> {{ getHoraReserva(solicitudSeleccionadaMapa().horaReserva) }}</p>
                 <p *ngIf="solicitudSeleccionadaMapa().descripcion">
                   <strong>Descripción:</strong><br>
                   {{ solicitudSeleccionadaMapa().descripcion }}

@@ -722,6 +722,18 @@ export class ProfessionalDashboardComponent implements OnInit {
     });
   }
 
+  getHoraReserva(hora: string | undefined | null): string {
+    if (!hora || hora === 'undefined' || hora === 'null' || hora.trim() === '') {
+      return 'No especificada';
+    }
+    // Formatear hora si viene en formato HH:mm:ss a HH:mm
+    if (hora.includes(':')) {
+      const parts = hora.split(':');
+      return `${parts[0]}:${parts[1]}`;
+    }
+    return hora;
+  }
+
   formatTime(dateString: string): string {
     const date = new Date(dateString);
     const now = new Date();
