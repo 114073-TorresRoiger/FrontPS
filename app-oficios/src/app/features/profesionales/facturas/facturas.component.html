@@ -1,6 +1,6 @@
 <div class="facturas-container">
   <header class="page-header">
-    <button class="btn btn-outline-secondary back-btn mb-3" (click)="goBack()">
+    <button class="btn btn-outline-light back-btn mb-3" (click)="goBack()">
       <lucide-angular [img]="ArrowLeft" size="20"></lucide-angular>
       <span class="ms-2">Volver al Dashboard</span>
     </button>
@@ -76,6 +76,14 @@
               <div class="col-auto text-end">
                 <small class="text-muted text-uppercase d-block mb-1">Monto</small>
                 <h5 class="mb-0 fw-bold">${{ factura.monto | number:'1.2-2' }}</h5>
+                <button 
+                  class="btn btn-sm btn-outline-primary mt-2"
+                  (click)="descargarComprobante(factura.nroFactura)"
+                  title="Descargar Comprobante"
+                >
+                  <lucide-angular [img]="Download" size="16"></lucide-angular>
+                  <span class="ms-1">Descargar</span>
+                </button>
               </div>
             </div>
           </div>

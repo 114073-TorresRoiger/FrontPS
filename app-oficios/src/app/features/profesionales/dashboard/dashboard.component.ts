@@ -25,7 +25,10 @@ import { LucideAngularModule,
   Inbox,
   MapPin,
   Filter,
-  MoreVertical
+  MoreVertical,
+  File,
+  Mail,
+  MapPinned
 } from 'lucide-angular';
 import { AuthService } from '../../../domain/auth';
 import { GetSolicitudesUseCase } from '../../../domain/solicitudes/use-cases/get-solicitudes.usecase';
@@ -89,6 +92,9 @@ export class ProfessionalDashboardComponent implements OnInit {
   readonly MapPin = MapPin;
   readonly Filter = Filter;
   readonly MoreVertical = MoreVertical;
+  readonly File = File;
+  readonly Mail = Mail;
+  readonly MapPinned = MapPinned;
 
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
@@ -714,6 +720,18 @@ export class ProfessionalDashboardComponent implements OnInit {
       month: 'long',
       year: 'numeric'
     });
+  }
+
+  getHoraReserva(hora: string | undefined | null): string {
+    if (!hora || hora === 'undefined' || hora === 'null' || hora.trim() === '') {
+      return 'No especificada';
+    }
+    // Formatear hora si viene en formato HH:mm:ss a HH:mm
+    if (hora.includes(':')) {
+      const parts = hora.split(':');
+      return `${parts[0]}:${parts[1]}`;
+    }
+    return hora;
   }
 
   formatTime(dateString: string): string {

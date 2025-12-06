@@ -183,51 +183,50 @@
 
 // ====== ACTION CARDS ======
 .action-card {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
 
   &:hover {
-    transform: translateY(-6px);
-    background: rgba(255, 255, 255, 0.15);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    transform: translateY(-4px);
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
 
   .action-icon {
     width: 64px;
     height: 64px;
-    border-radius: 16px;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
 
     &.solicitudes {
-      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      background: #6366f1;
       color: white;
     }
 
     &.invoices {
-      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      background: #3b82f6;
       color: white;
     }
 
     &.reviews {
-      background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+      background: #f59e0b;
       color: white;
     }
 
     &.messages {
-      background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
+      background: #8b5cf6;
       color: white;
     }
 
     &.payments {
-      background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-      color: #333;
+      background: #10b981;
+      color: white;
     }
   }
 
@@ -332,11 +331,19 @@
   position: relative;
 }
 
+.table-responsive {
+  overflow: visible !important;
+}
+
+.card-body {
+  overflow: visible !important;
+}
+
 .dropdown-menu-custom {
   position: absolute;
   top: 100%;
   right: 0;
-  z-index: 1000;
+  z-index: 9999;
   min-width: 200px;
   padding: 0.5rem 0;
   margin: 0.25rem 0 0;
@@ -345,6 +352,7 @@
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   animation: slideDown 0.2s ease;
+  display: none;
 
   &.show {
     display: block;
@@ -398,6 +406,17 @@
   from {
     opacity: 0;
     transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -779,5 +798,17 @@ textarea.form-control {
   .badge {
     font-size: 0.75rem;
     padding: 0.25rem 0.5rem;
+  }
+}
+
+// Animaciones
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

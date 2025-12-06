@@ -1,4 +1,4 @@
-export type TipoNotificacion = 'NUEVA_SOLICITUD' | 'TRABAJO_FINALIZADO' | 'MENSAJE_NUEVO';
+export type TipoNotificacion = 'NUEVA_SOLICITUD' | 'TRABAJO_FINALIZADO' | 'MENSAJE_NUEVO' | 'TRABAJO_CANCELADO' | 'SOLICITUD_RECHAZADA';
 
 export interface Notificacion {
   id: number;
@@ -9,6 +9,8 @@ export interface Notificacion {
   leida: boolean;
   idRelacionado?: number; // ID de la solicitud, trabajo o mensaje relacionado
   urlAccion?: string; // URL para navegar al hacer clic
+  motivoCancelacion?: string; // Razón de cancelación si aplica
+  montoFinal?: number; // Monto del trabajo si aplica
 }
 
 export interface NotificacionResponse {

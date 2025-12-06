@@ -53,5 +53,6 @@ export interface TrabajoClienteResponse {
   montoFinal: string;
   idpago: string;
   estadoPago: string;
+  nroFactura?: number; // Número de factura para descargar comprobante
   tieneResenia?: boolean; // Opcional
 }
