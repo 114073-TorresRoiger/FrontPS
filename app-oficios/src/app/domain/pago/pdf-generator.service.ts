@@ -129,17 +129,22 @@ export class PDFGeneratorService {
     ctx.fillText('Gracias por confiar en Tu Oficio', canvas.width / 2, 760);
     ctx.fillText('Este es un comprobante electrónico válido', canvas.width / 2, 780);
 
-    // Convertir canvas a imagen y descargar
-    canvas.toBlob((blob) => {
-      if (blob) {
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `Factura_${factura.nroFactura}_${factura.nombreCliente.replace(/\s/g, '_')}.png`;
-        link.click();
-        URL.revokeObjectURL(url);
-      }
+    // Convertir canvas a PDF usando jsPDF
+    const imgData = canvas.toDataURL('image/png');
+    
+    // Crear PDF con jsPDF
+    const { jsPDF } = (window as any).jspdf;
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'pt',
+      format: 'a4'
     });
+
+    // Agregar la imagen del canvas al PDF
+    pdf.addImage(imgData, 'PNG', 0, 0, 595, 842);
+    
+    // Descargar el PDF
+    pdf.save(`Factura_${factura.nroFactura}_${factura.nombreCliente.replace(/\s/g, '_')}.pdf`);
   }
 
   descargarComprobante(nroFactura: number): void {
