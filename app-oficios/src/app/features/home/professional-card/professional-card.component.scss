@@ -70,6 +70,28 @@
   align-self: flex-start;
 }
 
+.professional-rating {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: 0.5rem;
+
+  .star-icon {
+    color: #fbbf24;
+  }
+
+  .rating-value {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #1f2937;
+  }
+
+  .review-count {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+}
+
 .contact-info {
   display: flex;
   flex-direction: column;

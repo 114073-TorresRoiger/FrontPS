@@ -13,6 +13,13 @@
     <div class="professional-header">
       <h3 class="professional-name">{{ professionalName }}</h3>
       <span class="professional-trade">{{ professional.oficio }}</span>
+      
+      <!-- Rating -->
+      <div class="professional-rating" *ngIf="professional.puntuacionPromedio">
+        <lucide-angular [img]="Star" [size]="16" class="star-icon"></lucide-angular>
+        <span class="rating-value">{{ professional.puntuacionPromedio }}</span>
+        <span class="review-count" *ngIf="professional.cantidadResenias">({{ professional.cantidadResenias }})</span>
+      </div>
     </div>
 
     <!-- Contact Info -->
