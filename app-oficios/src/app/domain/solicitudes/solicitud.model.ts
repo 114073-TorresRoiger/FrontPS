@@ -45,3 +45,8 @@ export interface ConfirmarTurnoRequest {
   duracion: number; // minutos, default 60
   observacion?: string;
 }
+
+export interface EstadisticaOficio {
+  oficio: string;
+  cantidadDeSolicitudes: number;
+}

@@ -67,24 +67,29 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th>ID</th>
               <th>Nombre</th>
               <th>Email</th>
-              <th>Fecha Registro</th>
+              <th>Strikes</th>
               <th>Estado</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let usuario of usuarios()">
-              <td>{{ usuario.id }}</td>
               <td>{{ usuario.nombre }}</td>
               <td>{{ usuario.email }}</td>
-              <td>{{ usuario.fechaRegistro }}</td>
               <td>
-                <span class="badge" [class.active]="usuario.estado === 'activo'" [class.inactive]="usuario.estado === 'inactivo'">
-                  {{ usuario.estado }}
+                <span class="badge" [class.warning]="usuario.strikes > 0">
+                  {{ usuario.strikes }}
                 </span>
               </td>
+              <td>
+                <span class="badge" [class.active]="usuario.estado" [class.inactive]="!usuario.estado">
+                  {{ usuario.estado ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+            </tr>
+            <tr *ngIf="usuarios().length === 0">
+              <td colspan="4" class="no-data-cell">No hay usuarios registrados</td>
             </tr>
           </tbody>
         </table>
@@ -100,20 +105,21 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th>ID</th>
               <th>Nombre</th>
               <th>Oficio</th>
               <th>Calificación</th>
-              <th>Servicios</th>
+              <th>Servicios Completados</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let profesional of profesionales()">
-              <td>{{ profesional.id }}</td>
               <td>{{ profesional.nombre }}</td>
               <td>{{ profesional.oficio }}</td>
               <td>⭐ {{ profesional.calificacion }}</td>
               <td>{{ profesional.serviciosCompletados }}</td>
+            </tr>
+            <tr *ngIf="profesionales().length === 0">
+              <td colspan="4" class="no-data-cell">No hay profesionales registrados</td>
             </tr>
           </tbody>
         </table>
@@ -126,17 +132,53 @@
     <!-- Oficios Más Demandados -->
     <section class="content-card">
       <div class="card-header">
-        <h2>Oficios Más Demandados</h2>
+        <h2>Oficios Más Solicitados</h2>
       </div>
-      <div class="demanda-list">
-        <div *ngFor="let item of oficiosMasDemandados()" class="demanda-item">
-          <div class="demanda-info">
-            <span class="demanda-nombre">{{ item.nombre }}</span>
-            <span class="demanda-cantidad">{{ item.cantidad }} solicitudes</span>
-          </div>
-          <div class="demanda-bar">
-            <div class="demanda-progress" [style.width.%]="(item.cantidad / oficiosMasDemandados()[0].cantidad) * 100"></div>
-          </div>
+
+      <!-- Filtros de Fecha -->
+      <div class="filtros-fecha">
+        <div class="filtro-group">
+          <label for="fechaInicio">Fecha Inicio:</label>
+          <input
+            type="date"
+            id="fechaInicio"
+            class="date-input"
+            [ngModel]="fechaInicio()"
+            (ngModelChange)="fechaInicio.set($event)">
+        </div>
+        <div class="filtro-group">
+          <label for="fechaFin">Fecha Fin:</label>
+          <input
+            type="date"
+            id="fechaFin"
+            class="date-input"
+            [ngModel]="fechaFin()"
+            (ngModelChange)="fechaFin.set($event)">
+        </div>
+        <button class="btn-filtro" (click)="aplicarFiltroFechas()">Aplicar</button>
+        <button class="btn-limpiar" (click)="limpiarFiltros()">Limpiar</button>
+      </div>
+
+      <!-- Gráfico de Torta -->
+      <div class="chart-container" *ngIf="oficiosMasDemandados().length > 0">
+        <canvas baseChart
+          [type]="pieChartType"
+          [data]="pieChartData"
+          [options]="pieChartOptions">
+        </canvas>
+      </div>
+
+      <!-- Mensaje cuando no hay datos -->
+      <div class="no-data" *ngIf="oficiosMasDemandados().length === 0">
+        <p>No hay datos disponibles para el período seleccionado</p>
+      </div>
+
+      <!-- Lista de Oficios con Cantidades -->
+      <div class="oficios-stats-list" *ngIf="oficiosMasDemandados().length > 0">
+        <h3>Detalle de Solicitudes por Oficio</h3>
+        <div class="stats-item" *ngFor="let item of oficiosMasDemandados()">
+          <span class="oficio-nombre">{{ item.oficio }}</span>
+          <span class="oficio-cantidad">{{ item.cantidadDeSolicitudes }} solicitudes</span>
         </div>
       </div>
     </section>
@@ -153,11 +195,12 @@
       <div class="oficios-list">
         <div *ngFor="let oficio of oficios()" class="oficio-item">
           <div class="oficio-info">
-            <h4>{{ oficio.nombre }}</h4>
-            <p>{{ oficio.descripcion }}</p>
-            <div class="oficio-stats">
-              <span>{{ oficio.profesionales }} profesionales</span>
-              <span>{{ oficio.demanda }} solicitudes</span>
+            <h4>{{ oficio.oficio }}</h4>
+            <p *ngIf="oficio.descripcion">{{ oficio.descripcion }}</p>
+            <div class="oficio-status">
+              <span class="status-badge" [class.activo]="oficio.activo">
+                {{ oficio.activo ? 'Activo' : 'Inactivo' }}
+              </span>
             </div>
           </div>
           <div class="oficio-actions">
@@ -229,7 +272,7 @@
           type="text"
           id="editNombreOficio"
           class="form-input"
-          [(ngModel)]="selectedOficio()!.nombre">
+          [(ngModel)]="selectedOficio()!.oficio">
       </div>
       <div class="form-group">
         <label for="editDescripcionOficio">Descripción</label>
@@ -238,6 +281,14 @@
           class="form-input"
           [(ngModel)]="selectedOficio()!.descripcion"
           rows="4"></textarea>
+      </div>
+      <div class="form-group">
+        <label>
+          <input
+            type="checkbox"
+            [(ngModel)]="selectedOficio()!.activo">
+          Oficio Activo
+        </label>
       </div>
     </div>
     <div class="modal-footer">

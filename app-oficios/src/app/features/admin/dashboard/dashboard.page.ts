@@ -1,43 +1,21 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, inject, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule, Users, Briefcase, Package, TrendingUp, Plus, Trash2, Edit, LogOut } from 'lucide-angular';
 import { AuthService } from '../../../domain/auth';
-
-interface Usuario {
-  id: number;
-  nombre: string;
-  email: string;
-  fechaRegistro: string;
-  estado: 'activo' | 'inactivo';
-}
-
-interface Profesional {
-  id: number;
-  nombre: string;
-  oficio: string;
-  calificacion: number;
-  serviciosCompletados: number;
-}
-
-interface Oficio {
-  id: number;
-  nombre: string;
-  descripcion: string;
-  profesionales: number;
-  demanda: number;
-  activo: boolean;
-}
-
-interface EstadisticasOficio {
-  nombre: string;
-  cantidad: number;
-}
+import { SolicitudRepository } from '../../../domain/solicitudes/solicitud.repository';
+import { EstadisticaOficio } from '../../../domain/solicitudes/solicitud.model';
+import { UsuarioRepository } from '../../../domain/usuario/usuario.repository';
+import { UsuarioMetrica, ProfesionalMetrica } from '../../../domain/usuario/usuario.model';
+import { OficioRepository } from '../../../domain/oficios/oficio.repository';
+import { Oficio } from '../../../domain/oficios/oficio.model';
+import { BaseChartDirective } from 'ng2-charts';
+import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 
 @Component({
   selector: 'app-dashboard-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule],
+  imports: [CommonModule, FormsModule, LucideAngularModule, BaseChartDirective],
   templateUrl: './dashboard.page.html',
   styleUrl: './dashboard.page.scss'
 })
@@ -50,22 +28,59 @@ export class DashboardPage implements OnInit {
   readonly Plus = Plus;
   readonly Trash2 = Trash2;
   readonly LogOut = LogOut;
+  readonly Edit = Edit;
 
   // Services
   private readonly authService = inject(AuthService);
-  readonly Edit = Edit;
+  private readonly solicitudRepository = inject(SolicitudRepository);
+  private readonly usuarioRepository = inject(UsuarioRepository);
+  private readonly oficioRepository = inject(OficioRepository);
+
+  // Chart reference
+  @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
 
   // Signals para datos
-  usuarios = signal<Usuario[]>([]);
-  profesionales = signal<Profesional[]>([]);
+  usuarios = signal<UsuarioMetrica[]>([]);
+  profesionales = signal<ProfesionalMetrica[]>([]);
   oficios = signal<Oficio[]>([]);
-  oficiosMasDemandados = signal<EstadisticasOficio[]>([]);
+  oficiosMasDemandados = signal<EstadisticaOficio[]>([]);
 
   // Estadísticas
   totalUsuarios = signal(0);
   totalProfesionales = signal(0);
   totalOficios = signal(0);
   totalOficiosActivos = signal(0);
+
+  // Date filters
+  fechaInicio = signal<string>('');
+  fechaFin = signal<string>('');
+
+  // Chart configuration
+  public pieChartType: ChartType = 'pie';
+  public pieChartData: ChartData<'pie'> = {
+    labels: [],
+    datasets: [{
+      data: [],
+      backgroundColor: [
+        '#FF6384',
+        '#36A2EB',
+        '#FFCE56',
+        '#4BC0C0',
+        '#9966FF',
+        '#FF9F40',
+        '#FF6384'
+      ]
+    }]
+  };
+  public pieChartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    maintainAspectRatio: true,
+    plugins: {
+      legend: {
+        position: 'bottom'
+      }
+    }
+  };
 
   // Modal states
   showAddOficioModal = signal(false);
@@ -90,52 +105,127 @@ export class DashboardPage implements OnInit {
     this.cargarOficiosDemandados();
   }
 
+  aplicarFiltroFechas() {
+    this.cargarOficiosDemandados();
+  }
+
+  limpiarFiltros() {
+    this.fechaInicio.set('');
+    this.fechaFin.set('');
+    this.cargarOficiosDemandados();
+  }
+
   cargarUsuarios() {
-    // Mock data - reemplazar con servicio real
-    const mockUsuarios: Usuario[] = [
-      { id: 1, nombre: 'Juan Pérez', email: 'juan@example.com', fechaRegistro: '2025-01-15', estado: 'activo' },
-      { id: 2, nombre: 'María González', email: 'maria@example.com', fechaRegistro: '2025-02-20', estado: 'activo' },
-      { id: 3, nombre: 'Carlos López', email: 'carlos@example.com', fechaRegistro: '2025-03-10', estado: 'inactivo' }
-    ];
-    this.usuarios.set(mockUsuarios);
-    this.totalUsuarios.set(mockUsuarios.length);
+    // Cargar totales
+    this.usuarioRepository.getMetricasUsuarios().subscribe({
+      next: (metricas) => {
+        this.totalUsuarios.set(metricas.cantClientes);
+        this.totalProfesionales.set(metricas.cantProfesionales);
+      },
+      error: (error) => {
+        console.error('Error cargando métricas de usuarios:', error);
+        this.totalUsuarios.set(0);
+        this.totalProfesionales.set(0);
+      }
+    });
+
+    // Cargar lista de usuarios (máximo 5)
+    this.usuarioRepository.getUsuariosMetrica(5).subscribe({
+      next: (usuarios) => {
+        this.usuarios.set(usuarios);
+      },
+      error: (error) => {
+        console.error('Error cargando lista de usuarios:', error);
+        this.usuarios.set([]);
+      }
+    });
   }
 
   cargarProfesionales() {
-    // Mock data - reemplazar con servicio real
-    const mockProfesionales: Profesional[] = [
-      { id: 1, nombre: 'Roberto Silva', oficio: 'Plomería', calificacion: 4.8, serviciosCompletados: 45 },
-      { id: 2, nombre: 'Ana Morales', oficio: 'Electricidad', calificacion: 4.9, serviciosCompletados: 62 },
-      { id: 3, nombre: 'Miguel Torres', oficio: 'Carpintería', calificacion: 4.7, serviciosCompletados: 38 }
-    ];
-    this.profesionales.set(mockProfesionales);
-    this.totalProfesionales.set(mockProfesionales.length);
+    // Cargar lista de profesionales (máximo 5)
+    this.usuarioRepository.getProfesionalesMetrica(5).subscribe({
+      next: (profesionales) => {
+        this.profesionales.set(profesionales);
+      },
+      error: (error) => {
+        console.error('Error cargando lista de profesionales:', error);
+        this.profesionales.set([]);
+      }
+    });
   }
 
   cargarOficios() {
-    // Mock data - reemplazar con servicio real
-    const mockOficios: Oficio[] = [
-      { id: 1, nombre: 'Plomería', descripcion: 'Servicios de plomería general', profesionales: 12, demanda: 145, activo: true },
-      { id: 2, nombre: 'Electricidad', descripcion: 'Instalaciones y reparaciones eléctricas', profesionales: 8, demanda: 128, activo: true },
-      { id: 3, nombre: 'Carpintería', descripcion: 'Trabajos en madera y muebles', profesionales: 15, demanda: 98, activo: true },
-      { id: 4, nombre: 'Pintura', descripcion: 'Pintura interior y exterior', profesionales: 10, demanda: 87, activo: true },
-      { id: 5, nombre: 'Jardinería', descripcion: 'Mantenimiento de jardines', profesionales: 6, demanda: 54, activo: false }
-    ];
-    this.oficios.set(mockOficios);
-    this.totalOficios.set(mockOficios.length);
-    this.totalOficiosActivos.set(mockOficios.filter(o => o.activo).length);
+    this.oficioRepository.list().subscribe({
+      next: (oficios) => {
+        this.oficios.set(oficios);
+        this.totalOficios.set(oficios.length);
+        this.totalOficiosActivos.set(oficios.filter(o => o.activo).length);
+      },
+      error: (error) => {
+        console.error('Error cargando oficios:', error);
+        this.oficios.set([]);
+        this.totalOficios.set(0);
+        this.totalOficiosActivos.set(0);
+      }
+    });
   }
 
   cargarOficiosDemandados() {
-    // Mock data - reemplazar con servicio real
-    const mockDemanda: EstadisticasOficio[] = [
-      { nombre: 'Plomería', cantidad: 145 },
-      { nombre: 'Electricidad', cantidad: 128 },
-      { nombre: 'Carpintería', cantidad: 98 },
-      { nombre: 'Pintura', cantidad: 87 },
-      { nombre: 'Jardinería', cantidad: 54 }
-    ];
-    this.oficiosMasDemandados.set(mockDemanda);
+    const fechaInicio = this.fechaInicio() || undefined;
+    const fechaFin = this.fechaFin() || undefined;
+
+    this.solicitudRepository.getOficiosMasSolicitados(fechaInicio, fechaFin).subscribe({
+      next: (data) => {
+        if (data && data.length > 0) {
+          this.oficiosMasDemandados.set(data);
+          this.actualizarGrafico(data);
+        } else {
+          // Si no hay datos, limpiar
+          this.oficiosMasDemandados.set([]);
+          this.limpiarGrafico();
+        }
+      },
+      error: (error) => {
+        console.error('Error cargando estadísticas:', error);
+        this.oficiosMasDemandados.set([]);
+        this.limpiarGrafico();
+      }
+    });
+  }
+
+  private actualizarGrafico(data: EstadisticaOficio[]) {
+    const labels = data.map(item => item.oficio);
+    const values = data.map(item => item.cantidadDeSolicitudes);
+
+    this.pieChartData = {
+      labels: labels,
+      datasets: [{
+        data: values,
+        backgroundColor: [
+          '#FF6384',
+          '#36A2EB',
+          '#FFCE56',
+          '#4BC0C0',
+          '#9966FF',
+          '#FF9F40',
+          '#C9CBCF'
+        ]
+      }]
+    };
+
+    // Actualizar el chart si existe
+    this.chart?.update();
+  }
+
+  private limpiarGrafico() {
+    this.pieChartData = {
+      labels: [],
+      datasets: [{
+        data: [],
+        backgroundColor: []
+      }]
+    };
+    this.chart?.update();
   }
 
   // Gestión de oficios
@@ -180,10 +270,30 @@ export class DashboardPage implements OnInit {
   }
 
   toggleEstadoOficio(oficio: Oficio) {
-    // TODO: Implementar llamada al backend
-    console.log('Toggle estado oficio:', oficio.id);
-    oficio.activo = !oficio.activo;
-    this.cargarOficios();
+    const accion = oficio.activo ? 'desactivar' : 'activar';
+    const mensajeConfirmacion = oficio.activo
+      ? '¿Está seguro que desea desactivar este oficio?'
+      : '¿Está seguro que desea activar este oficio?';
+
+    if (confirm(mensajeConfirmacion)) {
+      const observable = oficio.activo
+        ? this.oficioRepository.desactivar(oficio.id)
+        : this.oficioRepository.activar(oficio.id);
+
+      observable.subscribe({
+        next: (mensaje) => {
+          console.log(mensaje);
+          // Actualizar el estado localmente
+          oficio.activo = !oficio.activo;
+          // Recargar la lista para mantener sincronización
+          this.cargarOficios();
+        },
+        error: (error) => {
+          console.error(`Error al ${accion} oficio:`, error);
+          alert(`Error al ${accion} el oficio. Por favor, intente nuevamente.`);
+        }
+      });
+    }
   }
 
   eliminarOficio(id: number) {

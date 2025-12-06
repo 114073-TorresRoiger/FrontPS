@@ -1,8 +1,8 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { UsuarioRepository } from '../../domain/usuario/usuario.repository';
-import { UsuarioRequest } from '../../domain/usuario/usuario.model';
+import { UsuarioRequest, MetricasUsuarios, UsuarioMetrica, ProfesionalMetrica } from '../../domain/usuario/usuario.model';
 import { PerfilUsuario, PerfilUsuarioRequest } from '../../domain/usuario/models/perfil.model';
 import { environment } from '../../../environments/environment';
 
@@ -43,5 +43,25 @@ export class UsuarioHttpRepository implements UsuarioRepository {
 
   getAvatar(idAuth: number): Observable<string> {
     return this.http.get(`${this.baseUrl}/perfil/avatar/${idAuth}`, { responseType: 'text' });
+  }
+
+  getMetricasUsuarios(): Observable<MetricasUsuarios> {
+    return this.http.get<MetricasUsuarios>(`${this.baseUrl}/perfil/metrica/usuarios-registrados`);
+  }
+
+  getUsuariosMetrica(limit?: number): Observable<UsuarioMetrica[]> {
+    let params = new HttpParams();
+    if (limit) {
+      params = params.set('limit', limit.toString());
+    }
+    return this.http.get<UsuarioMetrica[]>(`${this.baseUrl}/perfil/metrica/usuarios`, { params });
+  }
+
+  getProfesionalesMetrica(limit?: number): Observable<ProfesionalMetrica[]> {
+    let params = new HttpParams();
+    if (limit) {
+      params = params.set('limit', limit.toString());
+    }
+    return this.http.get<ProfesionalMetrica[]>(`${this.baseUrl}/perfil/metrica/profesionales`, { params });
   }
 }

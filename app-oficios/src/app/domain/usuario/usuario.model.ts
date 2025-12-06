@@ -1,3 +1,22 @@
+export interface MetricasUsuarios {
+  cantProfesionales: number;
+  cantClientes: number;
+}
+
+export interface UsuarioMetrica {
+  nombre: string;
+  email: string;
+  strikes: number;
+  estado: boolean;
+}
+
+export interface ProfesionalMetrica {
+  nombre: string;
+  oficio: string;
+  calificacion: string;
+  serviciosCompletados: number;
+}
+
 export interface UsuarioRequest {
   password: string;
   name: string;

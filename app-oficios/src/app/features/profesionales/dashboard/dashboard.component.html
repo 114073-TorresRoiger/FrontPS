@@ -9,7 +9,7 @@
           <span class="ms-2">Volver al Inicio</span>
         </button>
         <button class="btn btn-danger logout-btn" (click)="logout()" title="Cerrar sesión">
-          <lucide-angular [img]="LogOut" [size]="20"></lucide-angular>
+          <lucide-angular [img]="LogOut" size="20"></lucide-angular>
           <span class="ms-2">Cerrar sesión</span>
         </button>
       </div>
@@ -27,7 +27,7 @@
         <!-- Filtro de Fechas -->
         <div class="d-flex align-items-center gap-2 flex-wrap">
           <div class="d-flex align-items-center gap-2">
-            <lucide-angular [img]="Filter" [size]="20" class="text-white"></lucide-angular>
+            <lucide-angular [img]="Filter" size="20" class="text-white"></lucide-angular>
             <label class="text-white mb-0">Desde:</label>
             <input
               type="date"
@@ -143,7 +143,7 @@
                         (click)="toggleMenuAcciones(trabajo.idTrabajo, $event)"
                         title="Acciones"
                         [disabled]="actionLoading() === trabajo.idTrabajo">
-                        <lucide-angular [img]="MoreVertical" [size]="16"></lucide-angular>
+                        <lucide-angular [img]="MoreVertical" size="16"></lucide-angular>
                       </button>
 
                       <!-- Menú desplegable -->
@@ -151,14 +151,14 @@
                         *ngIf="menuAccionesAbierto() === trabajo.idTrabajo"
                         class="dropdown-menu-custom show"
                         (click)="$event.stopPropagation()">
-                        
+
                         <!-- Iniciar -->
                         <button
                           *ngIf="trabajo.estado === 'PENDIENTE'"
                           class="dropdown-item-custom"
                           (click)="iniciarTrabajoManual(trabajo.idTrabajo); cerrarMenuAcciones()"
                           [disabled]="actionLoading() === trabajo.idTrabajo">
-                          <lucide-angular [img]="Play" [size]="16" class="me-2"></lucide-angular>
+                          <lucide-angular [img]="Play" size="16" class="me-2"></lucide-angular>
                           Iniciar trabajo
                         </button>
 
@@ -168,7 +168,7 @@
                           class="dropdown-item-custom"
                           (click)="pausarTrabajoManual(trabajo.idTrabajo); cerrarMenuAcciones()"
                           [disabled]="actionLoading() === trabajo.idTrabajo">
-                          <lucide-angular [img]="Pause" [size]="16" class="me-2"></lucide-angular>
+                          <lucide-angular [img]="Pause" size="16" class="me-2"></lucide-angular>
                           Pausar trabajo
                         </button>
 
@@ -178,7 +178,7 @@
                           class="dropdown-item-custom"
                           (click)="reanudarTrabajoManual(trabajo.idTrabajo); cerrarMenuAcciones()"
                           [disabled]="actionLoading() === trabajo.idTrabajo">
-                          <lucide-angular [img]="Play" [size]="16" class="me-2"></lucide-angular>
+                          <lucide-angular [img]="Play" size="16" class="me-2"></lucide-angular>
                           Reanudar trabajo
                         </button>
 
@@ -188,7 +188,7 @@
                           class="dropdown-item-custom"
                           (click)="openFinalizarModal(trabajo.idTrabajo); cerrarMenuAcciones()"
                           [disabled]="actionLoading() === trabajo.idTrabajo">
-                          <lucide-angular [img]="Square" [size]="16" class="me-2"></lucide-angular>
+                          <lucide-angular [img]="Square" size="16" class="me-2"></lucide-angular>
                           Finalizar trabajo
                         </button>
 
@@ -198,7 +198,7 @@
                           class="dropdown-item-custom text-danger"
                           (click)="openCancelarModal(trabajo.idTrabajo); cerrarMenuAcciones()"
                           [disabled]="actionLoading() === trabajo.idTrabajo">
-                          <lucide-angular [img]="Ban" [size]="16" class="me-2"></lucide-angular>
+                          <lucide-angular [img]="Ban" size="16" class="me-2"></lucide-angular>
                           Cancelar trabajo
                         </button>
 
@@ -285,7 +285,7 @@
           <span class="ms-2">Volver al Dashboard</span>
         </button>
         <button class="btn btn-danger logout-btn" (click)="logout()" title="Cerrar sesión">
-          <lucide-angular [img]="LogOut" [size]="20"></lucide-angular>
+          <lucide-angular [img]="LogOut" size="20"></lucide-angular>
           <span class="ms-2">Cerrar sesión</span>
         </button>
       </div>
@@ -550,7 +550,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title d-flex align-items-center gap-2">
-          <lucide-angular [img]="Ban" [size]="24"></lucide-angular>
+          <lucide-angular [img]="Ban" size="24"></lucide-angular>
           Cancelar Trabajo
         </h5>
         <button type="button" class="btn-close" (click)="closeCancelarModal()"></button>
@@ -591,9 +591,9 @@
     <div class="modal-content">
       <div class="modal-header" [ngClass]="confirmModalType() === 'aceptar' ? 'bg-success-gradient' : 'bg-danger-gradient'">
         <h5 class="modal-title d-flex align-items-center gap-2">
-          <lucide-angular 
-            [img]="confirmModalType() === 'aceptar' ? Check : XIcon" 
-            [size]="24">
+          <lucide-angular
+            [img]="confirmModalType() === 'aceptar' ? Check : XIcon"
+            size="24">
           </lucide-angular>
           {{ confirmModalTitle() }}
         </h5>
@@ -611,9 +611,9 @@
           class="btn"
           [ngClass]="confirmModalType() === 'aceptar' ? 'btn-success' : 'btn-danger'"
           (click)="executeConfirmAction()">
-          <lucide-angular 
-            [img]="confirmModalType() === 'aceptar' ? Check : XIcon" 
-            [size]="18" 
+          <lucide-angular
+            [img]="confirmModalType() === 'aceptar' ? Check : XIcon"
+            size="18"
             class="me-1">
           </lucide-angular>
           {{ confirmModalType() === 'aceptar' ? 'Sí, aceptar' : 'Sí, rechazar' }}
@@ -633,13 +633,13 @@
           <lucide-angular
             *ngIf="responseModalType() === 'success'"
             [img]="CheckCircle"
-            [size]="64"
+            size="64"
             class="text-success">
           </lucide-angular>
           <lucide-angular
             *ngIf="responseModalType() === 'error'"
             [img]="AlertCircle"
-            [size]="64"
+            size="64"
             class="text-danger">
           </lucide-angular>
         </div>
@@ -655,3 +655,5 @@
   </div>
 </div>
 <div *ngIf="showResponseModal()" class="modal-backdrop fade show"></div>
+
+

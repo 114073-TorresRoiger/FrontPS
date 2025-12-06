@@ -13,4 +13,12 @@ export class OficioHttpRepository implements OficioRepository {
   list(): Observable<Oficio[]> {
     return this.http.get<Oficio[]>(`${this.baseUrl}/all`);
   }
+
+  activar(id: number): Observable<string> {
+    return this.http.put(`${this.baseUrl}/activar/${id}`, null, { responseType: 'text' });
+  }
+
+  desactivar(id: number): Observable<string> {
+    return this.http.put(`${this.baseUrl}/desactivar/${id}`, null, { responseType: 'text' });
+  }
 }

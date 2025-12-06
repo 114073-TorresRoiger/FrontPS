@@ -286,7 +286,7 @@ export class HomePage implements OnInit {
       title: this.formatOficioName(oficio.oficio),
       oficioOriginal: oficio.oficio,
       image: imageMap[oficio.oficio] || 'assets/logos/logo.png',
-      description: oficio.descripcion,
+      description: oficio.descripcion || 'Servicio profesional disponible',
       professionalCount: 0,
       averageRating: 0,
       totalReviews: 0,
@@ -640,7 +640,7 @@ export class HomePage implements OnInit {
       }
 
       let chatClient = this.streamChatService.getChatClient();
-      
+
       // Si no hay cliente de chat inicializado, intentar inicializarlo
       if (!chatClient || !chatClient.user) {
         try {
@@ -648,10 +648,10 @@ export class HomePage implements OnInit {
           const isProfessional = !!userAny.idProfesional;
           const realUserId = user.id.toString();
           const chatUserId = isProfessional ? userAny.idProfesional.toString() : realUserId;
-          const userName = user.name && user.lastName 
-            ? `${user.name} ${user.lastName}` 
+          const userName = user.name && user.lastName
+            ? `${user.name} ${user.lastName}`
             : user.name || 'Usuario';
-          
+
           console.log('🔄 Inicializando chat para contar mensajes...');
           await this.streamChatService.initializeChat(
             chatUserId,
@@ -659,7 +659,7 @@ export class HomePage implements OnInit {
             isProfessional,
             realUserId
           );
-          
+
           chatClient = this.streamChatService.getChatClient();
         } catch (initError) {
           console.error('❌ Error inicializando chat:', initError);
@@ -671,7 +671,7 @@ export class HomePage implements OnInit {
 
       // Obtener el total de mensajes no leídos de todos los canales del usuario
       const channels = await this.streamChatService.getUserChannels();
-      
+
       let totalUnread = 0;
       for (const channel of channels) {
         const unreadCount = channel.countUnread();
@@ -679,7 +679,7 @@ export class HomePage implements OnInit {
       }
 
       console.log('💬 Mensajes no leídos:', totalUnread);
-      
+
       this.mensajesNoLeidos.set(totalUnread);
       this.notificacionService.actualizarMensajesNoLeidos(totalUnread);
 
@@ -688,7 +688,7 @@ export class HomePage implements OnInit {
         this.setupMessageListeners(channels);
         this.messageListenersSetup = true;
       }
-      
+
     } catch (error) {
       console.error('❌ Error cargando mensajes no leídos:', error);
       this.mensajesNoLeidos.set(0);

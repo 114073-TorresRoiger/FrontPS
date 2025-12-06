@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable, catchError, map, of } from 'rxjs';
 import { SolicitudRepository } from '../../domain/solicitudes/solicitud.repository';
-import { SolicitudRequest, SolicitudResponse, SolicitudConProfesional, TurnoDisponible, ConfirmarTurnoRequest } from '../../domain/solicitudes/solicitud.model';
+import { SolicitudRequest, SolicitudResponse, SolicitudConProfesional, TurnoDisponible, ConfirmarTurnoRequest, EstadisticaOficio } from '../../domain/solicitudes/solicitud.model';
 import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -88,6 +88,24 @@ export class SolicitudHttpRepository implements SolicitudRepository {
       `${this.baseUrl}/turnos/confirmar`,
       null,
       { params: finalParams }
+    );
+  }
+
+  getOficiosMasSolicitados(fechaInicio?: string, fechaFin?: string): Observable<EstadisticaOficio[] | null> {
+    let params = new HttpParams();
+
+    if (fechaInicio) {
+      params = params.set('fechaInicio', fechaInicio);
+    }
+    if (fechaFin) {
+      params = params.set('fechaFin', fechaFin);
+    }
+
+    return this.http.get<EstadisticaOficio[]>(
+      `${this.baseUrl}/estadisticas/oficios-mas-solicitados`,
+      { params }
+    ).pipe(
+      catchError(() => of(null))
     );
   }
 }
