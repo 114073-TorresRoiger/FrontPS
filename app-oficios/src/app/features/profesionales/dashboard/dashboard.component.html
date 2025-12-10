@@ -366,6 +366,29 @@
         </div>
       </div>
     </div>
+
+    <!-- Paginación -->
+    <div *ngIf="!isLoadingSolicitudesConMapa() && totalElementos() > 0" 
+         class="d-flex justify-content-between align-items-center mt-4">
+      <div class="text-white">
+        Mostrando {{ solicitudesConMapa().length }} de {{ totalElementos() }} solicitudes
+        <span class="text-white-50">(Página {{ paginaActual() + 1 }} de {{ totalPaginas() }})</span>
+      </div>
+      <div class="btn-group">
+        <button 
+          class="btn btn-outline-light" 
+          (click)="cargarPaginaAnterior()"
+          [disabled]="!tieneAnteriorPagina()">
+          ← Anterior
+        </button>
+        <button 
+          class="btn btn-outline-light" 
+          (click)="cargarSiguientePagina()"
+          [disabled]="!tieneSiguientePagina()">
+          Siguiente →
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 

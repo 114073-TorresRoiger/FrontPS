@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit, HostListener } from '@angular/core';
+import { Component, signal, computed, inject, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { LucideAngularModule,
@@ -147,6 +147,17 @@ export class ProfessionalDashboardComponent implements OnInit {
   solicitudSeleccionadaMapa = signal<any>(null);
   isLoadingSolicitudesConMapa = signal(false);
   showDetalleMapaModal = signal(false);
+  
+  // Pagination
+  paginaActual = signal<number>(0);
+  tamanioPagina = signal<number>(5);
+  totalElementos = signal<number>(0);
+  totalPaginas = signal<number>(0);
+  tieneSiguientePagina = signal<boolean>(false);
+  tieneAnteriorPagina = signal<boolean>(false);
+  
+  // Computed signal for visible solicitudes (removed, using pagination now)
+  solicitudesVisibles = computed(() => this.solicitudesConMapa());
 
   // Date filters
   fechaDesde = signal<string>(this.getDefaultDesde());
@@ -330,30 +341,58 @@ export class ProfessionalDashboardComponent implements OnInit {
 
   async verTodasLasSolicitudes() {
     this.mostrarVistaSolicitudes.set(true);
+    this.paginaActual.set(0);
     await this.cargarSolicitudesConMapa();
   }
 
   volverAlDashboard() {
     this.mostrarVistaSolicitudes.set(false);
     this.solicitudSeleccionadaMapa.set(null);
+    this.paginaActual.set(0);
+    this.solicitudesConMapa.set([]);
   }
 
-  async cargarSolicitudesConMapa() {
+  async cargarSolicitudesConMapa(pagina?: number) {
     const user = this.authService.getCurrentUser();
     if (!user?.idProfesional) return;
 
     this.isLoadingSolicitudesConMapa.set(true);
 
     try {
-      const url = `${environment.apiUrl}/api/v1/solicitudes/profesional/${user.idProfesional}/con-ubicacion`;
-      const result = await this.http.get<any[]>(url).toPromise();
-      this.solicitudesConMapa.set(result || []);
-      console.log('✅ Solicitudes con mapa cargadas:', result);
+      const paginaActual = pagina !== undefined ? pagina : this.paginaActual();
+      const url = `${environment.apiUrl}/api/v1/solicitudes/profesional/${user.idProfesional}/con-ubicacion/paginado?pagina=${paginaActual}&tamanio=${this.tamanioPagina()}`;
+      const result = await this.http.get<any>(url).toPromise();
+      
+      if (result) {
+        this.solicitudesConMapa.set(result.solicitudes || []);
+        this.paginaActual.set(result.paginaActual);
+        this.totalElementos.set(result.totalElementos);
+        this.totalPaginas.set(result.totalPaginas);
+        this.tieneSiguientePagina.set(result.tieneSiguiente);
+        this.tieneAnteriorPagina.set(result.tieneAnterior);
+        console.log('✅ Solicitudes paginadas cargadas:', {
+          pagina: result.paginaActual,
+          total: result.totalElementos,
+          mostradas: result.solicitudes?.length
+        });
+      }
     } catch (error) {
-      console.error('❌ Error cargando solicitudes con mapa:', error);
+      console.error('❌ Error cargando solicitudes paginadas:', error);
       this.solicitudesConMapa.set([]);
     } finally {
       this.isLoadingSolicitudesConMapa.set(false);
+    }
+  }
+
+  async cargarSiguientePagina() {
+    if (this.tieneSiguientePagina()) {
+      await this.cargarSolicitudesConMapa(this.paginaActual() + 1);
+    }
+  }
+
+  async cargarPaginaAnterior() {
+    if (this.tieneAnteriorPagina()) {
+      await this.cargarSolicitudesConMapa(this.paginaActual() - 1);
     }
   }
 
