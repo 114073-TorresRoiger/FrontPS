@@ -259,7 +259,7 @@ export class ProfessionalDashboardComponent implements OnInit {
     this.pagoService.historialIngresos(desde, hasta, user.idProfesional).subscribe({
       next: (pagos) => {
         console.log('✅ Historial de ingresos recibido:', pagos);
-        this.calculateMetrics(pagos);
+        this.calculateMetrics(pagos, user.idProfesional!);
         this.isLoadingMetrics.set(false);
       },
       error: (error) => {
@@ -268,7 +268,7 @@ export class ProfessionalDashboardComponent implements OnInit {
 
         // Si es un 404, mostrar métricas en 0 (no hay datos en ese período)
         if (error.status === 404) {
-          this.calculateMetrics([]);
+          this.calculateMetrics([], user.idProfesional!);
         } else {
           const mensajeError = error.error?.message || error.message || 'Error al cargar métricas';
           this.showErrorModal(mensajeError);
@@ -277,7 +277,7 @@ export class ProfessionalDashboardComponent implements OnInit {
     });
   }
 
-  private calculateMetrics(pagos: any[]) {
+  private calculateMetrics(pagos: any[], idProfesional: number) {
     console.log('📊 Calculando métricas con pagos:', pagos);
 
     // Calcular ingresos totales - todos los pagos retornados ya están aprobados
@@ -294,6 +294,21 @@ export class ProfessionalDashboardComponent implements OnInit {
       maximumFractionDigits: 0
     }).format(ingresoTotal);
 
+    // Obtener promedio de reseñas
+    this.http.get<number>(`${environment.apiUrl}/api/v1/resenias/promedio/${idProfesional}`)
+      .subscribe({
+        next: (promedio) => {
+          console.log('⭐ Promedio de reseñas:', promedio);
+          this.actualizarMetricas(ingresoFormateado, trabajosCompletados, ingresoTotal, promedio);
+        },
+        error: (error) => {
+          console.log('⚠️ No hay reseñas para este profesional:', error);
+          this.actualizarMetricas(ingresoFormateado, trabajosCompletados, ingresoTotal, null);
+        }
+      });
+  }
+
+  private actualizarMetricas(ingresoFormateado: string, trabajosCompletados: number, ingresoTotal: number, promedioResenias: number | null) {
     this.metrics.set([
       {
         title: 'Ingresos del Período',
@@ -310,25 +325,18 @@ export class ProfessionalDashboardComponent implements OnInit {
         icon: this.CheckCircle
       },
       {
-        title: 'Promedio por Trabajo',
-        value: trabajosCompletados > 0 ?
-          new Intl.NumberFormat('es-AR', {
-            style: 'currency',
-            currency: 'ARS',
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0
-          }).format(ingresoTotal / trabajosCompletados) :
-          '$0',
-        change: trabajosCompletados > 0 ? `En ${trabajosCompletados} trabajo${trabajosCompletados !== 1 ? 's' : ''}` : 'Sin datos',
-        trend: 'up',
+        title: 'Promedio de Reseñas',
+        value: promedioResenias !== null ? promedioResenias.toFixed(1) : 'Sin reseñas',
+        change: promedioResenias !== null ? `⭐ ${promedioResenias.toFixed(2)} / 5.0` : 'Aún no hay calificaciones',
+        trend: promedioResenias !== null && promedioResenias >= 4 ? 'up' : 'down',
         icon: this.Star
       }
     ]);
 
-    console.log('✅ Métricas calculadas:', {
+    console.log('✅ Métricas actualizadas:', {
       ingresoTotal,
       trabajosCompletados,
-      promedio: trabajosCompletados > 0 ? ingresoTotal / trabajosCompletados : 0
+      promedioResenias
     });
   }
 
