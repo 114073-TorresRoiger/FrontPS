@@ -491,3 +491,35 @@
             </div>
         </div>
     </div>
+
+    <!-- Modal de Éxito -->
+    <div class="modal-overlay" *ngIf="showSuccessModal()" (click)="closeSuccessModal()">
+        <div class="modal-content success-modal" (click)="$event.stopPropagation()">
+            <div class="modal-header success-header">
+                <h2>✓ Registro Exitoso</h2>
+                <button class="modal-close" (click)="closeSuccessModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>{{ modalMessage() }}</p>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-accept-btn success-btn" (click)="closeSuccessModal()">Ir al Login</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Error -->
+    <div class="modal-overlay" *ngIf="showErrorModal()" (click)="closeErrorModal()">
+        <div class="modal-content error-modal" (click)="$event.stopPropagation()">
+            <div class="modal-header error-header">
+                <h2>✕ Error en el Registro</h2>
+                <button class="modal-close" (click)="closeErrorModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>{{ modalMessage() }}</p>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-accept-btn error-btn" (click)="closeErrorModal()">Cerrar</button>
+            </div>
+        </div>
+    </div>
