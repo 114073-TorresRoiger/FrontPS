@@ -225,7 +225,9 @@ export class HomePage implements OnInit {
     this.isLoadingServices.set(true);
     this.listOficiosUseCase.execute().subscribe({
       next: (oficios: Oficio[]) => {
-        const serviceCards = oficios.map((oficio) => this.mapOficioToServiceCard(oficio));
+        // Filtrar solo oficios activos
+        const oficiosActivos = oficios.filter(oficio => oficio.activo);
+        const serviceCards = oficiosActivos.map((oficio) => this.mapOficioToServiceCard(oficio));
         this.services.set(serviceCards);
         this.isLoadingServices.set(false);
       },
