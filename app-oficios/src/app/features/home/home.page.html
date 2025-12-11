@@ -24,7 +24,7 @@
           />
         </div>
         <button class="search-btn" (click)="onSearch()">Buscar</button>
-        
+
         <!-- Onboarding Button -->
         <app-onboarding></app-onboarding>
       </div>
@@ -102,15 +102,15 @@
   <div class="sidebar-footer">
     <div *ngIf="isUserAuthenticated()" class="user-profile">
       <div class="user-avatar">
-        <img 
-          *ngIf="getUserAvatar()" 
-          [src]="getUserAvatar()" 
-          alt="Avatar" 
+        <img
+          *ngIf="getUserAvatar()"
+          [src]="getUserAvatar()"
+          alt="Avatar"
           class="avatar-image"
           (error)="$event.target.src='assets/icons/user-placeholder.svg'">
-        <lucide-angular 
-          *ngIf="!getUserAvatar()" 
-          [img]="User" 
+        <lucide-angular
+          *ngIf="!getUserAvatar()"
+          [img]="User"
           size="24">
         </lucide-angular>
       </div>
@@ -240,10 +240,10 @@
         <!-- Empty State -->
         <div *ngIf="!isLoadingProfessionals() && noProfessionalsFound()" class="empty-state">
           <div class="empty-state-icon">
-            <lucide-angular [img]="Users" size="64"></lucide-angular>
+            <lucide-angular [img]="Users" size="64" color="white"></lucide-angular>
           </div>
-          <h3 class="empty-state-title">No hay profesionales disponibles</h3>
-          <p class="empty-state-message">
+          <h3 class="empty-state-title" style="color: white;">No hay profesionales disponibles</h3>
+          <p class="empty-state-message" style="color: white;">
             Actualmente no hay profesionales registrados para el servicio de
             <strong>{{ selectedService()?.title }}</strong
             >. Te invitamos a revisar otros servicios o volver más tarde.
