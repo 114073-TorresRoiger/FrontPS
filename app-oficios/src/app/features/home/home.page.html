@@ -102,7 +102,17 @@
   <div class="sidebar-footer">
     <div *ngIf="isUserAuthenticated()" class="user-profile">
       <div class="user-avatar">
-        <lucide-angular [img]="User" size="24"></lucide-angular>
+        <img 
+          *ngIf="getUserAvatar()" 
+          [src]="getUserAvatar()" 
+          alt="Avatar" 
+          class="avatar-image"
+          (error)="$event.target.src='assets/icons/user-placeholder.svg'">
+        <lucide-angular 
+          *ngIf="!getUserAvatar()" 
+          [img]="User" 
+          size="24">
+        </lucide-angular>
       </div>
       <div class="user-info">
         <div class="user-name">{{ getUserDisplayName() }}</div>

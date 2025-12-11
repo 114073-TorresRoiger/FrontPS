@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import {
   FormsModule,
   ReactiveFormsModule,
@@ -62,6 +63,7 @@ import { NotificacionesModalComponent } from '../../shared/components/notificaci
 import { NotificacionService } from '../../data/notificaciones/notificacion.service';
 import { StreamChatService } from '../chat/services/stream-chat.service';
 import { OnboardingComponent } from '../../shared/components/onboarding/onboarding.component';
+import { environment } from '../../../environments/environment';
 
 interface ServiceCard {
   id: number;
@@ -100,6 +102,7 @@ export class HomePage implements OnInit {
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly http = inject(HttpClient);
   readonly authService = inject(AuthService);
   private readonly listOficiosUseCase = inject(ListOficiosUseCase);
   private readonly getProfesionalesByOficioUseCase = inject(GetProfesionalesByOficioUseCase);
@@ -181,6 +184,9 @@ export class HomePage implements OnInit {
   // Notificaciones
   mensajesNoLeidos = signal(0);
 
+  // Avatar del usuario
+  userAvatar = signal<string | null>(null);
+
   // Featured professionals
   featuredProfessionals = signal<PerfilProfesional[]>([]);
   isLoadingFeaturedProfessionals = signal(true);
@@ -192,6 +198,7 @@ export class HomePage implements OnInit {
     this.loadNotificaciones();
     this.loadMensajesNoLeidos();
     this.loadFeaturedProfessionals();
+    this.loadUserAvatar();
   }
 
   @HostListener('window:focus', ['$event'])
@@ -542,6 +549,29 @@ export class HomePage implements OnInit {
   getUserDisplayName(): string {
     return this.authService.getUserFullName();
   }
+  
+  getUserAvatar(): string | null {
+    return this.userAvatar();
+  }
+  
+  private loadUserAvatar(): void {
+    const user = this.authService.getCurrentUser();
+    if (user?.id) {
+      this.http.get<string>(`${environment.apiUrl}/api/v1/perfil/avatar/${user.id}`, { responseType: 'text' as 'json' })
+        .subscribe({
+          next: (avatar) => {
+            this.userAvatar.set(avatar);
+            this.authService.updateUserAvatar(avatar);
+            this.cdr.markForCheck();
+          },
+          error: (error) => {
+            console.log('Avatar no encontrado o error al cargar:', error);
+            this.userAvatar.set(null);
+          }
+        });
+    }
+  }
+  
   isUserAuthenticated(): boolean {
     return this.authService.isLoggedIn();
   }

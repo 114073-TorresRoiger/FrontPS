@@ -38,6 +38,14 @@
       border-color: rgba(255, 255, 255, 0.4);
     }
   }
+
+  .title-underline {
+    width: 150px;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.3);
+    margin-top: 1.5rem;
+    border-radius: 2px;
+  }
 }
 
 .section-title {
