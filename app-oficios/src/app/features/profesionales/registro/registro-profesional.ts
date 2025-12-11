@@ -29,6 +29,11 @@ export class RegistroProfesional implements OnInit {
   successMessage = signal<string | null>(null);
   newEspecialidad = signal('');
   stillWorking = signal(true); // Controla si aún ejerce el oficio
+  
+  // Modales
+  showSuccessModal = signal(false);
+  showErrorModal = signal(false);
+  modalMessage = signal('');
 
   ngOnInit(): void {
     this.initForm();
@@ -147,18 +152,15 @@ export class RegistroProfesional implements OnInit {
     this.registerUseCase.execute(request).subscribe({
       next: (response) => {
         this.isLoading.set(false);
-        this.successMessage.set('¡Registro exitoso! Serás redirigido al inicio...');
-
-        setTimeout(() => {
-          this.router.navigate(['/home']);
-        }, 2000);
+        this.modalMessage.set('¡Registro exitoso! Has sido registrado como profesional. Serás redirigido al inicio.');
+        this.showSuccessModal.set(true);
       },
       error: (error) => {
         this.isLoading.set(false);
         console.error('Error registering professional:', error);
-        this.errorMessage.set(
-          error.error?.message || 'Error al registrar como profesional. Por favor, intente nuevamente.'
-        );
+        const errorMsg = error.error?.message || 'Error al registrar como profesional. Por favor, intente nuevamente.';
+        this.modalMessage.set(errorMsg);
+        this.showErrorModal.set(true);
       }
     });
   }
@@ -195,5 +197,14 @@ export class RegistroProfesional implements OnInit {
 
   goBack(): void {
     this.router.navigate(['/home']);
+  }
+
+  closeSuccessModal(): void {
+    this.showSuccessModal.set(false);
+    this.router.navigate(['/home']);
+  }
+
+  closeErrorModal(): void {
+    this.showErrorModal.set(false);
   }
 }

@@ -757,3 +757,57 @@ body::before {
     padding: 1rem 1.5rem;
   }
 }
+
+/* Modales de Éxito y Error */
+.success-modal {
+  .modal-header {
+    background-color: var(--success-color);
+    color: white;
+    border-radius: 16px 16px 0 0;
+  }
+  
+  .modal-close {
+    color: white;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+  }
+}
+
+.error-modal {
+  .modal-header {
+    background-color: var(--error-color);
+    color: white;
+    border-radius: 16px 16px 0 0;
+  }
+  
+  .modal-close {
+    color: white;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+    }
+  }
+}
+
+.success-btn {
+  background: var(--success-color) !important;
+  
+  &:hover {
+    background: #15803d !important;
+    box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3);
+  }
+}
+
+.error-btn {
+  background: var(--error-color) !important;
+  
+  &:hover {
+    background: #b91c1c !important;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  }
+}
+

@@ -1,3 +1,5 @@
+@import '../../../app.scss';
+
 .dashboard-container {
   min-height: 100vh;
   background: linear-gradient(135deg, #1e293b 0%, #0f172a 50%, #1e293b 100%);
@@ -463,12 +465,14 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: none;
+  background-color: $primary-color;
+  border-radius: 12px 12px 0 0;
 
   h3 {
     font-size: 1.25rem;
     font-weight: 600;
-    color: #1a1a1a;
+    color: white;
   }
 }
 
@@ -481,14 +485,14 @@
   border: none;
   background: none;
   font-size: 1.5rem;
-  color: #6b7280;
+  color: white;
   cursor: pointer;
   border-radius: 6px;
   transition: all 0.2s;
 
   &:hover {
-    background-color: #f3f4f6;
-    color: #374151;
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
   }
 }
 

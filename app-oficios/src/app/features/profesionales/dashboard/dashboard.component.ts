@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit, HostListener } from '@angular/core';
+import { Component, signal, computed, inject, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { LucideAngularModule,
@@ -147,6 +147,17 @@ export class ProfessionalDashboardComponent implements OnInit {
   solicitudSeleccionadaMapa = signal<any>(null);
   isLoadingSolicitudesConMapa = signal(false);
   showDetalleMapaModal = signal(false);
+  
+  // Pagination
+  paginaActual = signal<number>(0);
+  tamanioPagina = signal<number>(5);
+  totalElementos = signal<number>(0);
+  totalPaginas = signal<number>(0);
+  tieneSiguientePagina = signal<boolean>(false);
+  tieneAnteriorPagina = signal<boolean>(false);
+  
+  // Computed signal for visible solicitudes (removed, using pagination now)
+  solicitudesVisibles = computed(() => this.solicitudesConMapa());
 
   // Date filters
   fechaDesde = signal<string>(this.getDefaultDesde());
@@ -248,7 +259,7 @@ export class ProfessionalDashboardComponent implements OnInit {
     this.pagoService.historialIngresos(desde, hasta, user.idProfesional).subscribe({
       next: (pagos) => {
         console.log('✅ Historial de ingresos recibido:', pagos);
-        this.calculateMetrics(pagos);
+        this.calculateMetrics(pagos, user.idProfesional!);
         this.isLoadingMetrics.set(false);
       },
       error: (error) => {
@@ -257,7 +268,7 @@ export class ProfessionalDashboardComponent implements OnInit {
 
         // Si es un 404, mostrar métricas en 0 (no hay datos en ese período)
         if (error.status === 404) {
-          this.calculateMetrics([]);
+          this.calculateMetrics([], user.idProfesional!);
         } else {
           const mensajeError = error.error?.message || error.message || 'Error al cargar métricas';
           this.showErrorModal(mensajeError);
@@ -266,7 +277,7 @@ export class ProfessionalDashboardComponent implements OnInit {
     });
   }
 
-  private calculateMetrics(pagos: any[]) {
+  private calculateMetrics(pagos: any[], idProfesional: number) {
     console.log('📊 Calculando métricas con pagos:', pagos);
 
     // Calcular ingresos totales - todos los pagos retornados ya están aprobados
@@ -283,6 +294,21 @@ export class ProfessionalDashboardComponent implements OnInit {
       maximumFractionDigits: 0
     }).format(ingresoTotal);
 
+    // Obtener promedio de reseñas
+    this.http.get<number>(`${environment.apiUrl}/api/v1/resenias/promedio/${idProfesional}`)
+      .subscribe({
+        next: (promedio) => {
+          console.log('⭐ Promedio de reseñas:', promedio);
+          this.actualizarMetricas(ingresoFormateado, trabajosCompletados, ingresoTotal, promedio);
+        },
+        error: (error) => {
+          console.log('⚠️ No hay reseñas para este profesional:', error);
+          this.actualizarMetricas(ingresoFormateado, trabajosCompletados, ingresoTotal, null);
+        }
+      });
+  }
+
+  private actualizarMetricas(ingresoFormateado: string, trabajosCompletados: number, ingresoTotal: number, promedioResenias: number | null) {
     this.metrics.set([
       {
         title: 'Ingresos del Período',
@@ -299,25 +325,18 @@ export class ProfessionalDashboardComponent implements OnInit {
         icon: this.CheckCircle
       },
       {
-        title: 'Promedio por Trabajo',
-        value: trabajosCompletados > 0 ?
-          new Intl.NumberFormat('es-AR', {
-            style: 'currency',
-            currency: 'ARS',
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0
-          }).format(ingresoTotal / trabajosCompletados) :
-          '$0',
-        change: trabajosCompletados > 0 ? `En ${trabajosCompletados} trabajo${trabajosCompletados !== 1 ? 's' : ''}` : 'Sin datos',
-        trend: 'up',
+        title: 'Promedio de Reseñas',
+        value: promedioResenias !== null ? promedioResenias.toFixed(1) : 'Sin reseñas',
+        change: promedioResenias !== null ? `⭐ ${promedioResenias.toFixed(2)} / 5.0` : 'Aún no hay calificaciones',
+        trend: promedioResenias !== null && promedioResenias >= 4 ? 'up' : 'down',
         icon: this.Star
       }
     ]);
 
-    console.log('✅ Métricas calculadas:', {
+    console.log('✅ Métricas actualizadas:', {
       ingresoTotal,
       trabajosCompletados,
-      promedio: trabajosCompletados > 0 ? ingresoTotal / trabajosCompletados : 0
+      promedioResenias
     });
   }
 
@@ -330,30 +349,58 @@ export class ProfessionalDashboardComponent implements OnInit {
 
   async verTodasLasSolicitudes() {
     this.mostrarVistaSolicitudes.set(true);
+    this.paginaActual.set(0);
     await this.cargarSolicitudesConMapa();
   }
 
   volverAlDashboard() {
     this.mostrarVistaSolicitudes.set(false);
     this.solicitudSeleccionadaMapa.set(null);
+    this.paginaActual.set(0);
+    this.solicitudesConMapa.set([]);
   }
 
-  async cargarSolicitudesConMapa() {
+  async cargarSolicitudesConMapa(pagina?: number) {
     const user = this.authService.getCurrentUser();
     if (!user?.idProfesional) return;
 
     this.isLoadingSolicitudesConMapa.set(true);
 
     try {
-      const url = `${environment.apiUrl}/api/v1/solicitudes/profesional/${user.idProfesional}/con-ubicacion`;
-      const result = await this.http.get<any[]>(url).toPromise();
-      this.solicitudesConMapa.set(result || []);
-      console.log('✅ Solicitudes con mapa cargadas:', result);
+      const paginaActual = pagina !== undefined ? pagina : this.paginaActual();
+      const url = `${environment.apiUrl}/api/v1/solicitudes/profesional/${user.idProfesional}/con-ubicacion/paginado?pagina=${paginaActual}&tamanio=${this.tamanioPagina()}`;
+      const result = await this.http.get<any>(url).toPromise();
+      
+      if (result) {
+        this.solicitudesConMapa.set(result.solicitudes || []);
+        this.paginaActual.set(result.paginaActual);
+        this.totalElementos.set(result.totalElementos);
+        this.totalPaginas.set(result.totalPaginas);
+        this.tieneSiguientePagina.set(result.tieneSiguiente);
+        this.tieneAnteriorPagina.set(result.tieneAnterior);
+        console.log('✅ Solicitudes paginadas cargadas:', {
+          pagina: result.paginaActual,
+          total: result.totalElementos,
+          mostradas: result.solicitudes?.length
+        });
+      }
     } catch (error) {
-      console.error('❌ Error cargando solicitudes con mapa:', error);
+      console.error('❌ Error cargando solicitudes paginadas:', error);
       this.solicitudesConMapa.set([]);
     } finally {
       this.isLoadingSolicitudesConMapa.set(false);
+    }
+  }
+
+  async cargarSiguientePagina() {
+    if (this.tieneSiguientePagina()) {
+      await this.cargarSolicitudesConMapa(this.paginaActual() + 1);
+    }
+  }
+
+  async cargarPaginaAnterior() {
+    if (this.tieneAnteriorPagina()) {
+      await this.cargarSolicitudesConMapa(this.paginaActual() - 1);
     }
   }
 
