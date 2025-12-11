@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, inject, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, Users, Briefcase, Package, TrendingUp, Plus, Trash2, Edit, LogOut, Search, X, AlertTriangle } from 'lucide-angular';
+import { LucideAngularModule, Users, Briefcase, Package, TrendingUp, Plus, Trash2, Edit, LogOut, Search, X, AlertTriangle, CheckCircle, XCircle } from 'lucide-angular';
 import { AuthService } from '../../../domain/auth';
 import { SolicitudRepository } from '../../../domain/solicitudes/solicitud.repository';
 import { EstadisticaOficio } from '../../../domain/solicitudes/solicitud.model';
@@ -34,6 +34,8 @@ export class DashboardPage implements OnInit {
   readonly Search = Search;
   readonly X = X;
   readonly AlertTriangle = AlertTriangle;
+  readonly CheckCircle = CheckCircle;
+  readonly XCircle = XCircle;
 
   // Services
   private readonly authService = inject(AuthService);
@@ -101,6 +103,12 @@ export class DashboardPage implements OnInit {
   selectedOficio = signal<Oficio | null>(null);
   showStrikeModal = signal(false);
   selectedUsuarioForStrike = signal<UsuarioMetrica | PerfilCliente | null>(null);
+  showStrikeValidationModal = signal(false);
+  showStrikeConfirmModal = signal(false);
+  showStrikeSuccessModal = signal(false);
+  showStrikeErrorModal = signal(false);
+  strikeValidationMessage = signal('');
+  strikeErrorMessage = signal('');
 
   // Form data
   nuevoOficio = {
@@ -401,25 +409,38 @@ export class DashboardPage implements OnInit {
     const motivo = this.strikeForm.motivo.trim();
 
     if (!motivo) {
-      alert('Por favor, ingrese un motivo para el strike');
+      this.strikeValidationMessage.set('Por favor, ingrese un motivo para el strike');
+      this.showStrikeValidationModal.set(true);
       return;
     }
 
     if (!usuario) {
-      alert('No se ha seleccionado un usuario');
+      this.strikeValidationMessage.set('No se ha seleccionado un usuario');
+      this.showStrikeValidationModal.set(true);
       return;
     }
 
     if (!usuario.email) {
-      alert('No se pudo obtener el email del usuario');
+      this.strikeValidationMessage.set('No se pudo obtener el email del usuario');
+      this.showStrikeValidationModal.set(true);
       return;
     }
 
-    if (confirm(`¿Está seguro que desea agregar un strike a ${usuario.nombre}?\nMotivo: ${motivo}`)) {
+    // Mostrar modal de confirmación
+    this.showStrikeConfirmModal.set(true);
+  }
+
+  confirmarStrike() {
+    const usuario = this.selectedUsuarioForStrike();
+    const motivo = this.strikeForm.motivo.trim();
+
+    this.showStrikeConfirmModal.set(false);
+
+    if (usuario && usuario.email) {
       this.usuarioRepository.agregarStrike(usuario.email, motivo).subscribe({
         next: (mensaje) => {
           console.log(mensaje);
-          alert('Strike agregado exitosamente');
+          this.showStrikeSuccessModal.set(true);
           this.cerrarModalStrike();
           // Recargar los datos para reflejar el cambio
           if (this.mostrandoResultadosClientes()) {
@@ -430,10 +451,29 @@ export class DashboardPage implements OnInit {
         },
         error: (error) => {
           console.error('Error al agregar strike:', error);
-          alert('Error al agregar strike. Por favor, intente nuevamente.');
+          this.strikeErrorMessage.set('Error al agregar strike. Por favor, intente nuevamente.');
+          this.showStrikeErrorModal.set(true);
         }
       });
     }
+  }
+
+  cerrarModalValidacionStrike() {
+    this.showStrikeValidationModal.set(false);
+    this.strikeValidationMessage.set('');
+  }
+
+  cerrarModalConfirmacionStrike() {
+    this.showStrikeConfirmModal.set(false);
+  }
+
+  cerrarModalExitoStrike() {
+    this.showStrikeSuccessModal.set(false);
+  }
+
+  cerrarModalErrorStrike() {
+    this.showStrikeErrorModal.set(false);
+    this.strikeErrorMessage.set('');
   }
 
   logout() {
