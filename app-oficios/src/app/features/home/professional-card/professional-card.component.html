@@ -2,7 +2,7 @@
   <!-- Professional Image -->
   <div class="professional-image">
     <img
-      src="assets/logos/logo.png"
+      [src]="professional.avatar || 'assets/logos/logo.png'"
       [alt]="professionalName"
       onerror="this.src='assets/logos/logo.png'">
   </div>
