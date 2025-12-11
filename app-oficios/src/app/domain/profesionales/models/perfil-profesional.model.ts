@@ -8,6 +8,7 @@ export interface PerfilProfesional {
   idProfesional: number;
   nombre: string;
   apellido: string;
+  avatar?: string;
   oficio: string;
   telefono: string;
   rangoPrecio: string;

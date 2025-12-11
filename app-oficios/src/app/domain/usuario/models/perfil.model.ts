@@ -1,4 +1,5 @@
 export interface Domicilio {
+  id?: number; // ID de la dirección en la BD
   calle: string;
   numero: string;
   piso?: string;

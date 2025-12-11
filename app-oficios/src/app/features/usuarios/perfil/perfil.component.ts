@@ -6,6 +6,8 @@ import { PerfilService } from '../../../domain/usuario/use-cases/perfil.service'
 import { PerfilUsuario, PerfilUsuarioRequest } from '../../../domain/usuario/models/perfil.model';
 import { AuthService } from '../../../domain/auth/auth.service';
 import { FirebaseStorageService } from '../../../core/services/firebase-storage.service';
+import { DomicilioService } from '../../../domain/domicilio/domicilio.service';
+import { Departamento, Ciudad, Barrio } from '../../../domain/domicilio/domicilio.model';
 import { finalize } from 'rxjs/operators';
 
 @Component({
@@ -21,6 +23,7 @@ export class PerfilComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
   private readonly firebaseStorage = inject(FirebaseStorageService);
+  private readonly domicilioService = inject(DomicilioService);
 
   perfilForm: FormGroup;
   isEditing = false;
@@ -29,6 +32,15 @@ export class PerfilComponent implements OnInit {
   error: string | null = null;
   success: string | null = null;
   imagePreview: string | null = null;
+  direccionId: number | null = null; // ID de la dirección en la BD
+  
+  // Datos para desplegables
+  departamentos: Departamento[] = [];
+  ciudades: Ciudad[] = [];
+  barrios: Barrio[] = [];
+  isLoadingDepartamentos = false;
+  isLoadingCiudades = false;
+  isLoadingBarrios = false;
 
   constructor() {
     this.perfilForm = this.createForm();
@@ -36,6 +48,7 @@ export class PerfilComponent implements OnInit {
 
   ngOnInit() {
     this.cargarPerfil();
+    this.cargarDepartamentos();
   }
 
   private createForm(): FormGroup {
@@ -53,9 +66,9 @@ export class PerfilComponent implements OnInit {
         numero: ['', Validators.required],
         piso: [''],
         depto: [''],
-        barrio: ['', Validators.required],
-        ciudad: ['', Validators.required],
-        departamento: ['', Validators.required]
+        idBarrio: ['', Validators.required],
+        idCiudad: ['', Validators.required],
+        idDepartamento: ['', Validators.required]
       })
     });
   }
@@ -75,6 +88,11 @@ export class PerfilComponent implements OnInit {
       next: (perfil: PerfilUsuario) => {
         this.perfilForm.patchValue(perfil);
         this.imagePreview = perfil.avatar || null;
+        this.direccionId = perfil.domicilio.id || null; // Guardar ID de dirección
+        
+        // Cargar datos de ubicación en cascada
+        this.cargarUbicacionDelPerfil(perfil.domicilio);
+        
         this.isLoading = false;
       },
       error: (error) => {
@@ -82,6 +100,58 @@ export class PerfilComponent implements OnInit {
         this.isLoading = false;
         console.error('Error cargando perfil:', error);
       }
+    });
+  }
+
+  private cargarUbicacionDelPerfil(domicilio: any): void {
+    // Primero cargar todos los departamentos
+    this.domicilioService.getAllDepartamentos().subscribe({
+      next: (departamentos: Departamento[]) => {
+        this.departamentos = departamentos;
+        
+        // Buscar el departamento que coincida con el nombre
+        const departamentoEncontrado = departamentos.find(
+          d => d.departamento.toLowerCase() === domicilio.departamento.toLowerCase()
+        );
+        
+        if (departamentoEncontrado) {
+          // Cargar ciudades de ese departamento
+          this.domicilioService.getCiudadesByDepartamento(departamentoEncontrado.id).subscribe({
+            next: (ciudades: Ciudad[]) => {
+              this.ciudades = ciudades;
+              
+              // Buscar la ciudad que coincida
+              const ciudadEncontrada = ciudades.find(
+                c => c.ciudad.toLowerCase() === domicilio.ciudad.toLowerCase()
+              );
+              
+              if (ciudadEncontrada) {
+                // Cargar barrios de esa ciudad
+                this.domicilioService.getBarriosByCiudad(ciudadEncontrada.id).subscribe({
+                  next: (barrios: Barrio[]) => {
+                    this.barrios = barrios;
+                    
+                    // Buscar el barrio que coincida
+                    const barrioEncontrado = barrios.find(
+                      b => b.barrio.toLowerCase() === domicilio.barrio.toLowerCase()
+                    );
+                    
+                    // Actualizar el formulario con los IDs correctos
+                    this.perfilForm.get('domicilio')?.patchValue({
+                      idDepartamento: departamentoEncontrado.id,
+                      idCiudad: ciudadEncontrada.id,
+                      idBarrio: barrioEncontrado?.id || ''
+                    });
+                  },
+                  error: (error: any) => console.error('Error cargando barrios:', error)
+                });
+              }
+            },
+            error: (error: any) => console.error('Error cargando ciudades:', error)
+          });
+        }
+      },
+      error: (error: any) => console.error('Error cargando departamentos:', error)
     });
   }
 
@@ -108,15 +178,33 @@ export class PerfilComponent implements OnInit {
       this.error = null;
       this.success = null;
 
-      // Crear objeto sin el email para la actualización
-      const { email, ...perfilData } = this.perfilForm.getRawValue();
-      const perfilRequest: PerfilUsuarioRequest = perfilData;
+      const formValue = this.perfilForm.getRawValue();
+      const domicilioFormValue = formValue.domicilio;
+      const barrioSeleccionado = this.barrios.find(b => b.id === domicilioFormValue.idBarrio);
+      
+      // Crear el objeto en el formato que espera el backend
+      const updateRequest = {
+        mail: formValue.email,
+        name: formValue.name,
+        lastName: formValue.lastName,
+        phone: formValue.telefono,
+        adress: this.direccionId ? {
+          id: this.direccionId,
+          idbarrio: barrioSeleccionado ? { id: barrioSeleccionado.id } : null,
+          calle: domicilioFormValue.calle,
+          numero: domicilioFormValue.numero,
+          piso: domicilioFormValue.piso || null,
+          depto: domicilioFormValue.depto || null
+        } : null
+      };
 
-      this.perfilService.actualizarPerfil(currentUser.id.toString(), perfilRequest).subscribe({
+      this.perfilService.actualizarPerfil(currentUser.id.toString(), updateRequest as any).subscribe({
         next: () => {
           this.success = 'Perfil actualizado correctamente';
           this.isEditing = false;
           this.isLoading = false;
+          // Recargar el perfil para obtener los datos actualizados
+          this.cargarPerfil();
         },
         error: (error) => {
           this.error = 'Error al actualizar el perfil. Intente nuevamente.';
@@ -254,6 +342,8 @@ export class PerfilComponent implements OnInit {
     this.perfilService.actualizarAvatar(currentUser.id, avatarUrl).subscribe({
       next: () => {
         console.log('✅ Avatar guardado en el backend');
+        // Actualizar el avatar en la sesión actual
+        this.authService.updateUserAvatar(avatarUrl);
         this.success = 'Foto actualizada correctamente';
         setTimeout(() => {
           this.success = null;
@@ -284,5 +374,76 @@ export class PerfilComponent implements OnInit {
 
   volver() {
     this.router.navigate(['/home']);
+  }
+
+  // ===== Métodos para desplegables =====
+  cargarDepartamentos(): void {
+    this.isLoadingDepartamentos = true;
+    this.domicilioService.getAllDepartamentos().subscribe({
+      next: (data: Departamento[]) => {
+        this.departamentos = data;
+        this.isLoadingDepartamentos = false;
+      },
+      error: (error: any) => {
+        console.error('Error cargando departamentos:', error);
+        this.isLoadingDepartamentos = false;
+      }
+    });
+  }
+
+  onDepartamentoChange(departamentoId: string): void {
+    if (!departamentoId) {
+      this.ciudades = [];
+      this.barrios = [];
+      this.perfilForm.get('domicilio')?.patchValue({
+        idCiudad: '',
+        idBarrio: ''
+      });
+      return;
+    }
+
+    this.isLoadingCiudades = true;
+    this.domicilioService.getCiudadesByDepartamento(Number(departamentoId)).subscribe({
+      next: (data: Ciudad[]) => {
+        this.ciudades = data;
+        this.barrios = [];
+        this.isLoadingCiudades = false;
+        // Limpiar ciudad y barrio
+        this.perfilForm.get('domicilio')?.patchValue({
+          idCiudad: '',
+          idBarrio: ''
+        });
+      },
+      error: (error: any) => {
+        console.error('Error cargando ciudades:', error);
+        this.isLoadingCiudades = false;
+      }
+    });
+  }
+
+  onCiudadChange(ciudadId: string): void {
+    if (!ciudadId) {
+      this.barrios = [];
+      this.perfilForm.get('domicilio')?.patchValue({
+        idBarrio: ''
+      });
+      return;
+    }
+
+    this.isLoadingBarrios = true;
+    this.domicilioService.getBarriosByCiudad(Number(ciudadId)).subscribe({
+      next: (data: Barrio[]) => {
+        this.barrios = data;
+        this.isLoadingBarrios = false;
+        // Limpiar barrio
+        this.perfilForm.get('domicilio')?.patchValue({
+          idBarrio: ''
+        });
+      },
+      error: (error: any) => {
+        console.error('Error cargando barrios:', error);
+        this.isLoadingBarrios = false;
+      }
+    });
   }
 }

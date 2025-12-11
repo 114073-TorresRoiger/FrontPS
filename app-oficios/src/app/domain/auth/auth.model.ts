@@ -15,6 +15,7 @@ export interface AuthResponse {
   idDireccion: number | null;
   idProfesional: number | null;
   roles: string[];
+  avatar?: string | null;
 }
 
 export interface User {
@@ -28,6 +29,7 @@ export interface User {
   idDireccion: number | null;
   idProfesional: number | null;
   roles: string[];
+  avatar?: string | null;
 }
 
 export interface AuthState {

@@ -4,7 +4,12 @@
       <lucide-angular [img]="ArrowLeft" size="20"></lucide-angular>
       <span class="ms-2">Volver al Dashboard</span>
     </button>
-    <h1>Facturas Generadas</h1>
+    <div class="text-center mt-4">
+      <h1 class="display-5 fw-bold text-white mb-2 d-flex align-items-center justify-content-center">
+        <lucide-angular [img]="FileText" size="32" class="me-2"></lucide-angular>
+        Facturas Generadas
+      </h1>
+    </div>
   </header>
 
   <form class="filtro-form card shadow-sm p-4 mb-4" (ngSubmit)="cargarFacturas()">
