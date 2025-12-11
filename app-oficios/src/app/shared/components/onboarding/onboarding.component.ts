@@ -1,4 +1,4 @@
-import { Component, signal, inject, output } from '@angular/core';
+import { Component, signal, inject, output, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { LucideAngularModule, HelpCircle, X, ArrowRight, ArrowLeft } from 'lucide-angular';
 
@@ -24,9 +24,6 @@ interface OnboardingStep {
     >
       <lucide-angular [img]="HelpCircle" size="20"></lucide-angular>
     </button>
-
-    <!-- Onboarding Overlay -->
-    <div *ngIf="isActive()" class="onboarding-overlay" (click)="skipTour()"></div>
 
     <!-- Onboarding Tooltip -->
     <div 
@@ -83,16 +80,6 @@ interface OnboardingStep {
 
       <div class="tooltip-arrow"></div>
     </div>
-
-    <!-- Highlight Overlay for Target Elements -->
-    <div 
-      *ngIf="isActive() && highlightRect()" 
-      class="highlight-overlay"
-      [style.top.px]="highlightRect()!.top"
-      [style.left.px]="highlightRect()!.left"
-      [style.width.px]="highlightRect()!.width"
-      [style.height.px]="highlightRect()!.height"
-    ></div>
   `,
   styles: [`
     .onboarding-btn {
@@ -136,13 +123,13 @@ interface OnboardingStep {
 
     .highlight-overlay {
       position: fixed;
-      border: 3px solid #0d6efd;
+      border: none;
       border-radius: 8px;
-      background: rgba(13, 110, 253, 0.1);
+      background: transparent;
       z-index: 1000;
       pointer-events: none;
       box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.75);
-      animation: pulse 2s infinite;
+      animation: none;
       transform: translateZ(0);
     }
 
@@ -351,7 +338,6 @@ export class OnboardingComponent {
   currentStepIndex = signal(0);
   currentStep = signal<OnboardingStep | null>(null);
   tooltipPosition = signal({ top: 0, left: 0 });
-  highlightRect = signal<DOMRect | null>(null);
 
   // Events
   tourCompleted = output<void>();
@@ -362,29 +348,29 @@ export class OnboardingComponent {
       id: 'sidebar',
       title: '🎯 Menú Principal',
       description: 'Accede a tu perfil, trabajos, notificaciones y más. Si eres profesional, también encontrarás tu dashboard aquí.',
-      target: '.sidebar',
-      position: 'right'
+      target: '.search-input-wrapper',
+      position: 'top'
     },
     {
       id: 'chat',
       title: '💬 Chat en Tiempo Real',
       description: 'Comunícate directamente con los profesionales o clientes. Los mensajes no leídos se mostrarán con un badge.',
       target: '.floating-chat-btn',
-      position: 'left'
+      position: 'top'
     },
     {
       id: 'services',
       title: '🛠️ Servicios Populares',
       description: 'Explora nuestra amplia variedad de servicios. Haz clic en cualquier categoría para ver profesionales disponibles.',
       target: '.services-section',
-      position: 'top'
+      position: 'bottom'
     },
     {
       id: 'featured',
       title: '⭐ Profesionales Destacados',
       description: 'Conoce a los profesionales más solicitados del mes, todos con excelentes valoraciones y experiencia comprobada.',
       target: '.featured-professionals-section',
-      position: 'top'
+      position: 'bottom'
     },
     {
       id: 'search',
@@ -442,19 +428,6 @@ export class OnboardingComponent {
 
     // Obtener posición del elemento relativo al viewport
     const rect = targetElement.getBoundingClientRect();
-    
-    // Establecer el highlight en la posición exacta del elemento
-    this.highlightRect.set({
-      top: rect.top,
-      left: rect.left,
-      width: rect.width,
-      height: rect.height,
-      right: rect.right,
-      bottom: rect.bottom,
-      x: rect.x,
-      y: rect.y,
-      toJSON: rect.toJSON
-    } as DOMRect);
 
     // Calculate tooltip position
     const tooltipWidth = 400;
@@ -468,20 +441,32 @@ export class OnboardingComponent {
     switch (step.position) {
       case 'bottom':
         top = rect.bottom + offset;
-        // Usar la posición left del contenedor principal (home-container)
-        left = rect.left;
+        // Para elementos del contenido, mover 250px a la izquierda
+        left = rect.left - 250;
         break;
       case 'top':
-        top = rect.top - tooltipHeight - offset;
-        // Usar la posición left del contenedor principal (home-container)
-        left = rect.left;
+        // Para tooltips arriba, ajustar para que no tapen la barra de búsqueda
+        // Si el step es chat, posicionar más a la izquierda
+        if (step.id === 'chat') {
+          top = rect.top - tooltipHeight - offset;
+          left = rect.left - tooltipWidth - 200; // Moverlo aún más a la izquierda
+        } else if (step.id === 'services') {
+          // Para services, posicionar más abajo
+          top = rect.top + 150; // Bajar 150px
+          left = rect.left - 250;
+        } else {
+          // Para featured y otros, posicionar debajo de la barra de búsqueda
+          top = rect.top + 100; // Bajar 100px para no tapar la búsqueda
+          left = rect.left - 250;
+        }
         break;
       case 'left':
+        // Para el chat, ya está bien posicionado, no ajustar
         top = rect.top + (rect.height / 2) - (tooltipHeight / 2);
         left = rect.left - tooltipWidth - offset;
         break;
       case 'right':
-        // Para el sidebar, posicionar justo a la derecha
+        // Para el sidebar, posicionar justo a la derecha del sidebar
         top = rect.top + (rect.height / 2) - (tooltipHeight / 2);
         left = rect.right + offset;
         break;
@@ -496,13 +481,15 @@ export class OnboardingComponent {
     const minTop = padding;
     const maxTop = viewportHeight - tooltipHeight - padding;
     
-    // Solo ajustar si se sale por la derecha
+    // Ajustar solo si se sale por la derecha (no forzar un mínimo)
     if (left > maxLeft) {
       left = maxLeft;
     }
     
     top = Math.max(minTop, Math.min(top, maxTop));
 
+    console.log('📍 Tooltip position:', { step: step.id, top, left, rectLeft: rect.left, rectRight: rect.right });
+    
     this.tooltipPosition.set({ top, left });
   }
 
@@ -525,12 +512,31 @@ export class OnboardingComponent {
   skipTour() {
     this.isActive.set(false);
     this.currentStep.set(null);
-    this.highlightRect.set(null);
   }
 
   finishTour() {
     localStorage.setItem('onboarding_completed', 'true');
     this.tourCompleted.emit();
     this.skipTour();
+  }
+
+  @HostListener('window:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    if (!this.isActive()) return;
+
+    switch(event.key) {
+      case 'ArrowRight':
+        event.preventDefault();
+        this.nextStep();
+        break;
+      case 'ArrowLeft':
+        event.preventDefault();
+        this.previousStep();
+        break;
+      case 'Escape':
+        event.preventDefault();
+        this.skipTour();
+        break;
+    }
   }
 }

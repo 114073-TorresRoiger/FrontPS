@@ -44,6 +44,11 @@ export class Registro implements OnInit {
   // Terms and Conditions modal
   showTermsModal = signal(false);
 
+  // Success/Error modals
+  showSuccessModal = signal(false);
+  showErrorModal = signal(false);
+  modalMessage = signal('');
+
   // Password visibility
   showPassword = signal(false);
 
@@ -236,13 +241,14 @@ export class Registro implements OnInit {
       this.authService.registerUsuario(usuarioRequest).subscribe({
         next: (response) => {
           console.log('Registro exitoso:', response);
-          alert('¡Registro exitoso! Por favor verifica tu correo electrónico para confirmar tu cuenta.');
-          this.router.navigate(['/auth/login']);
+          this.modalMessage.set('¡Registro exitoso! Por favor verifica tu correo electrónico para confirmar tu cuenta.');
+          this.showSuccessModal.set(true);
           this.isSubmitting = false;
         },
         error: (error) => {
           console.error('Error en el registro:', error);
-          alert('Error en el registro: ' + (error.error?.message || 'Por favor intenta nuevamente'));
+          this.modalMessage.set('Error en el registro: ' + (error.error?.message || 'Por favor intenta nuevamente'));
+          this.showErrorModal.set(true);
           this.isSubmitting = false;
         }
       });
@@ -287,5 +293,14 @@ export class Registro implements OnInit {
 
   togglePasswordVisibility(): void {
     this.showPassword.set(!this.showPassword());
+  }
+
+  closeSuccessModal(): void {
+    this.showSuccessModal.set(false);
+    this.router.navigate(['/auth/login']);
+  }
+
+  closeErrorModal(): void {
+    this.showErrorModal.set(false);
   }
 }
