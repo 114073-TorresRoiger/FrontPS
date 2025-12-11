@@ -84,7 +84,8 @@ export class AuthService {
             nacimiento: response.nacimiento,
             idDireccion: response.idDireccion,
             idProfesional: response.idProfesional,
-            roles: response.roles
+            roles: response.roles,
+            avatar: response.avatar || null
           };
 
           // Store token and user data
@@ -190,6 +191,23 @@ export class AuthService {
   getUserFullName(): string {
     const user = this.getCurrentUser();
     return user ? `${user.name} ${user.lastName}` : '';
+  }
+
+  /**
+   * Update user avatar in current session
+   */
+  updateUserAvatar(avatarUrl: string): void {
+    const currentUser = this.getCurrentUser();
+    if (currentUser) {
+      const updatedUser = { ...currentUser, avatar: avatarUrl };
+      localStorage.setItem(this.USER_KEY, JSON.stringify(updatedUser));
+      
+      this.updateAuthState({
+        isAuthenticated: true,
+        token: this.getToken(),
+        user: updatedUser
+      });
+    }
   }
 
   /**

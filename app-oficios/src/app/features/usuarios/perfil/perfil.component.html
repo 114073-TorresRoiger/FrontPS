@@ -243,46 +243,60 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label for="barrio">Barrio *</label>
-            <input
-              id="barrio"
-              type="text"
-              formControlName="barrio"
-              [class.error]="getDomicilioFieldError('barrio')"
-              [readonly]="!isEditing"
-              placeholder="Nombre del barrio">
-            <div *ngIf="getDomicilioFieldError('barrio')" class="field-error">
-              {{ getDomicilioFieldError('barrio') }}
+            <label for="departamento">Departamento *</label>
+            <select
+              id="departamento"
+              formControlName="idDepartamento"
+              [class.error]="getDomicilioFieldError('idDepartamento')"
+              [disabled]="!isEditing"
+              (change)="onDepartamentoChange($any($event.target).value)"
+              class="form-input">
+              <option value="">Seleccione un departamento</option>
+              <option *ngFor="let dept of departamentos" [value]="dept.id">
+                {{ dept.departamento }}
+              </option>
+            </select>
+            <div *ngIf="getDomicilioFieldError('idDepartamento')" class="field-error">
+              {{ getDomicilioFieldError('idDepartamento') }}
             </div>
           </div>
 
           <div class="form-group">
             <label for="ciudad">Ciudad *</label>
-            <input
+            <select
               id="ciudad"
-              type="text"
-              formControlName="ciudad"
-              [class.error]="getDomicilioFieldError('ciudad')"
-              [readonly]="!isEditing"
-              placeholder="Nombre de la ciudad">
-            <div *ngIf="getDomicilioFieldError('ciudad')" class="field-error">
-              {{ getDomicilioFieldError('ciudad') }}
+              formControlName="idCiudad"
+              [class.error]="getDomicilioFieldError('idCiudad')"
+              [disabled]="!isEditing"
+              (change)="onCiudadChange($any($event.target).value)"
+              class="form-input">
+              <option value="">Seleccione una ciudad</option>
+              <option *ngFor="let city of ciudades" [value]="city.id">
+                {{ city.ciudad }}
+              </option>
+            </select>
+            <div *ngIf="getDomicilioFieldError('idCiudad')" class="field-error">
+              {{ getDomicilioFieldError('idCiudad') }}
             </div>
           </div>
         </div>
 
         <div class="form-row">
           <div class="form-group">
-            <label for="departamento">Departamento *</label>
-            <input
-              id="departamento"
-              type="text"
-              formControlName="departamento"
-              [class.error]="getDomicilioFieldError('departamento')"
-              [readonly]="!isEditing"
-              placeholder="Ej: CAPITAL">
-            <div *ngIf="getDomicilioFieldError('departamento')" class="field-error">
-              {{ getDomicilioFieldError('departamento') }}
+            <label for="barrio">Barrio *</label>
+            <select
+              id="barrio"
+              formControlName="idBarrio"
+              [class.error]="getDomicilioFieldError('idBarrio')"
+              [disabled]="!isEditing"
+              class="form-input">
+              <option value="">Seleccione un barrio</option>
+              <option *ngFor="let barrio of barrios" [value]="barrio.id">
+                {{ barrio.barrio }}
+              </option>
+            </select>
+            <div *ngIf="getDomicilioFieldError('idBarrio')" class="field-error">
+              {{ getDomicilioFieldError('idBarrio') }}
             </div>
           </div>
         </div>

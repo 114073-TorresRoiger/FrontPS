@@ -440,6 +440,14 @@
         justify-content: center;
         color: $white;
         flex-shrink: 0;
+        overflow: hidden;
+        
+        .avatar-image {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          border-radius: 50%;
+        }
       }
 
       .user-info {
@@ -1155,7 +1163,7 @@
     .view-professionals-btn {
       width: 100%;
       padding: 0.75rem;
-      background: linear-gradient(135deg, $primary-color, $secondary-color);
+      background: linear-gradient(135deg, #3b4261 0%, #4c4d64 100%);
       color: $white;
       border: none;
       border-radius: 8px;
@@ -1165,9 +1173,8 @@
       transition: all 0.3s ease;
 
       &:hover {
-        background: linear-gradient(135deg, $primary-dark, $secondary-dark);
         transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba($primary-color, 0.3);
+        box-shadow: 0 4px 12px rgba(59, 66, 97, 0.4);
       }
     }
   }
@@ -1350,7 +1357,7 @@
 
         .contact-professional-btn {
           padding: 0.75rem 1.5rem;
-          background: $accent-color;
+          background: linear-gradient(135deg, #3b4261 0%, #4c4d64 100%);
           color: white;
           border: none;
           border-radius: 8px;
@@ -1359,9 +1366,8 @@
           transition: all 0.3s ease;
 
           &:hover {
-            background: $primary-color;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba($primary-color, 0.3);
+            box-shadow: 0 4px 12px rgba(59, 66, 97, 0.4);
           }
         }
       }
@@ -1572,7 +1578,7 @@
 
       .contact-professional-btn {
         padding: 0.75rem 1.5rem;
-        background: linear-gradient(135deg, $success-color, darken($success-color, 10%));
+        background: linear-gradient(135deg, #3b4261 0%, #4c4d64 100%);
         color: $white;
         border: none;
         border-radius: 8px;
@@ -1582,12 +1588,8 @@
         transition: all 0.3s ease;
 
         &:hover {
-          background: linear-gradient(
-            135deg,
-            darken($success-color, 10%),
-            darken($success-color, 20%)
-          );
           transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(59, 66, 97, 0.4);
         }
       }
     }
