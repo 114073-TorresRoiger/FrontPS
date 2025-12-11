@@ -95,6 +95,7 @@
               <th>Email</th>
               <th>Strikes</th>
               <th>Estado</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -113,9 +114,14 @@
                     {{ cliente.estado ? 'Activo' : 'Inactivo' }}
                   </span>
                 </td>
+                <td>
+                  <button class="btn-icon warning" (click)="abrirModalStrike(cliente)" title="Agregar Strike">
+                    <lucide-angular [img]="AlertTriangle" [size]="18"></lucide-angular>
+                  </button>
+                </td>
               </tr>
               <tr *ngIf="clientesEncontrados().length === 0">
-                <td colspan="4" class="no-data-cell">No se encontraron clientes</td>
+                <td colspan="5" class="no-data-cell">No se encontraron clientes</td>
               </tr>
             </ng-container>
 
@@ -134,9 +140,14 @@
                     {{ usuario.estado ? 'Activo' : 'Inactivo' }}
                   </span>
                 </td>
+                <td>
+                  <button class="btn-icon warning" (click)="abrirModalStrike(usuario)" title="Agregar Strike">
+                    <lucide-angular [img]="AlertTriangle" [size]="18"></lucide-angular>
+                  </button>
+                </td>
               </tr>
               <tr *ngIf="usuarios().length === 0">
-                <td colspan="4" class="no-data-cell">No hay usuarios registrados</td>
+                <td colspan="5" class="no-data-cell">No hay usuarios registrados</td>
               </tr>
             </ng-template>
           </tbody>
@@ -382,6 +393,41 @@
     <div class="modal-footer">
       <button class="btn-secondary" (click)="cerrarModalEditarOficio()">Cancelar</button>
       <button class="btn-primary" (click)="actualizarOficio()">Guardar Cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Agregar Strike -->
+<div class="modal-overlay" *ngIf="showStrikeModal()" (click)="cerrarModalStrike()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Agregar Strike a Usuario</h3>
+      <button class="btn-close" (click)="cerrarModalStrike()">×</button>
+    </div>
+    <div class="modal-body" *ngIf="selectedUsuarioForStrike()">
+      <div class="user-info-strike">
+        <lucide-angular [img]="AlertTriangle" [size]="48" color="#f59e0b"></lucide-angular>
+        <h4>{{ selectedUsuarioForStrike()!.nombre }}</h4>
+        <p>{{ selectedUsuarioForStrike()!.email }}</p>
+        <p class="current-strikes">Strikes actuales: <strong>{{ selectedUsuarioForStrike()!.strikes }}</strong></p>
+      </div>
+      <div class="form-group">
+        <label for="motivoStrike">Motivo del Strike <span class="required">*</span></label>
+        <textarea
+          id="motivoStrike"
+          class="form-input"
+          [(ngModel)]="strikeForm.motivo"
+          placeholder="Describa el motivo del strike (ej: Comportamiento inapropiado, Incumplimiento de términos, etc.)"
+          rows="4"></textarea>
+      </div>
+      <div class="strike-warning">
+        <lucide-angular [img]="AlertTriangle" [size]="20" color="#dc2626"></lucide-angular>
+        <p>Esta acción quedará registrada en el historial del usuario.</p>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cerrarModalStrike()">Cancelar</button>
+      <button class="btn-danger" (click)="agregarStrike()">Agregar Strike</button>
     </div>
   </div>
 </div>

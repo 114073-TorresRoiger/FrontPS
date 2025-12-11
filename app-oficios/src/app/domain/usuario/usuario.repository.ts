@@ -17,4 +17,5 @@ export abstract class UsuarioRepository {
   abstract getProfesionalesMetrica(limit?: number): Observable<ProfesionalMetrica[]>;
   abstract buscarClientesPorNombre(nombre: string): Observable<PerfilCliente[]>;
   abstract buscarProfesionalesPorNombre(nombre: string): Observable<PerfilProfesional[]>;
+  abstract agregarStrike(email: string, motivo: string): Observable<string>;
 }

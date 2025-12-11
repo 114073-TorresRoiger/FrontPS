@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, inject, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, Users, Briefcase, Package, TrendingUp, Plus, Trash2, Edit, LogOut, Search, X } from 'lucide-angular';
+import { LucideAngularModule, Users, Briefcase, Package, TrendingUp, Plus, Trash2, Edit, LogOut, Search, X, AlertTriangle } from 'lucide-angular';
 import { AuthService } from '../../../domain/auth';
 import { SolicitudRepository } from '../../../domain/solicitudes/solicitud.repository';
 import { EstadisticaOficio } from '../../../domain/solicitudes/solicitud.model';
@@ -33,6 +33,7 @@ export class DashboardPage implements OnInit {
   readonly Edit = Edit;
   readonly Search = Search;
   readonly X = X;
+  readonly AlertTriangle = AlertTriangle;
 
   // Services
   private readonly authService = inject(AuthService);
@@ -98,11 +99,17 @@ export class DashboardPage implements OnInit {
   showAddOficioModal = signal(false);
   showEditOficioModal = signal(false);
   selectedOficio = signal<Oficio | null>(null);
+  showStrikeModal = signal(false);
+  selectedUsuarioForStrike = signal<UsuarioMetrica | PerfilCliente | null>(null);
 
   // Form data
   nuevoOficio = {
     nombre: '',
     descripcion: ''
+  };
+
+  strikeForm = {
+    motivo: ''
   };
 
   ngOnInit() {
@@ -373,6 +380,59 @@ export class DashboardPage implements OnInit {
       // TODO: Implementar llamada al backend
       console.log('Eliminar oficio:', id);
       this.cargarOficios();
+    }
+  }
+
+  // Gestión de strikes
+  abrirModalStrike(usuario: UsuarioMetrica | PerfilCliente) {
+    this.selectedUsuarioForStrike.set(usuario);
+    this.strikeForm.motivo = '';
+    this.showStrikeModal.set(true);
+  }
+
+  cerrarModalStrike() {
+    this.showStrikeModal.set(false);
+    this.selectedUsuarioForStrike.set(null);
+    this.strikeForm.motivo = '';
+  }
+
+  agregarStrike() {
+    const usuario = this.selectedUsuarioForStrike();
+    const motivo = this.strikeForm.motivo.trim();
+
+    if (!motivo) {
+      alert('Por favor, ingrese un motivo para el strike');
+      return;
+    }
+
+    if (!usuario) {
+      alert('No se ha seleccionado un usuario');
+      return;
+    }
+
+    if (!usuario.email) {
+      alert('No se pudo obtener el email del usuario');
+      return;
+    }
+
+    if (confirm(`¿Está seguro que desea agregar un strike a ${usuario.nombre}?\nMotivo: ${motivo}`)) {
+      this.usuarioRepository.agregarStrike(usuario.email, motivo).subscribe({
+        next: (mensaje) => {
+          console.log(mensaje);
+          alert('Strike agregado exitosamente');
+          this.cerrarModalStrike();
+          // Recargar los datos para reflejar el cambio
+          if (this.mostrandoResultadosClientes()) {
+            this.buscarCliente();
+          } else {
+            this.cargarUsuarios();
+          }
+        },
+        error: (error) => {
+          console.error('Error al agregar strike:', error);
+          alert('Error al agregar strike. Por favor, intente nuevamente.');
+        }
+      });
     }
   }
 
