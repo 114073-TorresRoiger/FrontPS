@@ -11,7 +11,7 @@ export class OficioHttpRepository implements OficioRepository {
   private readonly baseUrl = `${environment.apiUrl}/api/v1/oficios`;
 
   list(): Observable<Oficio[]> {
-    return this.http.get<Oficio[]>(`${this.baseUrl}/all`);
+    return this.http.get<Oficio[]>(`${this.baseUrl}/all-inactive`);
   }
 
   activar(id: number): Observable<string> {

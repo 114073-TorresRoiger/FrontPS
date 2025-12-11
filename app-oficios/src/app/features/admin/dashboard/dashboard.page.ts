@@ -119,6 +119,12 @@ export class DashboardPage implements OnInit {
   showStrikeErrorModal = signal(false);
   strikeValidationMessage = signal('');
   strikeErrorMessage = signal('');
+  
+  // Modales de oficio
+  showOficioSuccessModal = signal(false);
+  showOficioErrorModal = signal(false);
+  oficioModalMessage = signal('');
+  oficioErrorMessage = signal('');
 
   // Form data
   nuevoOficio = {
@@ -414,29 +420,28 @@ export class DashboardPage implements OnInit {
 
   toggleEstadoOficio(oficio: Oficio) {
     const accion = oficio.activo ? 'desactivar' : 'activar';
-    const mensajeConfirmacion = oficio.activo
-      ? '¿Está seguro que desea desactivar este oficio?'
-      : '¿Está seguro que desea activar este oficio?';
 
-    if (confirm(mensajeConfirmacion)) {
-      const observable = oficio.activo
-        ? this.oficioRepository.desactivar(oficio.id)
-        : this.oficioRepository.activar(oficio.id);
+    const observable = oficio.activo
+      ? this.oficioRepository.desactivar(oficio.id)
+      : this.oficioRepository.activar(oficio.id);
 
-      observable.subscribe({
-        next: (mensaje) => {
-          console.log(mensaje);
-          // Actualizar el estado localmente
-          oficio.activo = !oficio.activo;
-          // Recargar la lista para mantener sincronización
-          this.cargarOficios();
-        },
-        error: (error) => {
-          console.error(`Error al ${accion} oficio:`, error);
-          alert(`Error al ${accion} el oficio. Por favor, intente nuevamente.`);
-        }
-      });
-    }
+    observable.subscribe({
+      next: (mensaje) => {
+        console.log(mensaje);
+        // Actualizar el estado localmente
+        oficio.activo = !oficio.activo;
+        // Recargar la lista para mantener sincronización
+        this.cargarOficios();
+        // Mostrar modal de éxito
+        this.oficioModalMessage.set(`Oficio ${accion === 'activar' ? 'activado' : 'desactivado'} exitosamente`);
+        this.showOficioSuccessModal.set(true);
+      },
+      error: (error) => {
+        console.error(`Error al ${accion} oficio:`, error);
+        this.oficioErrorMessage.set(`Error al ${accion} el oficio. Por favor, intente nuevamente.`);
+        this.showOficioErrorModal.set(true);
+      }
+    });
   }
 
   eliminarOficio(id: number) {
@@ -536,6 +541,14 @@ export class DashboardPage implements OnInit {
   cerrarModalErrorStrike() {
     this.showStrikeErrorModal.set(false);
     this.strikeErrorMessage.set('');
+  }
+
+  cerrarModalExitoOficio() {
+    this.showOficioSuccessModal.set(false);
+  }
+
+  cerrarModalErrorOficio() {
+    this.showOficioErrorModal.set(false);
   }
 
   logout() {

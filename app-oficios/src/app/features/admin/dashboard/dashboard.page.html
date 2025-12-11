@@ -544,3 +544,38 @@
     </div>
   </div>
 </div>
+
+<!-- Modal de Éxito de Oficio -->
+<div class="modal-overlay" *ngIf="showOficioSuccessModal()" (click)="cerrarModalExitoOficio()">
+  <div class="modal-content modal-small" (click)="$event.stopPropagation()">
+    <div class="modal-header modal-header-success">
+      <lucide-angular [img]="CheckCircle" [size]="32" color="#10b981"></lucide-angular>
+      <h3>Operación Exitosa</h3>
+      <button class="btn-close" (click)="cerrarModalExitoOficio()">×</button>
+    </div>
+    <div class="modal-body text-center">
+      <p class="modal-message">{{ oficioModalMessage() }}</p>
+      <p class="modal-submessage">Los cambios se han guardado correctamente.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-success btn-block" (click)="cerrarModalExitoOficio()">Aceptar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Error de Oficio -->
+<div class="modal-overlay" *ngIf="showOficioErrorModal()" (click)="cerrarModalErrorOficio()">
+  <div class="modal-content modal-small" (click)="$event.stopPropagation()">
+    <div class="modal-header modal-header-error">
+      <lucide-angular [img]="XCircle" [size]="32" color="#ef4444"></lucide-angular>
+      <h3>Error</h3>
+      <button class="btn-close" (click)="cerrarModalErrorOficio()">×</button>
+    </div>
+    <div class="modal-body text-center">
+      <p class="modal-message">{{ oficioErrorMessage() }}</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-danger btn-block" (click)="cerrarModalErrorOficio()">Cerrar</button>
+    </div>
+  </div>
+</div>

@@ -618,6 +618,21 @@
     }
   }
 
+  .btn-secondary {
+    background-color: #6b7280;
+    color: white;
+    border: none;
+    padding: 0.625rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      background-color: #4b5563;
+    }
+  }
+
   .btn-danger {
     background-color: #ef4444;
     color: white;
