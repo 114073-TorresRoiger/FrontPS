@@ -532,6 +532,110 @@
       }
     }
   }
+
+  // Estilos para modales de respuesta
+  .modal-header-success {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background-color: #d1fae5;
+    border-bottom: 2px solid #10b981;
+    padding: 1.25rem;
+    border-radius: 16px 16px 0 0;
+
+    h3 {
+      color: #ffffff;
+      margin: 0;
+      flex: 1;
+      font-weight: 600;
+    }
+  }
+
+  .modal-header-error {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background-color: #fee2e2;
+    border-bottom: 2px solid #ef4444;
+    padding: 1.25rem;
+    border-radius: 16px 16px 0 0;
+
+    h3 {
+      color: #ffffff;
+      margin: 0;
+      flex: 1;
+      font-weight: 600;
+    }
+  }
+
+  .btn-close-custom {
+    background: transparent;
+    border: none;
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1;
+    color: inherit;
+    opacity: 0.5;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: all 0.2s;
+
+    &:hover {
+      opacity: 1;
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+  }
+
+  .modal-message {
+    font-size: 1rem;
+    color: #374151;
+    font-weight: 500;
+  }
+
+  .modal-submessage {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+
+  .btn-success {
+    background-color: #10b981;
+    color: white;
+    border: none;
+    padding: 0.625rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      background-color: #059669;
+    }
+  }
+
+  .btn-danger {
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    padding: 0.625rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      background-color: #dc2626;
+    }
+  }
+
+  .btn-block {
+    width: 100%;
+  }
 }
 
 .modal-backdrop {

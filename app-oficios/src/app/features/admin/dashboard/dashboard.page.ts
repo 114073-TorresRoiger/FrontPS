@@ -52,6 +52,16 @@ export class DashboardPage implements OnInit {
   oficios = signal<Oficio[]>([]);
   oficiosMasDemandados = signal<EstadisticaOficio[]>([]);
 
+  // Paginación de usuarios
+  paginaUsuariosActual = signal<number>(0);
+  usuariosPorPagina = 5;
+  hayMasUsuarios = signal<boolean>(false);
+
+  // Paginación de profesionales
+  paginaProfesionalesActual = signal<number>(0);
+  profesionalesPorPagina = 5;
+  hayMasProfesionales = signal<boolean>(false);
+
   // Búsqueda de clientes y profesionales
   busquedaCliente = signal<string>('');
   busquedaProfesional = signal<string>('');
@@ -156,29 +166,75 @@ export class DashboardPage implements OnInit {
       }
     });
 
-    // Cargar lista de usuarios (máximo 5)
-    this.usuarioRepository.getUsuariosMetrica(5).subscribe({
+    this.cargarPaginaUsuarios();
+  }
+
+  cargarPaginaUsuarios() {
+    // Cargar usuarios con paginación (pedimos 1 más para saber si hay más páginas)
+    const limit = this.usuariosPorPagina + 1;
+    const offset = this.paginaUsuariosActual() * this.usuariosPorPagina;
+    
+    this.usuarioRepository.getUsuariosMetrica(limit, offset).subscribe({
       next: (usuarios) => {
-        this.usuarios.set(usuarios);
+        // Si recibimos más usuarios de los solicitados, hay más páginas
+        this.hayMasUsuarios.set(usuarios.length > this.usuariosPorPagina);
+        // Solo mostramos los usuarios de la página actual
+        this.usuarios.set(usuarios.slice(0, this.usuariosPorPagina));
       },
       error: (error) => {
         console.error('Error cargando lista de usuarios:', error);
         this.usuarios.set([]);
+        this.hayMasUsuarios.set(false);
       }
     });
   }
 
+  siguientesPaginaUsuarios() {
+    this.paginaUsuariosActual.set(this.paginaUsuariosActual() + 1);
+    this.cargarPaginaUsuarios();
+  }
+
+  anterioresPaginaUsuarios() {
+    if (this.paginaUsuariosActual() > 0) {
+      this.paginaUsuariosActual.set(this.paginaUsuariosActual() - 1);
+      this.cargarPaginaUsuarios();
+    }
+  }
+
   cargarProfesionales() {
-    // Cargar lista de profesionales (máximo 5)
-    this.usuarioRepository.getProfesionalesMetrica(5).subscribe({
+    this.cargarPaginaProfesionales();
+  }
+
+  cargarPaginaProfesionales() {
+    // Cargar profesionales con paginación (pedimos 1 más para saber si hay más páginas)
+    const limit = this.profesionalesPorPagina + 1;
+    const offset = this.paginaProfesionalesActual() * this.profesionalesPorPagina;
+    
+    this.usuarioRepository.getProfesionalesMetrica(limit, offset).subscribe({
       next: (profesionales) => {
-        this.profesionales.set(profesionales);
+        // Si recibimos más profesionales de los solicitados, hay más páginas
+        this.hayMasProfesionales.set(profesionales.length > this.profesionalesPorPagina);
+        // Solo mostramos los profesionales de la página actual
+        this.profesionales.set(profesionales.slice(0, this.profesionalesPorPagina));
       },
       error: (error) => {
         console.error('Error cargando lista de profesionales:', error);
         this.profesionales.set([]);
+        this.hayMasProfesionales.set(false);
       }
     });
+  }
+
+  siguientesPaginaProfesionales() {
+    this.paginaProfesionalesActual.set(this.paginaProfesionalesActual() + 1);
+    this.cargarPaginaProfesionales();
+  }
+
+  anterioresPaginaProfesionales() {
+    if (this.paginaProfesionalesActual() > 0) {
+      this.paginaProfesionalesActual.set(this.paginaProfesionalesActual() - 1);
+      this.cargarPaginaProfesionales();
+    }
   }
 
   buscarCliente() {
@@ -392,6 +448,12 @@ export class DashboardPage implements OnInit {
   }
 
   // Gestión de strikes
+  getUsuarioDisplayName(usuario: UsuarioMetrica | PerfilCliente | null): string {
+    if (!usuario) return '';
+    // UsuarioMetrica uses 'nombre', PerfilCliente uses 'name'
+    return (usuario as any).nombre || (usuario as any).name || '';
+  }
+
   abrirModalStrike(usuario: UsuarioMetrica | PerfilCliente) {
     this.selectedUsuarioForStrike.set(usuario);
     this.strikeForm.motivo = '';

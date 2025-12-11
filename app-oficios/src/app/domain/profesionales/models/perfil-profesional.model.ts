@@ -16,4 +16,5 @@ export interface PerfilProfesional {
   especialidades: string[];
   puntuacionPromedio?: number;
   cantidadResenias?: number;
+  serviciosCompletados?: number;
 }

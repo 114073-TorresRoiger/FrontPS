@@ -22,11 +22,15 @@ export interface PerfilUsuario {
 }
 
 export interface PerfilCliente {
-  idCliente: number;
-  nombre: string;
-  apellido: string;
+  avatar?: string;
+  name: string;
+  lastName: string;
   email: string;
   telefono: string;
+  documento?: string;
+  tipoDocumento?: string;
+  nacimiento?: string;
+  domicilio?: Domicilio;
   strikes: number;
   estado: boolean;
 }

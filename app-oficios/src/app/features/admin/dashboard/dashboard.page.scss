@@ -226,6 +226,18 @@
     background-color: #fef3c7;
     color: #92400e;
   }
+  
+  // Específico para strikes - asegurar que sea visible
+  &.strike-badge {
+    background-color: #f3f4f6;
+    color: #1f2937;
+    font-weight: 700;
+    
+    &.warning {
+      background-color: #fef3c7;
+      color: #92400e;
+    }
+  }
 }
 
 .no-data-cell {
@@ -303,6 +315,51 @@
   &:active {
     transform: scale(0.95);
   }
+}
+
+// Pagination controls
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 1.5rem 1rem;
+  margin-top: 1rem;
+}
+
+.btn-pagination {
+  padding: 0.625rem 1.25rem;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover:not(:disabled) {
+    background-color: #2563eb;
+    transform: translateY(-1px);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.95);
+  }
+
+  &:disabled {
+    background-color: #9ca3af;
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}
+
+.pagination-info {
+  color: #1a1a1a;
+  font-weight: 600;
+  font-size: 0.875rem;
+  min-width: 80px;
+  text-align: center;
 }
 
 // Demanda List

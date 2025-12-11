@@ -13,8 +13,8 @@ export abstract class UsuarioRepository {
   abstract updateAvatar(idAuth: number, avatarUrl: string): Observable<any>;
   abstract getAvatar(idAuth: number): Observable<string>;
   abstract getMetricasUsuarios(): Observable<MetricasUsuarios>;
-  abstract getUsuariosMetrica(limit?: number): Observable<UsuarioMetrica[]>;
-  abstract getProfesionalesMetrica(limit?: number): Observable<ProfesionalMetrica[]>;
+  abstract getUsuariosMetrica(limit?: number, offset?: number): Observable<UsuarioMetrica[]>;
+  abstract getProfesionalesMetrica(limit?: number, offset?: number): Observable<ProfesionalMetrica[]>;
   abstract buscarClientesPorNombre(nombre: string): Observable<PerfilCliente[]>;
   abstract buscarProfesionalesPorNombre(nombre: string): Observable<PerfilProfesional[]>;
   abstract agregarStrike(email: string, motivo: string): Observable<string>;

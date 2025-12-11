@@ -50,18 +50,24 @@ export class UsuarioHttpRepository implements UsuarioRepository {
     return this.http.get<MetricasUsuarios>(`${this.baseUrl}/perfil/metrica/usuarios-registrados`);
   }
 
-  getUsuariosMetrica(limit?: number): Observable<UsuarioMetrica[]> {
+  getUsuariosMetrica(limit?: number, offset?: number): Observable<UsuarioMetrica[]> {
     let params = new HttpParams();
     if (limit) {
       params = params.set('limit', limit.toString());
     }
+    if (offset !== undefined) {
+      params = params.set('offset', offset.toString());
+    }
     return this.http.get<UsuarioMetrica[]>(`${this.baseUrl}/perfil/metrica/usuarios`, { params });
   }
 
-  getProfesionalesMetrica(limit?: number): Observable<ProfesionalMetrica[]> {
+  getProfesionalesMetrica(limit?: number, offset?: number): Observable<ProfesionalMetrica[]> {
     let params = new HttpParams();
     if (limit) {
       params = params.set('limit', limit.toString());
+    }
+    if (offset !== undefined) {
+      params = params.set('offset', offset.toString());
     }
     return this.http.get<ProfesionalMetrica[]>(`${this.baseUrl}/perfil/metrica/profesionales`, { params });
   }
