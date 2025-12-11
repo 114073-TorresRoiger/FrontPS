@@ -20,6 +20,10 @@ export class ChatPage implements OnInit, OnDestroy {
   channels: Channel[] = [];
   selectedChannel: Channel | null = null;
   messages: any[] = [];
+  private channelListeners: Map<string, boolean> = new Map();
+  private messageNewHandler: any = null;
+  private messageDeletedHandler: any = null;
+  private globalMessageHandler: any = null;
 
   // Eliminación de mensajes
   selectedMessageToDelete: any = null;
@@ -47,6 +51,23 @@ export class ChatPage implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    // Limpiar todos los listeners
+    if (this.selectedChannel) {
+      if (this.messageNewHandler) {
+        this.selectedChannel.off('message.new', this.messageNewHandler);
+      }
+      if (this.messageDeletedHandler) {
+        this.selectedChannel.off('message.deleted', this.messageDeletedHandler);
+      }
+    }
+    
+    // Limpiar listener global
+    const client = this.chatService.getChatClient();
+    if (client && this.globalMessageHandler) {
+      client.off('message.new', this.globalMessageHandler);
+    }
+    
+    this.channelListeners.clear();
     this.chatService.disconnectUser();
   }
 
@@ -111,6 +132,27 @@ export class ChatPage implements OnInit, OnDestroy {
     try {
       this.channels = await this.chatService.getUserChannels();
       console.log('✅ Canales cargados:', this.channels.length);
+      
+      // Configurar listener global para actualizar lista de canales
+      const client = this.chatService.getChatClient();
+      if (client) {
+        // Remover listener anterior si existe
+        if (this.globalMessageHandler) {
+          client.off('message.new', this.globalMessageHandler);
+        }
+        
+        // Crear y guardar nuevo handler
+        this.globalMessageHandler = async (event: any) => {
+          // Solo actualizar si el mensaje es de otro usuario
+          if (event.user?.id !== this.currentUserId) {
+            console.log('📬 Mensaje nuevo en otro canal, actualizando lista');
+            await this.loadChannels();
+            await this.updateUnreadCount();
+          }
+        };
+        
+        client.on('message.new', this.globalMessageHandler);
+      }
     } catch (error) {
       console.error('❌ Error cargando canales:', error);
     }
@@ -143,6 +185,17 @@ export class ChatPage implements OnInit, OnDestroy {
 
   // Selección de canal
   async openChannel(channel: Channel): Promise<void> {
+    // Limpiar listeners del canal anterior
+    if (this.selectedChannel && this.selectedChannel.cid !== channel.cid) {
+      if (this.messageNewHandler) {
+        this.selectedChannel.off('message.new', this.messageNewHandler);
+      }
+      if (this.messageDeletedHandler) {
+        this.selectedChannel.off('message.deleted', this.messageDeletedHandler);
+      }
+      this.channelListeners.delete(this.selectedChannel.cid);
+    }
+    
     this.selectedChannel = channel;
     await this.loadMessages();
     // Actualizar contador de mensajes no leídos después de marcar como leído
@@ -176,12 +229,40 @@ export class ChatPage implements OnInit, OnDestroy {
     if (!this.selectedChannel) return;
     
     try {
+      // Recargar el estado del canal para obtener mensajes actualizados
+      await this.selectedChannel.watch();
+      
       const state = this.selectedChannel.state;
       this.messages = (state.messages || []).filter((m: any) => !m.deleted_at);
+      
+      console.log('📨 Mensajes cargados:', this.messages.length);
 
-      // Escuchar nuevos mensajes
-      this.selectedChannel.on('message.new', () => this.loadMessages());
-      this.selectedChannel.on('message.deleted', () => this.loadMessages());
+      // Solo configurar listeners si no existen para este canal
+      if (!this.channelListeners.has(this.selectedChannel.cid)) {
+        console.log('👂 Configurando listeners para canal:', this.selectedChannel.cid);
+        
+        // Crear y guardar handler para nuevos mensajes
+        this.messageNewHandler = (event: any) => {
+          console.log('📩 Nuevo mensaje recibido:', event.message);
+          // Agregar el nuevo mensaje sin recargar todo
+          if (!this.messages.find(m => m.id === event.message.id)) {
+            this.messages = [...this.messages, event.message];
+            setTimeout(() => this.scrollToBottom(), 100);
+          }
+        };
+        
+        // Crear y guardar handler para mensajes eliminados
+        this.messageDeletedHandler = (event: any) => {
+          console.log('🗑️ Mensaje eliminado:', event.message?.id);
+          // Remover el mensaje eliminado
+          this.messages = this.messages.filter(m => m.id !== event.message?.id);
+        };
+        
+        this.selectedChannel.on('message.new', this.messageNewHandler);
+        this.selectedChannel.on('message.deleted', this.messageDeletedHandler);
+        
+        this.channelListeners.set(this.selectedChannel.cid, true);
+      }
 
       // Marcar como leído
       await this.selectedChannel.markRead();
@@ -214,12 +295,21 @@ export class ChatPage implements OnInit, OnDestroy {
     const input = document.getElementById('messageInput') as HTMLInputElement;
     if (!input || !input.value.trim()) return;
 
+    const messageText = input.value.trim();
+    input.value = ''; // Limpiar input inmediatamente
+
     try {
-      await this.selectedChannel.sendMessage({ text: input.value.trim() });
-      input.value = '';
-      await this.loadMessages();
+      console.log('📤 Enviando mensaje:', messageText);
+      const response = await this.selectedChannel.sendMessage({ text: messageText });
+      console.log('✅ Mensaje enviado:', response);
+      
+      // El listener message.new se encargará de agregar el mensaje a la UI
+      setTimeout(() => this.scrollToBottom(), 100);
     } catch (error) {
       console.error('❌ Error enviando mensaje:', error);
+      // Restaurar el mensaje en el input si falla
+      input.value = messageText;
+      alert('Error al enviar el mensaje. Intenta de nuevo.');
     }
   }
 
@@ -288,12 +378,22 @@ export class ChatPage implements OnInit, OnDestroy {
         );
       }
       
+      console.log('✅ Conversación creada, cerrando modal y actualizando lista');
       this.closeProfessionalModal();
+      
+      // Esperar un momento para que el backend procese
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Recargar canales para mostrar el nuevo
       await this.loadChannels();
+      
+      // Abrir el canal recién creado
       await this.openChannel(channel);
+      
+      console.log('✅ Canal abierto correctamente');
     } catch (error) {
-      console.error('Error al crear conversación:', error);
-      alert('Error al crear la conversación');
+      console.error('❌ Error al crear conversación:', error);
+      alert('Error al crear la conversación. Por favor, intenta de nuevo.');
     }
   }
 
@@ -331,9 +431,10 @@ export class ChatPage implements OnInit, OnDestroy {
     try {
       const client = this.chatService.getChatClient();
       await client.deleteMessage(this.selectedMessageToDelete.id);
+      console.log('🗑️ Mensaje eliminado correctamente');
       
       this.closeDeleteModal();
-      await this.loadMessages();
+      // El listener message.deleted se encargará de actualizar la UI
     } catch (error) {
       console.error('Error al eliminar mensaje:', error);
       alert('Error al eliminar el mensaje');

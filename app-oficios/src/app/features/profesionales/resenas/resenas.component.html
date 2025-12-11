@@ -87,13 +87,6 @@
           <div class="resena-body mb-3">
             <p class="text-secondary mb-0">{{ resena.comentario }}</p>
           </div>
-
-          <div class="resena-footer">
-            <button class="btn btn-sm btn-outline-secondary">
-              <lucide-angular [img]="ThumbsUp" size="16" class="me-1"></lucide-angular>
-              Útil
-            </button>
-          </div>
         </div>
 
         <div *ngIf="resenas.length === 0" class="alert alert-info text-center" role="alert">

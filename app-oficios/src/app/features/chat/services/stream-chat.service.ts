@@ -90,6 +90,7 @@ export class StreamChatService {
       const channels = await this.chatClient.queryChannels(filter, sort, {
         watch: true,
         state: true,
+        limit: 100,
       });
 
       console.log('✅ Canales obtenidos:', channels.length);
