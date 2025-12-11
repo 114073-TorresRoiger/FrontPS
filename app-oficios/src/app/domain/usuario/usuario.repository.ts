@@ -1,6 +1,7 @@
 import { Observable } from 'rxjs';
 import { UsuarioRequest, MetricasUsuarios, UsuarioMetrica, ProfesionalMetrica } from './usuario.model';
-import { PerfilUsuario, PerfilUsuarioRequest } from './models/perfil.model';
+import { PerfilUsuario, PerfilUsuarioRequest, PerfilCliente } from './models/perfil.model';
+import { PerfilProfesional } from '../profesionales/models/perfil-profesional.model';
 
 export abstract class UsuarioRepository {
   abstract register(usuario: UsuarioRequest): Observable<any>;
@@ -14,4 +15,6 @@ export abstract class UsuarioRepository {
   abstract getMetricasUsuarios(): Observable<MetricasUsuarios>;
   abstract getUsuariosMetrica(limit?: number): Observable<UsuarioMetrica[]>;
   abstract getProfesionalesMetrica(limit?: number): Observable<ProfesionalMetrica[]>;
+  abstract buscarClientesPorNombre(nombre: string): Observable<PerfilCliente[]>;
+  abstract buscarProfesionalesPorNombre(nombre: string): Observable<PerfilProfesional[]>;
 }

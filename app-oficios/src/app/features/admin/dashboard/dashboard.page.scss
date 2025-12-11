@@ -233,6 +233,76 @@
   padding: 2rem 1rem !important;
 }
 
+// Search container
+.search-container {
+  margin-bottom: 1.5rem;
+  padding: 0 1rem;
+}
+
+.search-input-wrapper {
+  display: flex;
+  gap: 0.5rem;
+  max-width: 500px;
+}
+
+.search-input {
+  flex: 1;
+  padding: 0.625rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #1a1a1a;
+  transition: all 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  &::placeholder {
+    color: #9ca3af;
+  }
+}
+
+.btn-search,
+.btn-clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.625rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-search {
+  background-color: #3b82f6;
+  color: white;
+
+  &:hover {
+    background-color: #2563eb;
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
+.btn-clear {
+  background-color: #ef4444;
+  color: white;
+
+  &:hover {
+    background-color: #dc2626;
+  }
+
+  &:active {
+    transform: scale(0.95);
+  }
+}
+
 // Demanda List
 .demanda-list {
   display: flex;

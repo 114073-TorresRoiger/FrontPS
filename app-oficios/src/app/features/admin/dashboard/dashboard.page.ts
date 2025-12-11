@@ -1,12 +1,14 @@
 import { Component, OnInit, signal, inject, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, Users, Briefcase, Package, TrendingUp, Plus, Trash2, Edit, LogOut } from 'lucide-angular';
+import { LucideAngularModule, Users, Briefcase, Package, TrendingUp, Plus, Trash2, Edit, LogOut, Search, X } from 'lucide-angular';
 import { AuthService } from '../../../domain/auth';
 import { SolicitudRepository } from '../../../domain/solicitudes/solicitud.repository';
 import { EstadisticaOficio } from '../../../domain/solicitudes/solicitud.model';
 import { UsuarioRepository } from '../../../domain/usuario/usuario.repository';
 import { UsuarioMetrica, ProfesionalMetrica } from '../../../domain/usuario/usuario.model';
+import { PerfilCliente } from '../../../domain/usuario/models/perfil.model';
+import { PerfilProfesional } from '../../../domain/profesionales/models/perfil-profesional.model';
 import { OficioRepository } from '../../../domain/oficios/oficio.repository';
 import { Oficio } from '../../../domain/oficios/oficio.model';
 import { BaseChartDirective } from 'ng2-charts';
@@ -29,6 +31,8 @@ export class DashboardPage implements OnInit {
   readonly Trash2 = Trash2;
   readonly LogOut = LogOut;
   readonly Edit = Edit;
+  readonly Search = Search;
+  readonly X = X;
 
   // Services
   private readonly authService = inject(AuthService);
@@ -44,6 +48,14 @@ export class DashboardPage implements OnInit {
   profesionales = signal<ProfesionalMetrica[]>([]);
   oficios = signal<Oficio[]>([]);
   oficiosMasDemandados = signal<EstadisticaOficio[]>([]);
+
+  // Búsqueda de clientes y profesionales
+  busquedaCliente = signal<string>('');
+  busquedaProfesional = signal<string>('');
+  clientesEncontrados = signal<PerfilCliente[]>([]);
+  profesionalesEncontrados = signal<PerfilProfesional[]>([]);
+  mostrandoResultadosClientes = signal<boolean>(false);
+  mostrandoResultadosProfesionales = signal<boolean>(false);
 
   // Estadísticas
   totalUsuarios = signal(0);
@@ -152,6 +164,66 @@ export class DashboardPage implements OnInit {
         this.profesionales.set([]);
       }
     });
+  }
+
+  buscarCliente() {
+    const nombre = this.busquedaCliente().trim();
+    if (nombre.length < 2) {
+      alert('Ingrese al menos 2 caracteres para buscar');
+      return;
+    }
+
+    this.usuarioRepository.buscarClientesPorNombre(nombre).subscribe({
+      next: (clientes) => {
+        this.clientesEncontrados.set(clientes);
+        this.mostrandoResultadosClientes.set(true);
+        if (clientes.length === 0) {
+          alert('No se encontraron clientes con ese nombre');
+        }
+      },
+      error: (error) => {
+        console.error('Error buscando clientes:', error);
+        this.clientesEncontrados.set([]);
+        this.mostrandoResultadosClientes.set(false);
+        alert('Error al buscar clientes. Por favor, intente nuevamente.');
+      }
+    });
+  }
+
+  limpiarBusquedaClientes() {
+    this.busquedaCliente.set('');
+    this.clientesEncontrados.set([]);
+    this.mostrandoResultadosClientes.set(false);
+  }
+
+  buscarProfesional() {
+    const nombre = this.busquedaProfesional().trim();
+    if (nombre.length < 2) {
+      alert('Ingrese al menos 2 caracteres para buscar');
+      return;
+    }
+
+    this.usuarioRepository.buscarProfesionalesPorNombre(nombre).subscribe({
+      next: (profesionales) => {
+        this.profesionalesEncontrados.set(profesionales);
+        this.mostrandoResultadosProfesionales.set(true);
+        if (profesionales.length === 0) {
+          alert('No se encontraron profesionales con ese nombre');
+        }
+      },
+      error: (error) => {
+        console.error('Error buscando profesionales:', error);
+        this.profesionalesEncontrados.set([]);
+        this.mostrandoResultadosProfesionales.set(false);
+        alert('Error al buscar profesionales. Por favor, intente nuevamente.');
+      }
+    });
+  }
+
+  limpiarBusquedaProfesionales() {
+    this.busquedaProfesional.set('');
+    this.profesionalesEncontrados.set([]);
+    this.mostrandoResultadosProfesionales.set(false);
   }
 
   cargarOficios() {

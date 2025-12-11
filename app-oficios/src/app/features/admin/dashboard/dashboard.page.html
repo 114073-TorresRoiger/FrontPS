@@ -63,6 +63,30 @@
       <div class="card-header">
         <h2>Usuarios Registrados</h2>
       </div>
+
+      <!-- Barra de búsqueda -->
+      <div class="search-container">
+        <div class="search-input-wrapper">
+          <input
+            type="text"
+            class="search-input"
+            placeholder="Buscar cliente por nombre..."
+            [ngModel]="busquedaCliente()"
+            (ngModelChange)="busquedaCliente.set($event)"
+            (keyup.enter)="buscarCliente()">
+          <button class="btn-search" (click)="buscarCliente()" title="Buscar">
+            <lucide-angular [img]="Search" [size]="18"></lucide-angular>
+          </button>
+          <button
+            *ngIf="mostrandoResultadosClientes()"
+            class="btn-clear"
+            (click)="limpiarBusquedaClientes()"
+            title="Limpiar búsqueda">
+            <lucide-angular [img]="X" [size]="18"></lucide-angular>
+          </button>
+        </div>
+      </div>
+
       <div class="table-container">
         <table class="data-table">
           <thead>
@@ -74,23 +98,47 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let usuario of usuarios()">
-              <td>{{ usuario.nombre }}</td>
-              <td>{{ usuario.email }}</td>
-              <td>
-                <span class="badge" [class.warning]="usuario.strikes > 0">
-                  {{ usuario.strikes }}
-                </span>
-              </td>
-              <td>
-                <span class="badge" [class.active]="usuario.estado" [class.inactive]="!usuario.estado">
-                  {{ usuario.estado ? 'Activo' : 'Inactivo' }}
-                </span>
-              </td>
-            </tr>
-            <tr *ngIf="usuarios().length === 0">
-              <td colspan="4" class="no-data-cell">No hay usuarios registrados</td>
-            </tr>
+            <!-- Mostrar resultados de búsqueda si existen -->
+            <ng-container *ngIf="mostrandoResultadosClientes(); else listaUsuariosNormal">
+              <tr *ngFor="let cliente of clientesEncontrados()">
+                <td>{{ cliente.nombre }} {{ cliente.apellido }}</td>
+                <td>{{ cliente.email }}</td>
+                <td>
+                  <span class="badge" [class.warning]="cliente.strikes > 0">
+                    {{ cliente.strikes }}
+                  </span>
+                </td>
+                <td>
+                  <span class="badge" [class.active]="cliente.estado" [class.inactive]="!cliente.estado">
+                    {{ cliente.estado ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+              </tr>
+              <tr *ngIf="clientesEncontrados().length === 0">
+                <td colspan="4" class="no-data-cell">No se encontraron clientes</td>
+              </tr>
+            </ng-container>
+
+            <!-- Lista normal de usuarios -->
+            <ng-template #listaUsuariosNormal>
+              <tr *ngFor="let usuario of usuarios()">
+                <td>{{ usuario.nombre }}</td>
+                <td>{{ usuario.email }}</td>
+                <td>
+                  <span class="badge" [class.warning]="usuario.strikes > 0">
+                    {{ usuario.strikes }}
+                  </span>
+                </td>
+                <td>
+                  <span class="badge" [class.active]="usuario.estado" [class.inactive]="!usuario.estado">
+                    {{ usuario.estado ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+              </tr>
+              <tr *ngIf="usuarios().length === 0">
+                <td colspan="4" class="no-data-cell">No hay usuarios registrados</td>
+              </tr>
+            </ng-template>
           </tbody>
         </table>
       </div>
@@ -101,6 +149,30 @@
       <div class="card-header">
         <h2>Profesionales Registrados</h2>
       </div>
+
+      <!-- Barra de búsqueda -->
+      <div class="search-container">
+        <div class="search-input-wrapper">
+          <input
+            type="text"
+            class="search-input"
+            placeholder="Buscar profesional por nombre..."
+            [ngModel]="busquedaProfesional()"
+            (ngModelChange)="busquedaProfesional.set($event)"
+            (keyup.enter)="buscarProfesional()">
+          <button class="btn-search" (click)="buscarProfesional()" title="Buscar">
+            <lucide-angular [img]="Search" [size]="18"></lucide-angular>
+          </button>
+          <button
+            *ngIf="mostrandoResultadosProfesionales()"
+            class="btn-clear"
+            (click)="limpiarBusquedaProfesionales()"
+            title="Limpiar búsqueda">
+            <lucide-angular [img]="X" [size]="18"></lucide-angular>
+          </button>
+        </div>
+      </div>
+
       <div class="table-container">
         <table class="data-table">
           <thead>
@@ -112,15 +184,31 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let profesional of profesionales()">
-              <td>{{ profesional.nombre }}</td>
-              <td>{{ profesional.oficio }}</td>
-              <td>⭐ {{ profesional.calificacion }}</td>
-              <td>{{ profesional.serviciosCompletados }}</td>
-            </tr>
-            <tr *ngIf="profesionales().length === 0">
-              <td colspan="4" class="no-data-cell">No hay profesionales registrados</td>
-            </tr>
+            <!-- Mostrar resultados de búsqueda si existen -->
+            <ng-container *ngIf="mostrandoResultadosProfesionales(); else listaProfesionalesNormal">
+              <tr *ngFor="let profesional of profesionalesEncontrados()">
+                <td>{{ profesional.nombre }} {{ profesional.apellido }}</td>
+                <td>{{ profesional.oficio }}</td>
+                <td>⭐ {{ profesional.puntuacionPromedio || 'N/A' }}</td>
+                <td>{{ profesional.cantidadResenias || 0 }}</td>
+              </tr>
+              <tr *ngIf="profesionalesEncontrados().length === 0">
+                <td colspan="4" class="no-data-cell">No se encontraron profesionales</td>
+              </tr>
+            </ng-container>
+
+            <!-- Lista normal de profesionales -->
+            <ng-template #listaProfesionalesNormal>
+              <tr *ngFor="let profesional of profesionales()">
+                <td>{{ profesional.nombre }}</td>
+                <td>{{ profesional.oficio }}</td>
+                <td>⭐ {{ profesional.calificacion }}</td>
+                <td>{{ profesional.serviciosCompletados }}</td>
+              </tr>
+              <tr *ngIf="profesionales().length === 0">
+                <td colspan="4" class="no-data-cell">No hay profesionales registrados</td>
+              </tr>
+            </ng-template>
           </tbody>
         </table>
       </div>

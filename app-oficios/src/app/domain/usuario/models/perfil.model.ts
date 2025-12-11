@@ -20,6 +20,16 @@ export interface PerfilUsuario {
   domicilio: Domicilio;
 }
 
+export interface PerfilCliente {
+  idCliente: number;
+  nombre: string;
+  apellido: string;
+  email: string;
+  telefono: string;
+  strikes: number;
+  estado: boolean;
+}
+
 export interface PerfilUsuarioRequest {
   avatar?: string;
   name: string;

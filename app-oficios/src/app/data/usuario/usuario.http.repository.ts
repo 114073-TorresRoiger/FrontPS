@@ -3,7 +3,8 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { UsuarioRepository } from '../../domain/usuario/usuario.repository';
 import { UsuarioRequest, MetricasUsuarios, UsuarioMetrica, ProfesionalMetrica } from '../../domain/usuario/usuario.model';
-import { PerfilUsuario, PerfilUsuarioRequest } from '../../domain/usuario/models/perfil.model';
+import { PerfilUsuario, PerfilUsuarioRequest, PerfilCliente } from '../../domain/usuario/models/perfil.model';
+import { PerfilProfesional } from '../../domain/profesionales/models/perfil-profesional.model';
 import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
@@ -63,5 +64,15 @@ export class UsuarioHttpRepository implements UsuarioRepository {
       params = params.set('limit', limit.toString());
     }
     return this.http.get<ProfesionalMetrica[]>(`${this.baseUrl}/perfil/metrica/profesionales`, { params });
+  }
+
+  buscarClientesPorNombre(nombre: string): Observable<PerfilCliente[]> {
+    const params = new HttpParams().set('nombre', nombre);
+    return this.http.get<PerfilCliente[]>(`${this.baseUrl}/perfil/clientes/nombre`, { params });
+  }
+
+  buscarProfesionalesPorNombre(nombre: string): Observable<PerfilProfesional[]> {
+    const params = new HttpParams().set('nombre', nombre);
+    return this.http.get<PerfilProfesional[]>(`${this.baseUrl}/perfil/profesionales/nombre`, { params });
   }
 }
