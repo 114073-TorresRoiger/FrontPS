@@ -305,7 +305,7 @@
 .table {
   background: white;
   border-radius: 12px;
-  overflow: hidden;
+  overflow: visible;
 
   thead {
     background: #f8f9fa;
@@ -337,9 +337,14 @@
 // ====== MENU DESPLEGABLE DE ACCIONES ======
 .position-relative {
   position: relative;
+  z-index: 1050;
 }
 
 .table-responsive {
+  overflow: visible !important;
+}
+
+.card {
   overflow: visible !important;
 }
 
@@ -351,20 +356,37 @@
   position: absolute;
   top: 100%;
   right: 0;
-  z-index: 9999;
+  z-index: 10001;
   min-width: 200px;
   padding: 0.5rem 0;
   margin: 0.25rem 0 0;
-  background: white;
+  background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.15);
   border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   animation: slideDown 0.2s ease;
   display: none;
 
   &.show {
     display: block;
   }
+}
+
+// Overlay invisible para bloquear interacción con elementos detrás
+.position-relative::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10000;
+  background: transparent;
+  display: none;
+}
+
+.position-relative:has(.dropdown-menu-custom.show)::before {
+  display: block;
 }
 
 .dropdown-item-custom {
