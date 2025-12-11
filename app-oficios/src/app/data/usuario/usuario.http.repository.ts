@@ -75,4 +75,11 @@ export class UsuarioHttpRepository implements UsuarioRepository {
     const params = new HttpParams().set('nombre', nombre);
     return this.http.get<PerfilProfesional[]>(`${this.baseUrl}/perfil/profesionales/nombre`, { params });
   }
+
+  agregarStrike(email: string, motivo: string): Observable<string> {
+    return this.http.put(`${this.baseUrl}/perfil/strike/${encodeURIComponent(email)}`, motivo, {
+      headers: { 'Content-Type': 'application/json' },
+      responseType: 'text'
+    });
+  }
 }
