@@ -57,6 +57,11 @@ export class TrabajosFinalizadosPage implements OnInit {
     idProfesional: number;
   } | null>(null);
 
+  // Paginación
+  currentPage = signal(1);
+  itemsPerPage = 5;
+  totalPages = signal(0);
+
   ngOnInit(): void {
     this.loadTrabajosFinalizados();
   }
@@ -69,6 +74,7 @@ export class TrabajosFinalizadosPage implements OnInit {
     this.trabajoService.obtenerTrabajosFinalizadosPorCliente(user.id).subscribe({
       next: (trabajos) => {
         this.trabajosFinalizados.set(trabajos);
+        this.totalPages.set(Math.ceil(trabajos.length / this.itemsPerPage));
         this.isLoadingTrabajos.set(false);
       },
       error: (error) => {
@@ -161,5 +167,68 @@ export class TrabajosFinalizadosPage implements OnInit {
 
   goBack(): void {
     this.router.navigate(['/']);
+  }
+
+  // Métodos de paginación
+  getPaginatedTrabajos(): TrabajoClienteResponse[] {
+    const start = (this.currentPage() - 1) * this.itemsPerPage;
+    const end = start + this.itemsPerPage;
+    return this.trabajosFinalizados().slice(start, end);
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  nextPage(): void {
+    if (this.currentPage() < this.totalPages()) {
+      this.currentPage.set(this.currentPage() + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  previousPage(): void {
+    if (this.currentPage() > 1) {
+      this.currentPage.set(this.currentPage() - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const total = this.totalPages();
+    const current = this.currentPage();
+    
+    // Mostrar siempre la primera página
+    pages.push(1);
+    
+    // Calcular páginas intermedias
+    let start = Math.max(2, current - 1);
+    let end = Math.min(total - 1, current + 1);
+    
+    // Agregar puntos suspensivos si hay hueco
+    if (start > 2) {
+      pages.push(-1); // -1 representa "..."
+    }
+    
+    // Agregar páginas intermedias
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    
+    // Agregar puntos suspensivos si hay hueco
+    if (end < total - 1) {
+      pages.push(-1); // -1 representa "..."
+    }
+    
+    // Mostrar siempre la última página si hay más de una
+    if (total > 1) {
+      pages.push(total);
+    }
+    
+    return pages;
   }
 }

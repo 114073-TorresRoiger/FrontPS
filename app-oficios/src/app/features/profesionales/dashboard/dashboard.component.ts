@@ -117,6 +117,11 @@ export class ProfessionalDashboardComponent implements OnInit {
   trabajos = signal<any[]>([]);
   isLoadingTrabajos = signal(false);
 
+  // Paginación de trabajos
+  currentPageTrabajos = signal(1);
+  itemsPerPageTrabajos = 5;
+  totalPagesTrabajos = signal(0);
+
   // Modal de finalizar trabajo
   showFinalizarModal = signal(false);
   trabajoAFinalizar = signal<number | null>(null);
@@ -694,6 +699,7 @@ export class ProfessionalDashboardComponent implements OnInit {
         console.log('✅ Trabajos cargados:', trabajos);
         const trabajosOrdenados = this.ordenarTrabajos(trabajos);
         this.trabajos.set(trabajosOrdenados);
+        this.totalPagesTrabajos.set(Math.ceil(trabajosOrdenados.length / this.itemsPerPageTrabajos));
         this.isLoadingTrabajos.set(false);
       },
       error: (error) => {
@@ -846,5 +852,101 @@ export class ProfessionalDashboardComponent implements OnInit {
 
   logout() {
     this.authService.logout();
+  }
+
+  // Métodos de paginación para trabajos
+  getPaginatedTrabajos(): any[] {
+    const start = (this.currentPageTrabajos() - 1) * this.itemsPerPageTrabajos;
+    const end = start + this.itemsPerPageTrabajos;
+    return this.trabajos().slice(start, end);
+  }
+
+  goToPageTrabajos(page: number): void {
+    if (page >= 1 && page <= this.totalPagesTrabajos()) {
+      this.currentPageTrabajos.set(page);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  nextPageTrabajos(): void {
+    if (this.currentPageTrabajos() < this.totalPagesTrabajos()) {
+      this.currentPageTrabajos.set(this.currentPageTrabajos() + 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  previousPageTrabajos(): void {
+    if (this.currentPageTrabajos() > 1) {
+      this.currentPageTrabajos.set(this.currentPageTrabajos() - 1);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  getPageNumbersTrabajos(): number[] {
+    const pages: number[] = [];
+    const total = this.totalPagesTrabajos();
+    const current = this.currentPageTrabajos();
+    
+    pages.push(1);
+    
+    let start = Math.max(2, current - 1);
+    let end = Math.min(total - 1, current + 1);
+    
+    if (start > 2) {
+      pages.push(-1);
+    }
+    
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    
+    if (end < total - 1) {
+      pages.push(-1);
+    }
+    
+    if (total > 1) {
+      pages.push(total);
+    }
+    
+    return pages;
+  }
+
+  // Métodos de paginación mejorados para solicitudes
+  goToPageSolicitudes(page: number): void {
+    if (page >= 0 && page < this.totalPaginas()) {
+      this.cargarSolicitudesConMapa(page);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  getPageNumbersSolicitudes(): number[] {
+    const pages: number[] = [];
+    const total = this.totalPaginas();
+    const current = this.paginaActual();
+    
+    if (total === 0) return [];
+    
+    pages.push(0);
+    
+    let start = Math.max(1, current - 1);
+    let end = Math.min(total - 2, current + 1);
+    
+    if (start > 1) {
+      pages.push(-1);
+    }
+    
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    
+    if (end < total - 2) {
+      pages.push(-1);
+    }
+    
+    if (total > 1) {
+      pages.push(total - 1);
+    }
+    
+    return pages;
   }
 }

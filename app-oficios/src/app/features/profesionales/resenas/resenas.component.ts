@@ -28,6 +28,11 @@ export class ResenasComponent implements OnInit {
   loading: boolean = true;
   error: string | null = null;
 
+  // Paginación
+  currentPage: number = 1;
+  itemsPerPage: number = 5;
+  totalPages: number = 0;
+
   private readonly resenaRepo = inject(ResenaHttpRepository);
   private readonly authService = inject(AuthService);
 
@@ -57,6 +62,7 @@ export class ResenasComponent implements OnInit {
           return fechaB - fechaA;
         });
         this.totalResenas = resenas.length;
+        this.totalPages = Math.ceil(resenas.length / this.itemsPerPage);
         this.loading = false;
       },
       error: () => {
@@ -77,5 +83,62 @@ export class ResenasComponent implements OnInit {
   // Helper for templates: floors a decimal rating before building stars
   getStarsArrayFromRating(rating: number): boolean[] {
     return this.getStarsArray(Math.floor(rating));
+  }
+
+  // Métodos de paginación
+  getPaginatedResenas(): Resena[] {
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    const end = start + this.itemsPerPage;
+    return this.resenas.slice(start, end);
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  previousPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const total = this.totalPages;
+    const current = this.currentPage;
+    
+    pages.push(1);
+    
+    let start = Math.max(2, current - 1);
+    let end = Math.min(total - 1, current + 1);
+    
+    if (start > 2) {
+      pages.push(-1);
+    }
+    
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    
+    if (end < total - 1) {
+      pages.push(-1);
+    }
+    
+    if (total > 1) {
+      pages.push(total);
+    }
+    
+    return pages;
   }
 }

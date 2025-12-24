@@ -98,10 +98,11 @@
 // ====== SOLICITUD CARDS CON MAPA (Vista de solicitudes) ======
 .solicitud-card-mapa {
   background: white;
-  border-radius: 16px;
+  border-radius: 16px !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   overflow: hidden;
   transition: all 0.3s ease;
+  border: none;
 
   &:hover {
     transform: translateY(-6px);
@@ -116,6 +117,7 @@
   padding: 1.5rem;
   background: linear-gradient(135deg, #3b4261 0%, #4c4d64 100%);
   color: white;
+  border-radius: 16px 16px 0 0 !important;
 
   .cliente-info {
     display: flex;
@@ -167,6 +169,7 @@
   background: white;
   border-top: 1px solid #e9ecef;
   flex-wrap: wrap;
+  border-radius: 0 0 16px 16px !important;
 
   .btn {
     display: inline-flex;
@@ -959,5 +962,119 @@ textarea.form-control {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+// ====== ESTILOS DE PAGINACIÓN ======
+.pagination-container {
+  margin-top: 2rem;
+  padding: 1rem 0;
+
+  .pagination {
+    margin-bottom: 0.5rem;
+
+    .page-item {
+      margin: 0 0.25rem;
+
+      &.active .page-link {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-color: #667eea;
+        color: white;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      }
+
+      &.disabled .page-link {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+        color: rgba(255, 255, 255, 0.4);
+        cursor: not-allowed;
+      }
+
+      .page-link {
+        border-radius: 8px;
+        padding: 0.5rem 0.875rem;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+        font-weight: 500;
+        transition: all 0.2s ease;
+
+        &:hover:not(:disabled) {
+          background-color: rgba(255, 255, 255, 0.2);
+          border-color: #667eea;
+          color: white;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        &:focus {
+          box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        &:disabled {
+          background-color: rgba(255, 255, 255, 0.05);
+          border-color: rgba(255, 255, 255, 0.1);
+          color: rgba(255, 255, 255, 0.3);
+        }
+      }
+    }
+  }
+
+  .pagination-info {
+    color: #94a3b8;
+    font-size: 0.875rem;
+  }
+
+  @media (max-width: 768px) {
+    .pagination {
+      flex-wrap: wrap;
+      
+      .page-item {
+        margin: 0.125rem;
+
+        .page-link {
+          padding: 0.375rem 0.625rem;
+          font-size: 0.875rem;
+        }
+      }
+    }
+
+    .pagination-info small {
+      font-size: 0.75rem;
+    }
+  }
+}
+
+// Paginación específica para la tarjeta de trabajos (fondo blanco)
+.card .pagination-container {
+  .page-item {
+    .page-link {
+      background-color: #f8f9fa;
+      border-color: #dee2e6;
+      color: #667eea;
+
+      &:hover:not(:disabled) {
+        background-color: #f1f5f9;
+        border-color: #667eea;
+        color: #764ba2;
+      }
+
+      &:disabled {
+        background-color: #e9ecef;
+        border-color: #dee2e6;
+        color: #6c757d;
+      }
+    }
+
+    &.disabled .page-link {
+      background-color: #f8f9fa;
+      border-color: #dee2e6;
+      color: #6c757d;
+    }
+  }
+
+  .pagination-info {
+    color: #64748b;
   }
 }

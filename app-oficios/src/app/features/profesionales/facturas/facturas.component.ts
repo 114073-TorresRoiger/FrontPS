@@ -39,6 +39,11 @@ export class FacturasComponent implements OnInit {
   idProfesional: number | null = null;
   loading: boolean = false;
 
+  // Paginación
+  currentPage: number = 1;
+  itemsPerPage: number = 5;
+  totalPages: number = 0;
+
   ngOnInit() {
     const user = this.authService.getCurrentUser();
     this.idProfesional = user?.idProfesional ?? null;
@@ -83,6 +88,8 @@ export class FacturasComponent implements OnInit {
           const fechaB = new Date(b.fecha).getTime();
           return fechaB - fechaA;
         });
+        this.totalPages = Math.ceil(this.facturas.length / this.itemsPerPage);
+        this.currentPage = 1;
         this.loading = false;
       },
       error: (error) => {
@@ -103,5 +110,62 @@ export class FacturasComponent implements OnInit {
 
   descargarComprobante(nroFactura: number): void {
     this.pdfGenerator.descargarComprobante(nroFactura);
+  }
+
+  // Métodos de paginación
+  getPaginatedFacturas(): Factura[] {
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    const end = start + this.itemsPerPage;
+    return this.facturas.slice(start, end);
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  previousPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  getPageNumbers(): number[] {
+    const pages: number[] = [];
+    const total = this.totalPages;
+    const current = this.currentPage;
+    
+    pages.push(1);
+    
+    let start = Math.max(2, current - 1);
+    let end = Math.min(total - 1, current + 1);
+    
+    if (start > 2) {
+      pages.push(-1);
+    }
+    
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    
+    if (end < total - 1) {
+      pages.push(-1);
+    }
+    
+    if (total > 1) {
+      pages.push(total);
+    }
+    
+    return pages;
   }
 }

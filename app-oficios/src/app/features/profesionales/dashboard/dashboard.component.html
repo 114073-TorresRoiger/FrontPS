@@ -121,7 +121,7 @@
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let trabajo of trabajos()">
+                <tr *ngFor="let trabajo of getPaginatedTrabajos()">
                   <td>{{ trabajo.nombreCliente }}</td>
                   <td>{{ trabajo.oficio }}</td>
                   <td>
@@ -216,6 +216,45 @@
               </tbody>
             </table>
           </div>
+
+          <!-- Paginación de Trabajos -->
+          <div class="pagination-container" *ngIf="totalPagesTrabajos() > 1">
+            <nav aria-label="Paginación de trabajos">
+              <ul class="pagination justify-content-center">
+                <li class="page-item" [class.disabled]="currentPageTrabajos() === 1">
+                  <button class="page-link" (click)="previousPageTrabajos()" [disabled]="currentPageTrabajos() === 1">
+                    &laquo; Anterior
+                  </button>
+                </li>
+                
+                <li *ngFor="let page of getPageNumbersTrabajos()" 
+                    class="page-item" 
+                    [class.active]="page === currentPageTrabajos()"
+                    [class.disabled]="page === -1">
+                  <button 
+                    *ngIf="page !== -1" 
+                    class="page-link" 
+                    (click)="goToPageTrabajos(page)">
+                    {{ page }}
+                  </button>
+                  <span *ngIf="page === -1" class="page-link">...</span>
+                </li>
+                
+                <li class="page-item" [class.disabled]="currentPageTrabajos() === totalPagesTrabajos()">
+                  <button class="page-link" (click)="nextPageTrabajos()" [disabled]="currentPageTrabajos() === totalPagesTrabajos()">
+                    Siguiente &raquo;
+                  </button>
+                </li>
+              </ul>
+            </nav>
+            
+            <div class="pagination-info text-center mt-2">
+              <small class="text-muted">
+                Página {{ currentPageTrabajos() }} de {{ totalPagesTrabajos() }} - 
+                Mostrando {{ getPaginatedTrabajos().length }} de {{ trabajos().length }} trabajos
+              </small>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -296,6 +335,7 @@
           Solicitudes Recibidas
         </h1>
         <p class="text-white fs-5">Gestiona tus solicitudes con información detallada</p>
+        <div class="title-underline mx-auto"></div>
       </div>
     </header>
 
@@ -368,26 +408,42 @@
       </div>
     </div>
 
-    <!-- Paginación -->
-    <div *ngIf="!isLoadingSolicitudesConMapa() && totalElementos() > 0" 
-         class="d-flex justify-content-between align-items-center mt-4">
-      <div class="text-white">
-        Mostrando {{ solicitudesConMapa().length }} de {{ totalElementos() }} solicitudes
-        <span class="text-white-50">(Página {{ paginaActual() + 1 }} de {{ totalPaginas() }})</span>
-      </div>
-      <div class="btn-group">
-        <button 
-          class="btn btn-outline-light" 
-          (click)="cargarPaginaAnterior()"
-          [disabled]="!tieneAnteriorPagina()">
-          ← Anterior
-        </button>
-        <button 
-          class="btn btn-outline-light" 
-          (click)="cargarSiguientePagina()"
-          [disabled]="!tieneSiguientePagina()">
-          Siguiente →
-        </button>
+    <!-- Paginación de Solicitudes -->
+    <div *ngIf="!isLoadingSolicitudesConMapa() && totalPaginas() > 1" class="pagination-container mt-4">
+      <nav aria-label="Paginación de solicitudes">
+        <ul class="pagination justify-content-center">
+          <li class="page-item" [class.disabled]="!tieneAnteriorPagina()">
+            <button class="page-link" (click)="cargarPaginaAnterior()" [disabled]="!tieneAnteriorPagina()">
+              &laquo; Anterior
+            </button>
+          </li>
+          
+          <li *ngFor="let page of getPageNumbersSolicitudes()" 
+              class="page-item" 
+              [class.active]="page === paginaActual()"
+              [class.disabled]="page === -1">
+            <button 
+              *ngIf="page !== -1" 
+              class="page-link" 
+              (click)="goToPageSolicitudes(page)">
+              {{ page + 1 }}
+            </button>
+            <span *ngIf="page === -1" class="page-link">...</span>
+          </li>
+          
+          <li class="page-item" [class.disabled]="!tieneSiguientePagina()">
+            <button class="page-link" (click)="cargarSiguientePagina()" [disabled]="!tieneSiguientePagina()">
+              Siguiente &raquo;
+            </button>
+          </li>
+        </ul>
+      </nav>
+      
+      <div class="pagination-info text-center mt-2">
+        <small class="text-white-50">
+          Página {{ paginaActual() + 1 }} de {{ totalPaginas() }} - 
+          Mostrando {{ solicitudesConMapa().length }} de {{ totalElementos() }} solicitudes
+        </small>
       </div>
     </div>
   </div>
