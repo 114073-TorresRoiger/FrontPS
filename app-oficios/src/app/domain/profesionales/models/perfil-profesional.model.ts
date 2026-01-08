@@ -4,10 +4,19 @@ export interface DisponibilidadHorario {
   horaFin: string;
 }
 
+export interface FotoGaleria {
+  id?: number;
+  urlFoto: string;
+  descripcion?: string;
+  fechaSubida?: string;
+  orden?: number;
+}
+
 export interface PerfilProfesional {
   idProfesional: number;
   nombre: string;
   apellido: string;
+  email?: string;
   avatar?: string;
   oficio: string;
   telefono: string;
@@ -17,4 +26,5 @@ export interface PerfilProfesional {
   puntuacionPromedio?: number;
   cantidadResenias?: number;
   serviciosCompletados?: number;
+  fotosGaleria?: FotoGaleria[];
 }

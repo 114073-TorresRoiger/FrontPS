@@ -353,6 +353,10 @@ export class HomePage implements OnInit {
     this.showTurnoModal.set(true);
   }
 
+  viewProfessionalProfile(professional: PerfilProfesional) {
+    this.router.navigate(['/profesionales/perfil', professional.idProfesional]);
+  }
+
   closeTurnoModal() {
     this.showTurnoModal.set(false);
     this.selectedProfessional.set(null);
@@ -542,6 +546,14 @@ export class HomePage implements OnInit {
     this.isDropdownOpen.set(false);
     this.isSidebarOpen.set(false);
     this.router.navigate(['/profesionales/dashboard']);
+  }
+  goToPerfilProfesional() {
+    this.isDropdownOpen.set(false);
+    this.isSidebarOpen.set(false);
+    const user = this.authService.getCurrentUser();
+    if (user?.idProfesional) {
+      this.router.navigate(['/profesionales/perfil', user.idProfesional]);
+    }
   }
   logout() {
     this.isDropdownOpen.set(false);

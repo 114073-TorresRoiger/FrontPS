@@ -4,6 +4,10 @@ import { noAdminGuard } from '../../core/guards/no-admin.guard';
 
 export const PROFESIONALES_ROUTES: Routes = [
   {
+    path: 'perfil/:id',
+    loadComponent: () => import('./perfil/perfil-profesional.component').then(m => m.PerfilProfesionalComponent)
+  },
+  {
     path: 'registro',
     loadComponent: () => import('./registro/registro-profesional').then(m => m.RegistroProfesional)
   },

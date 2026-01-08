@@ -80,8 +80,12 @@
       </div>
     </div>
 
-    <!-- Contact Button -->
+    <!-- Action Buttons -->
     <div class="professional-footer">
+      <button class="profile-btn" (click)="onViewProfile()">
+        <lucide-angular [img]="Eye" [size]="18"></lucide-angular>
+        <span>Ver perfil</span>
+      </button>
       <button class="contact-btn" (click)="onContact()">
         <lucide-angular [img]="User" [size]="18"></lucide-angular>
         <span>Contactar</span>
