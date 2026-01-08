@@ -17,11 +17,68 @@
           <lucide-angular [img]="Search" size="20" class="search-icon"></lucide-angular>
           <input
             type="text"
-            placeholder="Buscar servicio, ubicación o profesional..."
+            placeholder="Buscar profesional..."
             class="search-input"
             [(ngModel)]="searchQuery"
             (keyup.enter)="onSearch()"
+            (input)="onSearch()"
           />
+
+          <!-- Filter by Zone Toggle -->
+          <label class="search-filter-zone">
+            <input
+              type="checkbox"
+              [(ngModel)]="filterByZone"
+              (change)="onSearch()"
+              class="zone-checkbox"
+            />
+            <span class="checkbox-label">Por zona</span>
+          </label>
+
+          <!-- Search Results Dropdown -->
+          <div *ngIf="showSearchResults()" class="search-results-dropdown">
+            <!-- Loading State -->
+            <div *ngIf="isLoadingSearchResults()" class="search-results-loading">
+              <p>Buscando profesionales...</p>
+            </div>
+
+            <!-- No Results State -->
+            <div *ngIf="!isLoadingSearchResults() && noSearchResultsFound()" class="search-results-empty">
+              <p>No se encontraron profesionales</p>
+              <small>Intenta con otro nombre o zona</small>
+            </div>
+
+            <!-- Results List -->
+            <div *ngIf="!isLoadingSearchResults() && !noSearchResultsFound() && searchResults().length > 0" class="search-results-list">
+              <div *ngFor="let professional of searchResults()" class="search-result-item" (click)="contactProfessional(professional)">
+                <div class="result-avatar">
+                  <lucide-angular [img]="User" size="32"></lucide-angular>
+                </div>
+                <div class="result-info">
+                  <h4 class="result-name">{{ getProfessionalDisplayName(professional) }}</h4>
+                  <p class="result-oficio">{{ professional.oficio }}</p>
+                  <p class="result-zona" *ngIf="professional.especialidades && professional.especialidades.length > 0">
+                    <lucide-angular [img]="MapPin" size="14" inline></lucide-angular>
+                    {{ professional.especialidades[0] }}
+                  </p>
+                </div>
+                <div class="result-rating">
+                  <lucide-angular [img]="Star" size="16" color="#fbbf24"></lucide-angular>
+                  <span>{{ professional.puntuacionPromedio || 'Sin reseñas' }}</span>
+                </div>
+              </div>
+
+              <!-- View All Button -->
+              <button class="view-all-results" (click)="showSearchResults.set(false)">
+                Ver más resultados
+              </button>
+            </div>
+
+            <!-- Close Button -->
+            <button *ngIf="showSearchResults()" class="close-search-results" (click)="closeSearchResults()">
+              <lucide-angular [img]="X" size="18"></lucide-angular>
+            </button>
+          </div>
         </div>
         <button class="search-btn" (click)="onSearch()">Buscar</button>
 

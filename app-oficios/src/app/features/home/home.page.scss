@@ -1,4 +1,5 @@
-@import '../../app.scss';
+@use '../../app.scss' as *;
+@use 'sass:color';
 
 // Navbar Styles
 .navbar {
@@ -86,11 +87,14 @@
     display: flex;
     gap: 0.5rem;
     width: 100%;
+    position: relative;
   }
 
   .search-input-wrapper {
     position: relative;
     flex: 1;
+    z-index: 1001;
+  }
 
     .search-icon {
       position: absolute;
@@ -102,7 +106,7 @@
 
     .search-input {
       width: 100%;
-      padding: 0.5rem 0.75rem 0.5rem 2.5rem;
+      padding: 0.5rem 3rem 0.5rem 2.5rem;
       border: 2px solid $border-light;
       border-radius: 6px;
       font-size: 0.9rem;
@@ -116,6 +120,40 @@
 
       &::placeholder {
         color: $text-placeholder;
+      }
+    }
+
+    // Filter by Zone Checkbox
+    .search-filter-zone {
+      position: absolute;
+      right: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      user-select: none;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: rgba($primary-color, 0.05);
+      }
+
+      .zone-checkbox {
+        width: 16px;
+        height: 16px;
+        cursor: pointer;
+        accent-color: $primary-color;
+      }
+
+      .checkbox-label {
+        font-size: 0.8rem;
+        color: $text-light;
+        font-weight: 500;
+        white-space: nowrap;
       }
     }
   }
@@ -133,8 +171,167 @@
     transition: all 0.3s ease;
 
     &:hover {
-      background: darken($success-color, 10%);
+      background: color.adjust($success-color, $lightness: -10%);
       transform: translateY(-1px);
+    }
+  }
+
+  // Search Results Dropdown Styles
+  .search-results-dropdown {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0;
+    width: 100%;
+    min-width: 300px;
+    max-width: 100%;
+    background: $white;
+    border-radius: 8px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    border: 1px solid $border-light;
+    z-index: 1002;
+    max-height: 400px;
+    overflow-y: auto;
+    animation: slideDown 0.3s ease;
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .search-results-loading,
+    .search-results-empty {
+      padding: 1.5rem;
+      text-align: center;
+      color: $text-light;
+
+      p {
+        margin: 0 0 0.5rem;
+        font-weight: 500;
+      }
+
+      small {
+        font-size: 0.85rem;
+        color: $text-placeholder;
+      }
+    }
+
+    .search-results-list {
+      max-height: 350px;
+      overflow-y: auto;
+
+      .search-result-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        border-bottom: 1px solid $border-light;
+        cursor: pointer;
+        transition: all 0.2s ease;
+
+        &:last-child {
+          border-bottom: none;
+        }
+
+        &:hover {
+          background: $background-light;
+
+          .result-name {
+            color: $primary-color;
+          }
+        }
+
+        .result-avatar {
+          flex-shrink: 0;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background: $background-light;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: $text-light;
+        }
+
+        .result-info {
+          flex: 1;
+          min-width: 0;
+
+          .result-name {
+            margin: 0;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: $text-dark;
+            transition: color 0.2s ease;
+          }
+
+          .result-oficio {
+            margin: 0.25rem 0 0;
+            font-size: 0.85rem;
+            color: $text-light;
+          }
+
+          .result-zona {
+            margin: 0.25rem 0 0;
+            font-size: 0.85rem;
+            color: $text-placeholder;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+          }
+        }
+
+        .result-rating {
+          flex-shrink: 0;
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+          font-size: 0.85rem;
+          color: $text-light;
+        }
+      }
+
+      .view-all-results {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background: $background-light;
+        border: none;
+        color: $primary-color;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border-radius: 0 0 8px 8px;
+
+        &:hover {
+          background: rgba($primary-color, 0.1);
+        }
+      }
+    }
+
+    .close-search-results {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: $text-light;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.25rem;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: $background-light;
+        color: $text-dark;
+      }
     }
   }
 
@@ -269,13 +466,13 @@
 
           &:hover {
             background: rgba($error-color, 0.1);
-            color: darken($error-color, 10%);
+            color: color.adjust($error-color, $lightness: -10%);
           }
         }
       }
     }
   }
-}
+
 
 // Sidebar Overlay
 .sidebar-overlay {
@@ -514,7 +711,7 @@
   animation: pulse-ring 2s infinite;
 
   &:hover {
-    background: darken($accent-color, 10%);
+    background: color.adjust($accent-color, $lightness: -10%);
     transform: translateY(-3px) scale(1.05);
     box-shadow: 0 6px 25px rgba(0, 0, 0, 0.4);
   }
@@ -790,7 +987,7 @@
       transition: all 0.2s;
 
       &:hover {
-        background: darken($primary-color, 8%);
+        background: color.adjust($primary-color, $lightness: -8%);
         transform: translateY(-1px);
       }
     }
@@ -1085,7 +1282,7 @@
       transition: all 0.3s ease;
 
       &:hover {
-        background: darken($accent-color, 10%);
+        background: color.adjust($accent-color, $lightness: -10%);
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba($accent-color, 0.3);
       }
@@ -2181,7 +2378,7 @@
       color: white;
 
       &:hover:not(:disabled) {
-        background: darken($accent-color, 10%);
+        background: color.adjust($accent-color, $lightness: -10%);
         transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba($accent-color, 0.3);
       }

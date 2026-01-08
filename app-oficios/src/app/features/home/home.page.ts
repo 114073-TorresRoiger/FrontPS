@@ -191,6 +191,13 @@ export class HomePage implements OnInit {
   featuredProfessionals = signal<PerfilProfesional[]>([]);
   isLoadingFeaturedProfessionals = signal(true);
 
+  // Search results
+  searchResults = signal<PerfilProfesional[]>([]);
+  isLoadingSearchResults = signal(false);
+  showSearchResults = signal(false);
+  noSearchResultsFound = signal(false);
+  filterByZone = signal(false);
+
   ngOnInit(): void {
     this.loadServices();
     this.initSolicitudForm();
@@ -271,8 +278,62 @@ export class HomePage implements OnInit {
       .join(' ');
   }
 
-  onSearch() {
-    console.log('Searching for:', this.searchQuery());
+  onSearch(): void {
+    const query = this.searchQuery().trim();
+
+    if (!query) {
+      this.showSearchResults.set(false);
+      this.searchResults.set([]);
+      return;
+    }
+
+    this.isLoadingSearchResults.set(true);
+    this.noSearchResultsFound.set(false);
+    this.showSearchResults.set(true);
+
+    // Construir parámetros según el filtro seleccionado
+    let apiUrl = `${environment.apiUrl}/api/v1/busqueda/profesionales?`;
+
+    if (this.filterByZone()) {
+      // Si se selecciona filtrar por zona, solo busca en el parámetro zona
+      apiUrl += `zona=${encodeURIComponent(query)}`;
+    } else {
+      // Si no, busca por nombre y zona simultáneamente
+      apiUrl += `nombre=${encodeURIComponent(query)}&zona=${encodeURIComponent(query)}`;
+    }
+
+    this.http.get<any[]>(apiUrl).subscribe({
+      next: (response: any) => {
+        console.log('✅ Resultados de búsqueda:', response);
+
+        // Manejar respuesta según el formato
+        let profesionales: PerfilProfesional[] = [];
+
+        if (Array.isArray(response)) {
+          // Si la respuesta es un array directo de profesionales
+          profesionales = response as PerfilProfesional[];
+        } else if (response && response.mensaje === 'No se encontraron profesionales') {
+          // Si no se encontraron profesionales
+          profesionales = [];
+        }
+
+        this.searchResults.set(profesionales);
+        this.noSearchResultsFound.set(profesionales.length === 0);
+        this.isLoadingSearchResults.set(false);
+      },
+      error: (error) => {
+        console.error('❌ Error en búsqueda:', error);
+        this.searchResults.set([]);
+        this.noSearchResultsFound.set(true);
+        this.isLoadingSearchResults.set(false);
+      }
+    });
+  }
+
+  closeSearchResults(): void {
+    this.showSearchResults.set(false);
+    this.searchResults.set([]);
+    this.searchQuery.set('');
   }
 
   toggleFavorite(serviceId: number) {
@@ -351,6 +412,9 @@ export class HomePage implements OnInit {
 
     this.selectedProfessional.set(professional);
     this.showTurnoModal.set(true);
+
+    // Cerrar el dropdown de búsqueda automáticamente
+    this.closeSearchResults();
   }
 
   closeTurnoModal() {
@@ -551,11 +615,11 @@ export class HomePage implements OnInit {
   getUserDisplayName(): string {
     return this.authService.getUserFullName();
   }
-  
+
   getUserAvatar(): string | null {
     return this.userAvatar();
   }
-  
+
   private loadUserAvatar(): void {
     const user = this.authService.getCurrentUser();
     if (user?.id) {
@@ -573,7 +637,7 @@ export class HomePage implements OnInit {
         });
     }
   }
-  
+
   isUserAuthenticated(): boolean {
     return this.authService.isLoggedIn();
   }
