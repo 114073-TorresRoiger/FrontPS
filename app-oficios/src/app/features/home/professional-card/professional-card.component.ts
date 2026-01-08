@@ -1,6 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LucideAngularModule, Clock, DollarSign, Phone, User, Calendar, Star } from 'lucide-angular';
+import { LucideAngularModule, Clock, DollarSign, Phone, User, Calendar, Star, Eye } from 'lucide-angular';
 import { PerfilProfesional, DisponibilidadHorario } from '../../../domain/profesionales/models/perfil-profesional.model';
 
 @Component({
@@ -13,6 +13,7 @@ import { PerfilProfesional, DisponibilidadHorario } from '../../../domain/profes
 export class ProfessionalCardComponent {
   @Input() professional!: PerfilProfesional;
   @Output() contact = new EventEmitter<PerfilProfesional>();
+  @Output() viewProfile = new EventEmitter<PerfilProfesional>();
 
   // Icons
   readonly Clock = Clock;
@@ -21,6 +22,7 @@ export class ProfessionalCardComponent {
   readonly User = User;
   readonly Calendar = Calendar;
   readonly Star = Star;
+  readonly Eye = Eye;
 
   showFullSchedule = false;
 
@@ -62,6 +64,10 @@ export class ProfessionalCardComponent {
 
   onContact(): void {
     this.contact.emit(this.professional);
+  }
+
+  onViewProfile(): void {
+    this.viewProfile.emit(this.professional);
   }
 
   formatDayName(dia: string): string {

@@ -1,19 +1,15 @@
 <div class="perfil-container">
   <div class="perfil-header">
-    <button class="back-btn" (click)="volver()" type="button">
-      <i class="icon-arrow-left"></i>
-      <span>Volver</span>
-    </button>
-    <h1>Mi Perfil</h1>
-    <button
-      class="edit-btn"
-      (click)="toggleEditar()"
-      [class.editing]="isEditing"
-      [disabled]="isLoading"
-      type="button">
-      <i [class]="isEditing ? 'icon-x' : 'icon-edit'"></i>
-      <span>{{ isEditing ? 'Cancelar' : 'Editar' }}</span>
-    </button>
+    <div class="header-top">
+      <button class="back-btn" (click)="volver()" type="button">
+        <lucide-angular [img]="ArrowLeft" [size]="20"></lucide-angular>
+        <span>Volver al Inicio</span>
+      </button>
+    </div>
+    <div class="text-center">
+      <h1>Mi Perfil</h1>
+      <div class="title-underline mx-auto"></div>
+    </div>
   </div>
 
   <!-- Loading State -->
@@ -39,7 +35,10 @@
       <!-- Columna Izquierda - Foto de Usuario -->
       <div class="perfil-avatar-section">
         <div class="avatar-container">
-          <div class="avatar-image" [class.uploading]="isUploadingImage">
+          <div class="avatar-image" 
+               [class.uploading]="isUploadingImage" 
+               [class.editable]="isEditing"
+               (click)="isEditing && !isUploadingImage && cambiarFoto()">
             <img 
               [src]="imagePreview || perfilForm.get('avatar')?.value || 'assets/icons/user-placeholder.svg'" 
               [alt]="(perfilForm.get('name')?.value || 'Usuario') + ' ' + (perfilForm.get('lastName')?.value || '')"
@@ -48,6 +47,10 @@
               <div class="spinner-small"></div>
               <span>Subiendo...</span>
             </div>
+            <div *ngIf="isEditing && !isUploadingImage" class="edit-overlay">
+              <i class="icon-camera"></i>
+              <span>Cambiar foto</span>
+            </div>
           </div>
           <div class="avatar-info">
             <h3 class="user-name">
@@ -55,14 +58,15 @@
             </h3>
             <p class="user-email">{{ perfilForm.get('email')?.value || 'email@ejemplo.com' }}</p>
           </div>
-          <div *ngIf="isEditing" class="avatar-actions">
-            <button 
-              type="button" 
-              class="btn btn-outline change-photo-btn" 
-              (click)="cambiarFoto()"
-              [disabled]="isUploadingImage">
-              <i class="icon-camera"></i>
-              {{ isUploadingImage ? 'Subiendo...' : 'Cambiar Foto' }}
+          <div class="edit-section">
+            <button
+              class="edit-btn"
+              (click)="toggleEditar()"
+              [class.editing]="isEditing"
+              [disabled]="isLoading"
+              type="button">
+              <i [class]="isEditing ? 'icon-x' : 'icon-edit'"></i>
+              <span>{{ isEditing ? 'Cancelar' : 'Editar' }}</span>
             </button>
           </div>
         </div>

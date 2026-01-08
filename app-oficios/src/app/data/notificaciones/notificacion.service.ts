@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of, forkJoin } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
-import { Notificacion, NotificacionResponse, TipoNotificacion } from '../../domain/notificaciones/notificacion.model';
+import { Notificacion, NotificacionResponse, TipoNotificacion, ReporteProfesional } from '../../domain/notificaciones/notificacion.model';
 
 @Injectable({
   providedIn: 'root'
@@ -327,5 +327,48 @@ export class NotificacionService {
       return `solicitud_${notificacion.idRelacionado}`;
     }
     return `notif_${notificacion.id}`;
+  }
+
+  /**
+   * Enviar reporte de profesional al administrador
+   */
+  reportarProfesional(reporte: ReporteProfesional): Observable<any> {
+    const payload = {
+      idProfesional: reporte.idProfesional,
+      razon: reporte.razon,
+      reportadoPor: reporte.reportadoPor
+    };
+    
+    return this.http.post(`${this.API_URL}/api/v1/reportes`, payload).pipe(
+      map(response => {
+        console.log('✅ Reporte enviado correctamente:', response);
+        return response;
+      }),
+      catchError(error => {
+        console.error('❌ Error al enviar reporte:', error);
+        throw error;
+      })
+    );
+  }
+
+  /**
+   * Obtener reportes pendientes (para administrador)
+   */
+  obtenerReportesPendientes(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.API_URL}/api/v1/reportes/pendientes`);
+  }
+
+  /**
+   * Obtener todos los reportes (para administrador)
+   */
+  obtenerTodosLosReportes(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.API_URL}/api/v1/reportes`);
+  }
+
+  /**
+   * Eliminar un reporte (para administrador)
+   */
+  eliminarReporte(idReporte: number): Observable<void> {
+    return this.http.delete<void>(`${this.API_URL}/api/v1/reportes/${idReporte}`);
   }
 }

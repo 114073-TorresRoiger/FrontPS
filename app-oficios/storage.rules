@@ -13,5 +13,11 @@ service firebase.storage {
       allow write: if request.resource.size < 5 * 1024 * 1024  // Máximo 5MB
                    && request.resource.contentType.matches('image/.*');  // Solo imágenes
     }
+    
+    // Permitir escritura en la carpeta galeria con validaciones
+    match /galeria/{profesionalFolder}/{fileName} {
+      allow write: if request.resource.size < 5 * 1024 * 1024  // Máximo 5MB
+                   && request.resource.contentType.matches('image/.*');  // Solo imágenes
+    }
   }
 }

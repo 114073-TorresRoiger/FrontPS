@@ -9,11 +9,12 @@ import { FirebaseStorageService } from '../../../core/services/firebase-storage.
 import { DomicilioService } from '../../../domain/domicilio/domicilio.service';
 import { Departamento, Ciudad, Barrio } from '../../../domain/domicilio/domicilio.model';
 import { finalize } from 'rxjs/operators';
+import { LucideAngularModule, ArrowLeft, Edit, X, Camera } from 'lucide-angular';
 
 @Component({
   selector: 'app-perfil',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, LucideAngularModule],
   templateUrl: './perfil.component.html',
   styleUrl: './perfil.component.scss'
 })
@@ -24,6 +25,12 @@ export class PerfilComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly firebaseStorage = inject(FirebaseStorageService);
   private readonly domicilioService = inject(DomicilioService);
+
+  // Lucide icons
+  readonly ArrowLeft = ArrowLeft;
+  readonly Edit = Edit;
+  readonly X = X;
+  readonly Camera = Camera;
 
   perfilForm: FormGroup;
   isEditing = false;

@@ -54,6 +54,16 @@
         <p class="stat-label">Oficios Activos</p>
       </div>
     </div>
+
+    <div class="stat-card" [class.warning]="totalReportes() > 0">
+      <div class="stat-icon reports">
+        <lucide-angular [img]="Flag" [size]="32"></lucide-angular>
+      </div>
+      <div class="stat-content">
+        <h3 class="stat-value">{{ totalReportes() }}</h3>
+        <p class="stat-label">Reportes Pendientes</p>
+      </div>
+    </div>
   </section>
 
   <!-- Main Content Grid -->
@@ -355,6 +365,46 @@
       </div>
     </section>
   </div>
+
+  <!-- Reportes Section -->
+  <section class="content-card reportes-section" *ngIf="totalReportes() > 0">
+    <div class="card-header">
+      <div class="header-with-icon">
+        <lucide-angular [img]="Flag" [size]="24" class="warning-icon"></lucide-angular>
+        <h2>Reportes de Profesionales</h2>
+      </div>
+      <span class="badge-counter">{{ totalReportes() }} pendientes</span>
+    </div>
+
+    <div class="reportes-list">
+      <div *ngFor="let reporte of reportesPendientes()" class="reporte-item">
+        <div class="reporte-header">
+          <div class="reporte-info">
+            <h4>{{ reporte.nombreProfesional }}</h4>
+            <span class="reporte-fecha">{{ reporte.fechaReporte | date:'dd/MM/yyyy HH:mm' }}</span>
+          </div>
+          <span class="reporte-badge">Pendiente</span>
+        </div>
+        <div class="reporte-body">
+          <p class="reporte-razon"><strong>Razón:</strong> {{ reporte.razon }}</p>
+          <p class="reporte-autor" *ngIf="reporte.nombreReportante">
+            <strong>Reportado por:</strong> {{ reporte.nombreReportante }}
+          </p>
+        </div>
+        <div class="reporte-actions">
+          <button class="btn-sm danger" (click)="eliminarReporte(reporte.id)" title="Eliminar reporte">
+            <lucide-angular [img]="Trash2" [size]="16"></lucide-angular>
+            Eliminar
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Mensaje de eliminado -->
+<div class="toast-message" *ngIf="reporteEliminado()">
+  Reporte eliminado
 </div>
 
 <!-- Modal Agregar Oficio -->
