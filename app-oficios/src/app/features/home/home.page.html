@@ -77,8 +77,10 @@
       <button *ngIf="isProfessional()" class="nav-item" (click)="goToDashboard()">
         <lucide-angular [img]="Briefcase" size="20"></lucide-angular>
         <span>Dashboard</span>
-      </button>
-      <button *ngIf="!isProfessional()" class="nav-item" (click)="goToRegisterProfessional()">
+      </button>      <button *ngIf="isProfessional()" class="nav-item" (click)="goToPerfilProfesional()">
+        <lucide-angular [img]="User" [size]="20"></lucide-angular>
+        <span>Perfil profesional</span>
+      </button>      <button *ngIf="!isProfessional()" class="nav-item" (click)="goToRegisterProfessional()">
         <lucide-angular [img]="UserPlus" size="20"></lucide-angular>
         <span>Registrarse</span>
       </button>
@@ -208,6 +210,7 @@
             *ngFor="let professional of featuredProfessionals()"
             [professional]="professional"
             (contact)="contactProfessional($event)"
+            (viewProfile)="viewProfessionalProfile($event)"
           >
           </app-professional-card>
         </div>
@@ -259,6 +262,7 @@
             *ngFor="let professional of getCurrentProfessionals()"
             [professional]="professional"
             (contact)="contactProfessional($event)"
+            (viewProfile)="viewProfessionalProfile($event)"
           >
           </app-professional-card>
         </div>

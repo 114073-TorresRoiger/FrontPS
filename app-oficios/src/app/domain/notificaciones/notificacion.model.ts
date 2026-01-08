@@ -1,4 +1,4 @@
-export type TipoNotificacion = 'NUEVA_SOLICITUD' | 'TRABAJO_FINALIZADO' | 'MENSAJE_NUEVO' | 'TRABAJO_CANCELADO' | 'SOLICITUD_RECHAZADA';
+export type TipoNotificacion = 'NUEVA_SOLICITUD' | 'TRABAJO_FINALIZADO' | 'MENSAJE_NUEVO' | 'TRABAJO_CANCELADO' | 'SOLICITUD_RECHAZADA' | 'REPORTE_PROFESIONAL';
 
 export interface Notificacion {
   id: number;
@@ -22,4 +22,11 @@ export interface NotificacionResponse {
   leida: boolean;
   idRelacionado?: number;
   urlAccion?: string;
+}
+
+export interface ReporteProfesional {
+  idProfesional: number;
+  nombreProfesional: string;
+  razon: string;
+  reportadoPor?: number;
 }

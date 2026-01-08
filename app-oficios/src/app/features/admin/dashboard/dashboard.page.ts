@@ -1,7 +1,7 @@
 import { Component, OnInit, signal, inject, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, Users, Briefcase, Package, TrendingUp, Plus, Trash2, Edit, LogOut, Search, X, AlertTriangle, CheckCircle, XCircle } from 'lucide-angular';
+import { LucideAngularModule, Users, Briefcase, Package, TrendingUp, Plus, Trash2, Edit, LogOut, Search, X, AlertTriangle, CheckCircle, XCircle, Flag } from 'lucide-angular';
 import { AuthService } from '../../../domain/auth';
 import { SolicitudRepository } from '../../../domain/solicitudes/solicitud.repository';
 import { EstadisticaOficio } from '../../../domain/solicitudes/solicitud.model';
@@ -13,6 +13,7 @@ import { OficioRepository } from '../../../domain/oficios/oficio.repository';
 import { Oficio } from '../../../domain/oficios/oficio.model';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
+import { NotificacionService } from '../../../data/notificaciones/notificacion.service';
 
 @Component({
   selector: 'app-dashboard-page',
@@ -36,12 +37,14 @@ export class DashboardPage implements OnInit {
   readonly AlertTriangle = AlertTriangle;
   readonly CheckCircle = CheckCircle;
   readonly XCircle = XCircle;
+  readonly Flag = Flag;
 
   // Services
   private readonly authService = inject(AuthService);
   private readonly solicitudRepository = inject(SolicitudRepository);
   private readonly usuarioRepository = inject(UsuarioRepository);
   private readonly oficioRepository = inject(OficioRepository);
+  private readonly notificacionService = inject(NotificacionService);
 
   // Chart reference
   @ViewChild(BaseChartDirective) chart?: BaseChartDirective;
@@ -51,6 +54,9 @@ export class DashboardPage implements OnInit {
   profesionales = signal<ProfesionalMetrica[]>([]);
   oficios = signal<Oficio[]>([]);
   oficiosMasDemandados = signal<EstadisticaOficio[]>([]);
+  reportesPendientes = signal<any[]>([]);
+  totalReportes = signal(0);
+  reporteEliminado = signal(false);
 
   // Paginación de usuarios
   paginaUsuariosActual = signal<number>(0);
@@ -138,6 +144,7 @@ export class DashboardPage implements OnInit {
 
   ngOnInit() {
     this.cargarDatos();
+    this.cargarReportes();
   }
 
   cargarDatos() {
@@ -146,6 +153,20 @@ export class DashboardPage implements OnInit {
     this.cargarProfesionales();
     this.cargarOficios();
     this.cargarOficiosDemandados();
+  }
+
+  cargarReportes() {
+    this.notificacionService.obtenerReportesPendientes().subscribe({
+      next: (reportes) => {
+        this.reportesPendientes.set(reportes);
+        this.totalReportes.set(reportes.length);
+      },
+      error: (error) => {
+        console.error('Error cargando reportes:', error);
+        this.reportesPendientes.set([]);
+        this.totalReportes.set(0);
+      }
+    });
   }
 
   aplicarFiltroFechas() {
@@ -549,6 +570,23 @@ export class DashboardPage implements OnInit {
 
   cerrarModalErrorOficio() {
     this.showOficioErrorModal.set(false);
+  }
+
+  // Gestión de reportes
+  eliminarReporte(idReporte: number) {
+    this.notificacionService.eliminarReporte(idReporte).subscribe({
+      next: () => {
+        console.log('Reporte eliminado exitosamente');
+        // Mostrar mensaje de éxito
+        this.reporteEliminado.set(true);
+        setTimeout(() => this.reporteEliminado.set(false), 3000);
+        // Recargar los reportes
+        this.cargarReportes();
+      },
+      error: (error) => {
+        console.error('Error al eliminar reporte:', error);
+      }
+    });
   }
 
   logout() {

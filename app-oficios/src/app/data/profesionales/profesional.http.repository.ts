@@ -23,4 +23,8 @@ export class ProfesionalHttpRepository implements ProfesionalRepository {
   getProfesionalesMasSolicitados(): Observable<PerfilProfesional[]> {
     return this.http.get<PerfilProfesional[]>(`${this.baseUrl}/solicitudes/profesionales/mas-solicitados`);
   }
+
+  getPerfilProfesional(idProfesional: number): Observable<PerfilProfesional> {
+    return this.http.get<PerfilProfesional>(`${this.baseUrl}/perfil/profesionales/${idProfesional}`);
+  }
 }
