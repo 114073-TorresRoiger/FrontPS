@@ -50,7 +50,7 @@
 
             <!-- Results List -->
             <div *ngIf="!isLoadingSearchResults() && !noSearchResultsFound() && searchResults().length > 0" class="search-results-list">
-              <div *ngFor="let professional of searchResults()" class="search-result-item" (click)="contactProfessional(professional)">
+              <div *ngFor="let professional of searchResults()" class="search-result-item" (click)="viewProfessionalProfile(professional)">
                 <div class="result-avatar">
                   <lucide-angular [img]="User" size="32"></lucide-angular>
                 </div>

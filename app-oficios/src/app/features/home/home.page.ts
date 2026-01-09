@@ -307,11 +307,15 @@ export class HomePage implements OnInit {
         console.log('✅ Resultados de búsqueda:', response);
 
         // Manejar respuesta según el formato
-        let profesionales: PerfilProfesional[] = [];
+        let profesionales: any[] = [];
 
         if (Array.isArray(response)) {
           // Si la respuesta es un array directo de profesionales
-          profesionales = response as PerfilProfesional[];
+          // Mapear el campo "id" a "idProfesional" para compatibilidad
+          profesionales = response.map((prof: any) => ({
+            ...prof,
+            idProfesional: prof.id || prof.idProfesional
+          }));
         } else if (response && response.mensaje === 'No se encontraron profesionales') {
           // Si no se encontraron profesionales
           profesionales = [];
@@ -418,6 +422,7 @@ export class HomePage implements OnInit {
   }
 
   viewProfessionalProfile(professional: PerfilProfesional) {
+    this.closeSearchResults();
     this.router.navigate(['/profesionales/perfil', professional.idProfesional]);
   }
 
