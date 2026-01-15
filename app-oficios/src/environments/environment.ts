@@ -1,9 +1,9 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:8081',
+  apiUrl: 'https://tuoficio-backend.onrender.com/api/v1',
   streamChat: {
-    apiKey: '3mjs68wckahw', // Reemplazar con tu API Key de Stream
-    apiUrl: 'http://localhost:8081/api/v1/chat'
+    apiKey: '3mjs68wckahw',
+    apiUrl: 'https://tuoficio-backend.onrender.com/api/v1/chat'
   },
   firebase: {
     apiKey: "AIzaSyCFosWOyraIAZL1J2aAyFK_CSdqj0UPVJc",
