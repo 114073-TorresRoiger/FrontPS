@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://tuoficio-backend.onrender.com/api/v1',
+  apiUrl: 'https://tuoficio-backend.onrender.com',
   streamChat: {
     apiKey: '3mjs68wckahw', // Usa tu API key de Stream Chat de producción
     apiUrl: 'https://tuoficio-backend.onrender.com/api/v1/chat'

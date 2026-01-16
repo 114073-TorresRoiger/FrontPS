@@ -1,6 +1,6 @@
 export const environment = {
   production: false,
-  apiUrl: 'https://tuoficio-backend.onrender.com/api/v1',
+  apiUrl: 'https://tuoficio-backend.onrender.com',
   streamChat: {
     apiKey: '3mjs68wckahw',
     apiUrl: 'https://tuoficio-backend.onrender.com/api/v1/chat'
