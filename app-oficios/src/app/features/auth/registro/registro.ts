@@ -174,14 +174,20 @@ export class Registro implements OnInit {
    * Cargar tipos de documento
    */
   loadTiposDocumento(): void {
+    console.log('🔍 Iniciando carga de tipos de documento...');
     this.isLoadingTiposDoc = true;
     this.authService.getTiposDocumento().subscribe({
       next: (data) => {
+        console.log('✅ Tipos de documento recibidos:', data);
         this.tiposDocumento = data;
         this.isLoadingTiposDoc = false;
+        console.log('📋 Array de tipos documento:', this.tiposDocumento);
       },
       error: (error) => {
-        console.error('Error cargando tipos documento:', error);
+        console.error('❌ Error cargando tipos documento:', error);
+        console.error('❌ Error status:', error.status);
+        console.error('❌ Error message:', error.message);
+        console.error('❌ Error completo:', JSON.stringify(error, null, 2));
         this.isLoadingTiposDoc = false;
       }
     });

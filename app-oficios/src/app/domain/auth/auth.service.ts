@@ -214,10 +214,16 @@ export class AuthService {
    * Get tipos de documentos
    */
   getTiposDocumento(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/api/v1/usuario/tipos-documento`)
+    const url = `${this.apiUrl}/api/v1/usuario/tipos-documento`;
+    console.log('🌐 Haciendo petición a:', url);
+    return this.http.get<any[]>(url)
       .pipe(
+        tap(data => console.log('✅ Respuesta del servidor:', data)),
         catchError(error => {
-          console.error('Error getting tipos documento:', error);
+          console.error('❌ Error en getTiposDocumento:', error);
+          console.error('❌ URL:', url);
+          console.error('❌ Status:', error.status);
+          console.error('❌ Message:', error.message);
           return throwError(() => error);
         })
       );
