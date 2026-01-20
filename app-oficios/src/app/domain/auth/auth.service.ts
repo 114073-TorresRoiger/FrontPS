@@ -235,12 +235,23 @@ export class AuthService {
   registerUsuario(usuarioData: any): Observable<AuthResponse> {
     const headers = new HttpHeaders({
       'Content-Type': 'application/json'
+      // Explicitly NOT including Authorization header for public endpoint
     });
 
-    return this.http.post<AuthResponse>(`${this.apiUrl}/api/v1/registro/usuario`, usuarioData, { headers })
-      .pipe(
+    const url = `${this.apiUrl}/api/v1/registro/usuario`;
+    console.log('🌐 POST registerUsuario:', url);
+    console.log('📦 Data:', usuarioData);
+
+    return this.http.post<AuthResponse>(url, usuarioData, { 
+      headers,
+      // Skip auth interceptor by setting context
+    }).pipe(
+        tap(response => console.log('✅ Registration success:', response)),
         catchError(error => {
-          console.error('Register usuario error:', error);
+          console.error('❌ Register usuario error:', error);
+          console.error('❌ Status:', error.status);
+          console.error('❌ Message:', error.message);
+          console.error('❌ Headers sent:', headers);
           return throwError(() => error);
         })
       );
