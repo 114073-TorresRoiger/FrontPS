@@ -255,7 +255,7 @@ export class Registro implements OnInit {
           console.error('Error en el registro:', error);
           // Mensaje específico para errores de autenticación
           if (error.status === 401) {
-            this.modalMessage.set('Error al registrarse, intente más tarde');
+            this.modalMessage.set('Error al registrarse, Por favor intente de nuevo más tarde.');
           } else {
             this.modalMessage.set('Error en el registro: ' + (error.error?.message || 'Por favor intenta nuevamente'));
           }
