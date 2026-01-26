@@ -811,3 +811,36 @@ body::before {
   }
 }
 
+/* Modales más pequeños para éxito y error */
+.small-modal {
+  max-width: 450px !important;
+  
+  .modal-header {
+    padding: 1.25rem 1.5rem;
+    
+    h2 {
+      font-size: 1.25rem;
+    }
+  }
+  
+  .modal-body {
+    padding: 1.5rem;
+    font-size: 0.95rem;
+    text-align: center;
+    
+    p {
+      margin: 0;
+    }
+  }
+  
+  .modal-footer {
+    padding: 1rem 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .small-modal {
+    max-width: 95% !important;
+  }
+}
+
