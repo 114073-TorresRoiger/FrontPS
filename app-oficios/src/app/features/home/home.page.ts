@@ -252,8 +252,8 @@ export class HomePage implements OnInit {
       PLOMERO: 'assets/services/plomero.jpg',
       CARPINTERO: 'assets/services/carpintero.jpg',
       PINTOR: 'assets/services/pintura.jpg',
-      'EMPLEADA DOMESTICA': 'assets/services/empleada-domestica.jpg',
       'INSTALADOR DE AIRES ACONDICIONADOS': 'assets/services/instalacion-aire-acondicionado.jpg',
+      'SERVICIO DE LIMPIEZA': 'assets/services/servicio-de-limpieza.jpg',
     };
 
     return {
