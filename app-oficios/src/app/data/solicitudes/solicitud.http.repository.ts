@@ -60,15 +60,23 @@ export class SolicitudHttpRepository implements SolicitudRepository {
   }
 
   obtenerTurnosDisponiblesSemana(idProfesional: number, fechaInicio: string, duracion: number = 60): Observable<TurnoDisponible[]> {
+    const url = `${this.baseUrl}/turnos/disponibles/semana/${idProfesional}`;
     const params = new HttpParams()
       .set('fechaInicio', fechaInicio)
       .set('duracion', duracion.toString());
 
-    return this.http.get<TurnoDisponible[]>(
-      `${this.baseUrl}/turnos/disponibles/semana/${idProfesional}`,
-      { params }
-    ).pipe(
-      catchError(() => of([]))
+    console.log('🔍 Obteniendo turnos disponibles:');
+    console.log('   - URL:', url);
+    console.log('   - Parámetros:', params.toString());
+    console.log('   - ID Profesional:', idProfesional);
+    console.log('   - Fecha Inicio:', fechaInicio);
+    console.log('   - Duración:', duracion);
+
+    return this.http.get<TurnoDisponible[]>(url, { params }).pipe(
+      catchError((error) => {
+        console.error('❌ Error al obtener turnos:', error);
+        return of([]);
+      })
     );
   }
 

@@ -42,6 +42,11 @@ export class TurnoModalComponent implements OnInit {
   observacion = signal('');
 
   ngOnInit(): void {
+    console.log('🎬 Turno Modal inicializado');
+    console.log('   - Professional:', this.professional);
+    console.log('   - ID Profesional:', this.professional?.idProfesional);
+    console.log('   - ID Usuario:', this.idUsuario);
+
     // Establecer fecha inicio como hoy
     const hoy = new Date();
     this.fechaInicio.set(this.formatDate(hoy));
@@ -58,6 +63,11 @@ export class TurnoModalComponent implements OnInit {
   cargarTurnos(): void {
     if (!this.fechaInicio()) return;
 
+    console.log('🎯 Cargando turnos con:');
+    console.log('   - ID Profesional:', this.professional.idProfesional);
+    console.log('   - Fecha Inicio:', this.fechaInicio());
+    console.log('   - Duración:', this.duracion());
+
     this.loading.set(true);
     this.error.set(null);
     this.turnoSeleccionado.set(null);
@@ -68,6 +78,7 @@ export class TurnoModalComponent implements OnInit {
       this.duracion()
     ).subscribe({
       next: (turnos) => {
+        console.log('✅ Turnos recibidos:', turnos.length);
         this.turnosDisponibles.set(turnos);
         this.loading.set(false);
         if (turnos.length === 0) {
@@ -75,7 +86,7 @@ export class TurnoModalComponent implements OnInit {
         }
       },
       error: (err) => {
-        console.error('Error al cargar turnos:', err);
+        console.error('❌ Error al cargar turnos:', err);
         this.error.set('Error al cargar los turnos disponibles');
         this.loading.set(false);
         this.turnosDisponibles.set([]);
