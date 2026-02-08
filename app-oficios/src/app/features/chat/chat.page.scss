@@ -659,36 +659,6 @@
   }
 }
 
-  .list-group-item {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #ffffff;
-    margin-bottom: 0.5rem;
-    border-radius: 12px;
-    transition: all 0.3s ease;
-
-    &:hover {
-      background: rgba(255, 255, 255, 0.1);
-      transform: translateX(5px);
-    }
-
-    h6 {
-      color: #ffffff;
-    }
-
-    .text-muted {
-      color: rgba(255, 255, 255, 0.6) !important;
-      background: transparent;
-      padding: 0;
-      border: none;
-    }
-  }
-
-  .professional-avatar {
-    background: linear-gradient(135deg, #3b82f6, #2563eb);
-  }
-}
-
 .modal-body {
   padding: 1.5rem 1.25rem;
   
