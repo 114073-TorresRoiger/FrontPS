@@ -593,6 +593,72 @@
   }
 }
 
+/* ============================
+   🧑‍⚕️ MODAL PROFESIONALES/CLIENTES
+   ============================ */
+#professionalModal {
+  .modal-content {
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+
+  .modal-header {
+    background: transparent;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1.5rem;
+    
+    .modal-title {
+      color: #ffffff;
+      font-weight: 600;
+      font-size: 1.25rem;
+    }
+    
+    .btn-close {
+      filter: invert(1);
+      opacity: 0.8;
+      
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+
+  .modal-body {
+    background: transparent;
+    padding: 1rem;
+  }
+
+  .list-group-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateX(5px);
+    }
+
+    h6 {
+      color: #ffffff;
+    }
+
+    .text-muted {
+      color: rgba(255, 255, 255, 0.6) !important;
+      background: transparent;
+      padding: 0;
+      border: none;
+    }
+  }
+
+  .professional-avatar {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+  }
+}
+
 .modal-body {
   padding: 1.5rem 1.25rem;
   
