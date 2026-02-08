@@ -6,6 +6,7 @@ import { LucideAngularModule, ArrowLeft, FileText, Download, Eye, Calendar } fro
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { AuthService } from 'src/app/domain/auth/auth.service';
 import { PDFGeneratorService } from 'src/app/domain/pago/pdf-generator.service';
+import { environment } from 'src/environments/environment';
 
 interface Factura {
   nroFactura: number;
@@ -78,7 +79,7 @@ export class FacturasComponent implements OnInit {
       .set('desde', desde.toISOString())
       .set('hasta', hasta.toISOString());
 
-    const url = 'http://localhost:8081/api/v1/pagos/historial-ingresos';
+    const url = `${environment.apiUrl}/api/v1/pagos/historial-ingresos`;
     
     this.http.get<Factura[]>(url, { params }).subscribe({
       next: (data) => {
