@@ -247,7 +247,16 @@ export class Registro implements OnInit {
       this.authService.registerUsuario(usuarioRequest).subscribe({
         next: (response) => {
           console.log('Registro exitoso:', response);
-          this.modalMessage.set('¡Registro exitoso! Por favor verifica tu correo electrónico para confirmar tu cuenta.');
+          this.modalMessage.set(
+            '✅ ¡Registro exitoso!\n\n' +
+            '📧 Hemos enviado un correo de confirmación a:\n' +
+            `${usuarioRequest.mail}\n\n` +
+            '⚠️ Importante:\n' +
+            '• Revisa tu bandeja de entrada\n' +
+            '• Si no lo ves, revisa la carpeta de SPAM\n' +
+            '• Haz clic en el enlace para activar tu cuenta\n' +
+            '• No podrás iniciar sesión hasta confirmar tu email'
+          );
           this.showSuccessModal.set(true);
           this.isSubmitting = false;
         },

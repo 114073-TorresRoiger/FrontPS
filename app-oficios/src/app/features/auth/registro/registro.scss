@@ -827,9 +827,11 @@ body::before {
     padding: 1.5rem;
     font-size: 0.95rem;
     text-align: center;
+    white-space: pre-line; /* Preserve line breaks in success/error messages */
     
     p {
       margin: 0;
+      text-align: left; /* Align text left for better readability of multi-line messages */
     }
   }
   

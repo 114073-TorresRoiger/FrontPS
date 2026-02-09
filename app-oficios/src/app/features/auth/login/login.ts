@@ -80,13 +80,19 @@ export class Login {
           console.error('Login failed:', error);
           this.isLoading.set(false);
 
+          // Check if the error message is about unverified account
+          const errorMessage = error.error?.message || error.message || '';
+          
+          if (errorMessage.includes('no verificada') || errorMessage.includes('confirmar tu cuenta')) {
+            this.loginError.set('⚠️ Cuenta no verificada. Por favor, revisa tu correo electrónico para confirmar tu cuenta.');
+          }
           // Set user-friendly error message
-          if (error.status === 401) {
+          else if (error.status === 401) {
             this.loginError.set('Credenciales inválidas. Verifica tu email y contraseña.');
           } else if (error.status === 0) {
             this.loginError.set('No se pudo conectar al servidor. Intenta nuevamente.');
           } else {
-            this.loginError.set('Error al iniciar sesión. Intenta nuevamente.');
+            this.loginError.set(errorMessage || 'Error al iniciar sesión. Intenta nuevamente.');
           }
         }
       });
