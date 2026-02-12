@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { StreamChatService } from './services/stream-chat.service';
 import { AuthService } from '../../domain/auth/auth.service';
 import { NotificacionService } from '../../data/notificaciones/notificacion.service';
@@ -43,6 +43,7 @@ export class ChatPage implements OnInit, OnDestroy {
     private chatService: StreamChatService,
     private authService: AuthService,
     private router: Router,
+    private route: ActivatedRoute,
     private notificacionService: NotificacionService
   ) {}
 
@@ -121,6 +122,21 @@ export class ChatPage implements OnInit, OnDestroy {
 
       this.isLoading = false;
       console.log('✅ Chat inicializado correctamente');
+      
+      // ✅ Verificar si hay un profesionalId en los query params
+      this.route.queryParams.subscribe(async params => {
+        const profesionalId = params['profesionalId'];
+        if (profesionalId && !this.isProfessional) {
+          console.log('📞 Iniciando conversación con profesional:', profesionalId);
+          await this.startConversationWithProfessional(profesionalId);
+          // Limpiar query params después de procesar
+          this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: {},
+            replaceUrl: true
+          });
+        }
+      });
     } catch (error) {
       console.error('❌ Error al inicializar chat:', error);
       this.error = 'Error al conectar al chat';
@@ -394,6 +410,34 @@ export class ChatPage implements OnInit, OnDestroy {
     } catch (error) {
       console.error('❌ Error al crear conversación:', error);
       alert('Error al crear la conversación. Por favor, intenta de nuevo.');
+    }
+  }
+
+  async startConversationWithProfessional(profesionalId: string): Promise<void> {
+    console.log('📤 Iniciando conversación con profesional ID:', profesionalId);
+    
+    try {
+      // Crear conversación con el profesional
+      const channel = await this.chatService.createConversationWithProfessional(
+        this.currentUserId,
+        profesionalId
+      );
+      
+      console.log('✅ Conversación creada, actualizando lista de canales');
+      
+      // Esperar un momento para que el backend procese
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Recargar canales para mostrar el nuevo
+      await this.loadChannels();
+      
+      // Abrir el canal recién creado
+      await this.openChannel(channel);
+      
+      console.log('✅ Conversación abierta correctamente');
+    } catch (error) {
+      console.error('❌ Error al iniciar conversación:', error);
+      alert('Error al iniciar la conversación con el profesional. Por favor, intenta de nuevo.');
     }
   }
 

@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, ArrowLeft, Star, Phone, DollarSign, Calendar, Clock, MapPin, Award, Image, Mail, Upload, X, Plus, Flag, CheckCircle } from 'lucide-angular';
+import { LucideAngularModule, ArrowLeft, Star, Phone, DollarSign, Calendar, Clock, MapPin, Award, Image, Mail, Upload, X, Plus, Flag, CheckCircle, MessageCircle } from 'lucide-angular';
 import { GetPerfilProfesionalUseCase } from '../../../domain/profesionales/use-cases/get-perfil-profesional.usecase';
 import { PerfilProfesional, FotoGaleria } from '../../../domain/profesionales/models/perfil-profesional.model';
 import { AuthService } from '../../../domain/auth/auth.service';
@@ -43,6 +43,7 @@ export class PerfilProfesionalComponent implements OnInit {
   readonly Plus = Plus;
   readonly Flag = Flag;
   readonly CheckCircle = CheckCircle;
+  readonly MessageCircle = MessageCircle;
 
   profesional: PerfilProfesional | null = null;
   loading = true;
@@ -301,6 +302,24 @@ export class PerfilProfesionalComponent implements OnInit {
         this.reportError = 'Error al enviar el reporte. Por favor, intenta nuevamente.';
         this.sendingReport = false;
       }
+    });
+  }
+
+  contactarProfesional(): void {
+    if (!this.profesional) return;
+    
+    const currentUser = this.authService.currentUser();
+    if (!currentUser) {
+      alert('Debes iniciar sesión para contactar a un profesional');
+      this.router.navigate(['/auth/login']);
+      return;
+    }
+    
+    // Navegar al chat con el ID del profesional como query parameter
+    this.router.navigate(['/chat'], { 
+      queryParams: { 
+        profesionalId: this.profesional.idProfesional 
+      } 
     });
   }
 }
