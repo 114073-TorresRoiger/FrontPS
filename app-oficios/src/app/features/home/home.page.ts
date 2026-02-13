@@ -196,7 +196,7 @@ export class HomePage implements OnInit {
   isLoadingSearchResults = signal(false);
   showSearchResults = signal(false);
   noSearchResultsFound = signal(false);
-  filterByZone = signal(false);
+  filterByZone = false;
 
   ngOnInit(): void {
     this.loadServices();
@@ -294,7 +294,7 @@ export class HomePage implements OnInit {
     // Construir parámetros según el filtro seleccionado
     let apiUrl = `${environment.apiUrl}/api/v1/busqueda/profesionales?`;
 
-    if (this.filterByZone()) {
+    if (this.filterByZone) {
       // Si se selecciona filtrar por zona, solo busca en el parámetro zona
       apiUrl += `zona=${encodeURIComponent(query)}`;
     } else {
