@@ -25,13 +25,14 @@
           />
 
           <!-- Filter by Zone Toggle -->
-          <label class="search-filter-zone">
+          <label class="search-filter-zone" [class.active]="filterByZone">
             <input
               type="checkbox"
               [(ngModel)]="filterByZone"
               (change)="onSearch()"
               class="zone-checkbox"
             />
+            <lucide-angular [img]="MapPin" size="16" class="zone-icon"></lucide-angular>
             <span class="checkbox-label">Por zona</span>
           </label>
 
