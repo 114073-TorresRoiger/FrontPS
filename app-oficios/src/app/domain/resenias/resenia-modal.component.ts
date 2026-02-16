@@ -368,9 +368,12 @@ export class ReseniaModalComponent {
         this.isSubmitting.set(false);
         this.successMessage.set(true);
         this.reseniaEnviada.emit();
-        setTimeout(() => {
-          this.close.emit();
-        }, 2000);
+        
+        // Mostrar mensaje de éxito
+        alert('✅ ¡Gracias por tu reseña! Tu opinión ha sido enviada correctamente.');
+        
+        // Cerrar el modal
+        this.close.emit();
       },
       error: (error: any) => {
         console.error('Error al enviar reseña:', error);
