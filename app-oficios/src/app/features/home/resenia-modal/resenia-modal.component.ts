@@ -2,7 +2,7 @@
 import { Component, Input, Output, EventEmitter, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { LucideAngularModule, X, Star, Send, CheckCircle } from 'lucide-angular';
+import { LucideAngularModule, X, Star, Send, CheckCircle, AlertCircle } from 'lucide-angular';
 import { ReseniaService, ReseniaRequest } from '../../../domain/resenias/resenia.service';
 
 @Component({
@@ -10,24 +10,29 @@ import { ReseniaService, ReseniaRequest } from '../../../domain/resenias/resenia
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule],
   template: `
-    <!-- Modal Principal -->
-    <div class="modal-overlay" (click)="!showSuccessModal() && cerrarModal()">
-      
-      <!-- Contenido: Formulario de Reseña -->
-      <div *ngIf="!showSuccessModal()" class="modal-content resenia-modal" (click)="$event.stopPropagation()">
+    <div class="modal-overlay" (click)="cerrarModal()">
+      <div class="modal-container" (click)="$event.stopPropagation()">
+        <!-- Header -->
         <div class="modal-header">
-          <h2>Califica tu experiencia</h2>
-          <button type="button" class="close-btn" (click)="cerrarModal(); $event.stopPropagation()">
-            <lucide-angular [img]="X" size="24"></lucide-angular>
+          <div class="header-content">
+            <h2>{{ showSuccessModal() ? 'Reseña Enviada' : 'Califica tu experiencia' }}</h2>
+            <p class="professional-name">{{ nombreProfesional }}</p>
+          </div>
+          <button class="close-btn" (click)="showSuccessModal() ? closeSuccessModal() : cerrarModal()">
+            <lucide-angular [img]="X" [size]="24"></lucide-angular>
           </button>
         </div>
 
-        <div class="modal-body">
-          <div class="professional-info">
-            <h3>{{ nombreProfesional }}</h3>
-            <p class="subtitle">¿Cómo fue tu experiencia con este profesional?</p>
-          </div>
+        <!-- Success Message -->
+        <div class="success-message" *ngIf="showSuccessModal()">
+          <lucide-angular [img]="CheckCircle" [size]="48" class="success-icon"></lucide-angular>
+          <h3>¡Reseña Enviada!</h3>
+          <p>Tu opinión ha sido registrada exitosamente</p>
+          <button class="btn btn-success-ok" (click)="closeSuccessModal()">OK</button>
+        </div>
 
+        <!-- Formulario de Reseña -->
+        <div class="modal-body" *ngIf="!showSuccessModal()">
           <form [formGroup]="reseniaForm" (ngSubmit)="enviarResenia()">
             <!-- Rating Stars -->
             <div class="form-group">
@@ -46,7 +51,7 @@ import { ReseniaService, ReseniaRequest } from '../../../domain/resenias/resenia
               <div *ngIf="puntuacionSeleccionada() > 0" class="rating-text">
                 {{ getRatingText() }}
               </div>
-              <div *ngIf="reseniaForm.get('puntuacion')?.invalid && reseniaForm.get('puntuacion')?.touched" class="error-message">
+              <div *ngIf="reseniaForm.get('puntuacion')?.invalid && reseniaForm.get('puntuacion')?.touched" class="error-text">
                 Por favor selecciona una calificación
               </div>
             </div>
@@ -61,22 +66,23 @@ import { ReseniaService, ReseniaRequest } from '../../../domain/resenias/resenia
                 placeholder="Cuéntanos sobre tu experiencia..."
                 class="form-control"
               ></textarea>
-              <div *ngIf="reseniaForm.get('comentario')?.invalid && reseniaForm.get('comentario')?.touched" class="error-message">
+              <div *ngIf="reseniaForm.get('comentario')?.invalid && reseniaForm.get('comentario')?.touched" class="error-text">
                 El comentario debe tener al menos 10 caracteres
               </div>
             </div>
 
-            <!-- Error/Success Messages -->
-            <div *ngIf="errorMessage()" class="alert alert-error">
-              {{ errorMessage() }}
+            <!-- Error Message -->
+            <div *ngIf="errorMessage()" class="error-message">
+              <lucide-angular [img]="AlertCircle" [size]="20"></lucide-angular>
+              <span>{{ errorMessage() }}</span>
             </div>
 
             <!-- Actions -->
-            <div class="modal-actions">
+            <div class="modal-footer">
               <button
                 type="button"
                 class="btn btn-secondary"
-                (click)="cerrarModal(); $event.stopPropagation()"
+                (click)="cerrarModal()"
                 [disabled]="isSubmitting()"
               >
                 Cancelar
@@ -93,26 +99,6 @@ import { ReseniaService, ReseniaRequest } from '../../../domain/resenias/resenia
           </form>
         </div>
       </div>
-
-      <!-- Contenido: Modal de Éxito -->
-      <div *ngIf="showSuccessModal()" class="modal-content success-modal" (click)="$event.stopPropagation()">
-        <div class="success-header">
-          <div class="success-icon">
-            <lucide-angular [img]="CheckCircle" [size]="48" color="#10b981"></lucide-angular>
-          </div>
-          <button type="button" class="close-btn-success" (click)="closeSuccessModal()">×</button>
-        </div>
-        <div class="success-body">
-          <h3 class="success-title">¡Éxito!</h3>
-          <p class="success-message">¡Gracias por tu reseña!</p>
-          <p class="success-submessage">Tu opinión ha sido enviada correctamente y ayudará a otros usuarios.</p>
-        </div>
-        <div class="success-footer">
-          <button type="button" class="btn-success-full" (click)="closeSuccessModal()">
-            Aceptar
-          </button>
-        </div>
-      </div>
     </div>
   `,
   styles: [`
@@ -122,7 +108,7 @@ import { ReseniaService, ReseniaRequest } from '../../../domain/resenias/resenia
       left: 0;
       right: 0;
       bottom: 0;
-      background-color: rgba(0, 0, 0, 0.5);
+      background-color: rgba(0, 0, 0, 0.6);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -130,84 +116,130 @@ import { ReseniaService, ReseniaRequest } from '../../../domain/resenias/resenia
       padding: 1rem;
     }
 
-    .modal-content {
+    .modal-container {
       background: white;
-      border-radius: 1rem;
+      border-radius: 16px;
       width: 100%;
+      max-width: 500px;
       max-height: 90vh;
       overflow-y: auto;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-    }
-
-    .resenia-modal {
-      max-width: 500px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
     }
 
     .modal-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      padding: 1.25rem 1.5rem;
-      background: #0d6efd;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      align-items: flex-start;
+      padding: 20px 24px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      border-radius: 16px 16px 0 0;
     }
 
-    .modal-header h2 {
-      font-size: 1.5rem;
+    .header-content h2 {
+      font-size: 20px;
       font-weight: 600;
-      color: #ffffff;
+      color: white;
+      margin: 0 0 4px 0;
+    }
+
+    .professional-name {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.8);
       margin: 0;
     }
 
     .close-btn {
-      background: rgba(255, 255, 255, 0.15);
+      background: rgba(255, 255, 255, 0.2);
       border: none;
-      border-radius: 50%;
-      width: 32px;
-      height: 32px;
+      border-radius: 8px;
+      width: 40px;
+      height: 40px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      color: #ffffff;
+      color: white;
       transition: all 0.2s;
-      padding: 0;
-      pointer-events: auto;
-      z-index: 10;
     }
 
     .close-btn:hover {
-      background: rgba(255, 255, 255, 0.25);
-      transform: scale(1.1);
+      background: rgba(255, 255, 255, 0.3);
+      transform: scale(1.05);
     }
 
-    .modal-body {
-      padding: 1.5rem;
-      background: rgba(26, 32, 44, 0.02);
-    }
-
-    .professional-info {
+    /* Success Message - Estilo similar al turno-modal */
+    .success-message {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 24px;
       text-align: center;
-      margin-bottom: 2rem;
     }
 
-    .professional-info h3 {
-      font-size: 1.5rem;
-      font-weight: 600;
+    .success-message .success-icon {
+      color: #10b981;
+      margin-bottom: 16px;
+      animation: scaleIn 0.5s ease;
+    }
+
+    .success-message h3 {
+      font-size: 24px;
+      font-weight: 700;
       color: #1f2937;
-      margin-bottom: 0.5rem;
+      margin: 0 0 8px 0;
     }
 
-    .subtitle {
+    .success-message p {
+      font-size: 16px;
       color: #6b7280;
-      font-size: 0.95rem;
+      margin: 0 0 24px 0;
+    }
+
+    .btn-success-ok {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border: none;
+      padding: 12px 48px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-success-ok:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    }
+
+    @keyframes scaleIn {
+      from { transform: scale(0); }
+      to { transform: scale(1); }
+    }
+
+    /* Modal Body */
+    .modal-body {
+      padding: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: #374151;
+      font-size: 14px;
     }
 
     .star-rating {
       display: flex;
-      gap: 0.5rem;
+      gap: 8px;
       justify-content: center;
-      margin: 1rem 0;
+      margin: 12px 0;
     }
 
     .star-btn {
@@ -216,48 +248,34 @@ import { ReseniaService, ReseniaRequest } from '../../../domain/resenias/resenia
       cursor: pointer;
       color: #d1d5db;
       transition: all 0.2s;
-      padding: 0.25rem;
+      padding: 4px;
     }
 
     .star-btn:hover {
-      transform: scale(1.1);
+      transform: scale(1.15);
     }
 
     .star-btn.active {
       color: #fbbf24;
     }
 
-    .star-btn.active :host ::ng-deep svg {
-      fill: currentColor;
-    }
-
     .rating-text {
       text-align: center;
       font-weight: 600;
       color: #1f2937;
-      margin-top: 0.5rem;
-      font-size: 1.1rem;
-    }
-
-    .form-group {
-      margin-bottom: 1.5rem;
-    }
-
-    .form-group label {
-      display: block;
-      font-weight: 500;
-      margin-bottom: 0.5rem;
-      color: #374151;
+      margin-top: 8px;
+      font-size: 16px;
     }
 
     .form-control {
       width: 100%;
-      padding: 0.75rem;
+      padding: 12px;
       border: 1px solid #d1d5db;
-      border-radius: 0.5rem;
-      font-size: 0.95rem;
+      border-radius: 8px;
+      font-size: 14px;
       resize: vertical;
       font-family: inherit;
+      box-sizing: border-box;
     }
 
     .form-control:focus {
@@ -266,56 +284,49 @@ import { ReseniaService, ReseniaRequest } from '../../../domain/resenias/resenia
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
 
-    .error-message {
+    .error-text {
       color: #ef4444;
-      font-size: 0.875rem;
-      margin-top: 0.25rem;
+      font-size: 12px;
+      margin-top: 4px;
     }
 
-    .alert {
-      padding: 0.75rem 1rem;
-      border-radius: 0.5rem;
-      margin-bottom: 1rem;
+    .error-message {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-    }
-
-    .alert-error {
-      background-color: #fef2f2;
+      gap: 8px;
+      padding: 12px 16px;
+      background: #fee2e2;
       color: #991b1b;
-      border: 1px solid #fecaca;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-bottom: 16px;
     }
 
-    .alert-success {
-      background-color: #f0fdf4;
-      color: #166534;
-      border: 1px solid #bbf7d0;
-    }
-
-    .modal-actions {
+    .modal-footer {
       display: flex;
-      gap: 1rem;
+      gap: 12px;
       justify-content: flex-end;
+      padding-top: 16px;
+      border-top: 1px solid #e5e7eb;
+      margin-top: 8px;
     }
 
     .btn {
-      padding: 0.75rem 1.5rem;
-      border-radius: 0.5rem;
+      padding: 12px 24px;
+      border-radius: 8px;
       font-weight: 500;
       cursor: pointer;
       transition: all 0.2s;
       display: inline-flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 8px;
       border: none;
-      pointer-events: auto;
+      font-size: 14px;
     }
 
     .btn-secondary {
       background-color: #f3f4f6;
       color: #374151;
-      pointer-events: auto;
     }
 
     .btn-secondary:hover:not(:disabled) {
@@ -323,117 +334,18 @@ import { ReseniaService, ReseniaRequest } from '../../../domain/resenias/resenia
     }
 
     .btn-primary {
-      background-color: #3b82f6;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
       color: white;
     }
 
     .btn-primary:hover:not(:disabled) {
-      background-color: #2563eb;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
     }
 
     .btn:disabled {
       opacity: 0.5;
       cursor: not-allowed;
-    }
-
-    /* Modal de Éxito - Estilos Simplificados */
-    .success-modal {
-      max-width: 400px;
-      border-radius: 16px;
-      overflow: hidden;
-      text-align: center;
-    }
-
-    .success-header {
-      background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
-      padding: 2rem 1.5rem 1rem;
-      position: relative;
-    }
-
-    .success-icon {
-      width: 80px;
-      height: 80px;
-      background: white;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto;
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-    }
-
-    .close-btn-success {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      background: rgba(255, 255, 255, 0.5);
-      border: none;
-      border-radius: 50%;
-      width: 32px;
-      height: 32px;
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: #065f46;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-    }
-
-    .close-btn-success:hover {
-      background: rgba(255, 255, 255, 0.8);
-      transform: scale(1.1);
-    }
-
-    .success-body {
-      padding: 1.5rem;
-      background: white;
-    }
-
-    .success-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #10b981;
-      margin: 0 0 0.5rem 0;
-    }
-
-    .success-message {
-      font-size: 1.125rem;
-      font-weight: 600;
-      color: #1f2937;
-      margin: 0 0 0.5rem 0;
-    }
-
-    .success-submessage {
-      font-size: 0.875rem;
-      color: #6b7280;
-      margin: 0;
-      line-height: 1.5;
-    }
-
-    .success-footer {
-      padding: 0 1.5rem 1.5rem;
-      background: white;
-    }
-
-    .btn-success-full {
-      width: 100%;
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-      color: white;
-      border: none;
-      padding: 1rem 2rem;
-      border-radius: 12px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s;
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-    }
-
-    .btn-success-full:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
     }
   `]
 })
@@ -449,6 +361,7 @@ export class ReseniaModalComponent {
   readonly Star = Star;
   readonly Send = Send;
   readonly CheckCircle = CheckCircle;
+  readonly AlertCircle = AlertCircle;
 
   private readonly fb = inject(FormBuilder);
   private readonly reseniaService = inject(ReseniaService);
