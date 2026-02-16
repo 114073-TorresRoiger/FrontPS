@@ -495,8 +495,6 @@ export class ReseniaModalComponent {
         console.log('✅ Reseña enviada exitosamente:', response);
         this.isSubmitting.set(false);
         this.successMessage.set(true);
-        console.log('📢 Emitiendo evento reseniaEnviada');
-        this.reseniaEnviada.emit();
         
         console.log('🎉 Mostrando modal de éxito');
         this.showSuccessModal.set(true);
@@ -517,6 +515,8 @@ export class ReseniaModalComponent {
   }
 
   closeSuccessModal(): void {
+    console.log('📢 Emitiendo evento reseniaEnviada');
+    this.reseniaEnviada.emit();
     this.showSuccessModal.set(false);
     this.close.emit();
   }
