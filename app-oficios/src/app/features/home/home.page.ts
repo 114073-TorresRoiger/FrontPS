@@ -254,6 +254,7 @@ export class HomePage implements OnInit {
       PINTOR: 'assets/services/pintura.jpg',
       'EMPLEADA DOMESTICA': 'assets/services/empleada-domestica.jpg',
       'INSTALADOR DE AIRES ACONDICIONADOS': 'assets/services/instalacion-aire-acondicionado.jpg',
+      'SERVICIO DE LIMPIEZA': 'assets/services/servicios-de-aseo-y-limpieza-profesional-.jpg',
     };
 
     return {
