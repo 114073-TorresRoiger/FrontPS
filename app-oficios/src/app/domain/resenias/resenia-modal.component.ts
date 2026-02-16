@@ -10,9 +10,11 @@ import { ReseniaService, ReseniaRequest } from '../../domain/resenias/resenia.se
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule],
   template: `
-    <!-- Modal de Reseña -->
-    <div *ngIf="!showSuccessModal()" class="modal-overlay" (click)="close.emit()">
-      <div class="modal-content resenia-modal" (click)="$event.stopPropagation()">
+    <!-- Modal Principal -->
+    <div class="modal-overlay" (click)="!showSuccessModal() && close.emit()">
+      
+      <!-- Contenido: Formulario de Reseña -->
+      <div *ngIf="!showSuccessModal()" class="modal-content resenia-modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h2>Califica tu experiencia</h2>
           <button class="close-btn" (click)="close.emit()">
@@ -69,10 +71,6 @@ import { ReseniaService, ReseniaRequest } from '../../domain/resenias/resenia.se
               {{ errorMessage() }}
             </div>
 
-            <div *ngIf="successMessage()" class="alert alert-success">
-              ¡Gracias por tu reseña!
-            </div>
-
             <!-- Actions -->
             <div class="modal-actions">
               <button
@@ -95,26 +93,24 @@ import { ReseniaService, ReseniaRequest } from '../../domain/resenias/resenia.se
           </form>
         </div>
       </div>
-    </div>
 
-    <!-- Modal de Éxito -->
-    <div *ngIf="showSuccessModal()" class="modal-overlay" (click)="closeSuccessModal()">
-      <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
-        <div class="modal-content success-modal-content">
-          <div class="modal-header-success">
-            <lucide-angular [img]="CheckCircle" [size]="32" color="#10b981"></lucide-angular>
-            <h3 class="mb-0">¡Éxito!</h3>
-            <button type="button" class="btn-close-custom" (click)="closeSuccessModal()">×</button>
+      <!-- Contenido: Modal de Éxito -->
+      <div *ngIf="showSuccessModal()" class="modal-content success-modal" (click)="$event.stopPropagation()">
+        <div class="success-header">
+          <div class="success-icon">
+            <lucide-angular [img]="CheckCircle" [size]="48" color="#10b981"></lucide-angular>
           </div>
-          <div class="modal-body text-center py-4">
-            <p class="modal-message mb-2">¡Gracias por tu reseña!</p>
-            <p class="modal-submessage">Tu opinión ha sido enviada correctamente y ayudará a otros usuarios.</p>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn-success btn-block" (click)="closeSuccessModal()">
-              Aceptar
-            </button>
-          </div>
+          <button type="button" class="close-btn-success" (click)="closeSuccessModal()">×</button>
+        </div>
+        <div class="success-body">
+          <h3 class="success-title">¡Éxito!</h3>
+          <p class="success-message">¡Gracias por tu reseña!</p>
+          <p class="success-submessage">Tu opinión ha sido enviada correctamente y ayudará a otros usuarios.</p>
+        </div>
+        <div class="success-footer">
+          <button type="button" class="btn-success-full" (click)="closeSuccessModal()">
+            Aceptar
+          </button>
         </div>
       </div>
     </div>
@@ -327,104 +323,104 @@ import { ReseniaService, ReseniaRequest } from '../../domain/resenias/resenia.se
       cursor: not-allowed;
     }
 
-    /* Modal de Éxito */
-    .modal-dialog {
-      max-width: 500px;
-      margin: 0 auto;
-    }
-
-    .modal-dialog-centered {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-height: 100%;
-    }
-
-    .success-modal-content {
+    /* Modal de Éxito - Estilos Simplificados */
+    .success-modal {
+      max-width: 400px;
       border-radius: 16px;
       overflow: hidden;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+      text-align: center;
     }
 
-    .modal-header-success {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      background-color: #d1fae5;
-      border-bottom: 2px solid #10b981;
-      padding: 1.25rem;
-      border-radius: 16px 16px 0 0;
+    .success-header {
+      background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+      padding: 2rem 1.5rem 1rem;
+      position: relative;
     }
 
-    .modal-header-success h3 {
-      color: #065f46;
-      margin: 0;
-      flex: 1;
-      font-weight: 600;
-    }
-
-    .btn-close-custom {
-      background: transparent;
-      border: none;
-      font-size: 1.75rem;
-      font-weight: 700;
-      line-height: 1;
-      color: #065f46;
-      opacity: 0.5;
-      cursor: pointer;
-      padding: 0;
-      width: 32px;
-      height: 32px;
+    .success-icon {
+      width: 80px;
+      height: 80px;
+      background: white;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 4px;
-      transition: all 0.2s;
-    }
-
-    .btn-close-custom:hover {
-      opacity: 1;
-      background-color: rgba(0, 0, 0, 0.05);
-    }
-
-    .modal-message {
-      font-size: 1.125rem;
-      color: #374151;
-      font-weight: 600;
-    }
-
-    .modal-submessage {
-      font-size: 0.875rem;
-      color: #6b7280;
-      margin: 0;
-    }
-
-    .modal-footer {
-      padding: 1rem 1.5rem;
-      border-top: 1px solid #e5e7eb;
-    }
-
-    .btn-success {
-      background-color: #10b981;
-      color: white;
-      border: none;
-      padding: 0.75rem 2rem;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      width: 100%;
-    }
-
-    .btn-success:hover {
-      background-color: #059669;
-      transform: translateY(-2px);
+      margin: 0 auto;
       box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
     }
 
-    .btn-block {
+    .close-btn-success {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      background: rgba(255, 255, 255, 0.5);
+      border: none;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #065f46;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .close-btn-success:hover {
+      background: rgba(255, 255, 255, 0.8);
+      transform: scale(1.1);
+    }
+
+    .success-body {
+      padding: 1.5rem;
+      background: white;
+    }
+
+    .success-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #10b981;
+      margin: 0 0 0.5rem 0;
+    }
+
+    .success-message {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #1f2937;
+      margin: 0 0 0.5rem 0;
+    }
+
+    .success-submessage {
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    .success-footer {
+      padding: 0 1.5rem 1.5rem;
+      background: white;
+    }
+
+    .btn-success-full {
       width: 100%;
-      display: block;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-success-full:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
     }
   `]
 })
