@@ -2,7 +2,7 @@
 import { Component, Input, Output, EventEmitter, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { LucideAngularModule, X, Star, Send } from 'lucide-angular';
+import { LucideAngularModule, X, Star, Send, CheckCircle } from 'lucide-angular';
 import { ReseniaService, ReseniaRequest } from '../../domain/resenias/resenia.service';
 
 @Component({
@@ -10,7 +10,8 @@ import { ReseniaService, ReseniaRequest } from '../../domain/resenias/resenia.se
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule, LucideAngularModule],
   template: `
-    <div class="modal-overlay" (click)="close.emit()">
+    <!-- Modal de Reseña -->
+    <div *ngIf="!showSuccessModal()" class="modal-overlay" (click)="close.emit()">
       <div class="modal-content resenia-modal" (click)="$event.stopPropagation()">
         <div class="modal-header">
           <h2>Califica tu experiencia</h2>
@@ -92,6 +93,28 @@ import { ReseniaService, ReseniaRequest } from '../../domain/resenias/resenia.se
               </button>
             </div>
           </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Éxito -->
+    <div *ngIf="showSuccessModal()" class="modal-overlay" (click)="closeSuccessModal()">
+      <div class="modal-dialog modal-dialog-centered" (click)="$event.stopPropagation()">
+        <div class="modal-content success-modal-content">
+          <div class="modal-header-success">
+            <lucide-angular [img]="CheckCircle" [size]="32" color="#10b981"></lucide-angular>
+            <h3 class="mb-0">¡Éxito!</h3>
+            <button type="button" class="btn-close-custom" (click)="closeSuccessModal()">×</button>
+          </div>
+          <div class="modal-body text-center py-4">
+            <p class="modal-message mb-2">¡Gracias por tu reseña!</p>
+            <p class="modal-submessage">Tu opinión ha sido enviada correctamente y ayudará a otros usuarios.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn-success btn-block" (click)="closeSuccessModal()">
+              Aceptar
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -303,6 +326,106 @@ import { ReseniaService, ReseniaRequest } from '../../domain/resenias/resenia.se
       opacity: 0.5;
       cursor: not-allowed;
     }
+
+    /* Modal de Éxito */
+    .modal-dialog {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .modal-dialog-centered {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100%;
+    }
+
+    .success-modal-content {
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-header-success {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background-color: #d1fae5;
+      border-bottom: 2px solid #10b981;
+      padding: 1.25rem;
+      border-radius: 16px 16px 0 0;
+    }
+
+    .modal-header-success h3 {
+      color: #065f46;
+      margin: 0;
+      flex: 1;
+      font-weight: 600;
+    }
+
+    .btn-close-custom {
+      background: transparent;
+      border: none;
+      font-size: 1.75rem;
+      font-weight: 700;
+      line-height: 1;
+      color: #065f46;
+      opacity: 0.5;
+      cursor: pointer;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+
+    .btn-close-custom:hover {
+      opacity: 1;
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .modal-message {
+      font-size: 1.125rem;
+      color: #374151;
+      font-weight: 600;
+    }
+
+    .modal-submessage {
+      font-size: 0.875rem;
+      color: #6b7280;
+      margin: 0;
+    }
+
+    .modal-footer {
+      padding: 1rem 1.5rem;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .btn-success {
+      background-color: #10b981;
+      color: white;
+      border: none;
+      padding: 0.75rem 2rem;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+    }
+
+    .btn-success:hover {
+      background-color: #059669;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-block {
+      width: 100%;
+      display: block;
+    }
   `]
 })
 export class ReseniaModalComponent {
@@ -316,6 +439,7 @@ export class ReseniaModalComponent {
   readonly X = X;
   readonly Star = Star;
   readonly Send = Send;
+  readonly CheckCircle = CheckCircle;
 
   private readonly fb = inject(FormBuilder);
   private readonly reseniaService = inject(ReseniaService);
@@ -325,6 +449,7 @@ export class ReseniaModalComponent {
   isSubmitting = signal(false);
   errorMessage = signal<string | null>(null);
   successMessage = signal(false);
+  showSuccessModal = signal(false);
 
   constructor() {
     this.reseniaForm = this.fb.group({
@@ -369,11 +494,8 @@ export class ReseniaModalComponent {
         this.successMessage.set(true);
         this.reseniaEnviada.emit();
         
-        // Mostrar mensaje de éxito
-        alert('✅ ¡Gracias por tu reseña! Tu opinión ha sido enviada correctamente.');
-        
-        // Cerrar el modal
-        this.close.emit();
+        // Mostrar modal de éxito
+        this.showSuccessModal.set(true);
       },
       error: (error: any) => {
         console.error('Error al enviar reseña:', error);
@@ -381,5 +503,10 @@ export class ReseniaModalComponent {
         this.errorMessage.set('Error al enviar la reseña. Por favor, intenta nuevamente.');
       }
     });
+  }
+
+  closeSuccessModal(): void {
+    this.showSuccessModal.set(false);
+    this.close.emit();
   }
 }
