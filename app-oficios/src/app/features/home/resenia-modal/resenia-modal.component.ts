@@ -131,7 +131,7 @@ import { ReseniaService, ReseniaRequest } from '../../../domain/resenias/resenia
       justify-content: space-between;
       align-items: flex-start;
       padding: 20px 24px;
-      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
       border-radius: 16px 16px 0 0;
     }
 
@@ -280,8 +280,8 @@ import { ReseniaService, ReseniaRequest } from '../../../domain/resenias/resenia
 
     .form-control:focus {
       outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      border-color: #1e293b;
+      box-shadow: 0 0 0 3px rgba(30, 41, 59, 0.1);
     }
 
     .error-text {
@@ -334,13 +334,13 @@ import { ReseniaService, ReseniaRequest } from '../../../domain/resenias/resenia
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
       color: white;
     }
 
     .btn-primary:hover:not(:disabled) {
       transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+      box-shadow: 0 4px 12px rgba(30, 41, 59, 0.4);
     }
 
     .btn:disabled {

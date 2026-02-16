@@ -148,27 +148,34 @@ import { ReseniaService, ReseniaRequest } from '../../domain/resenias/resenia.se
       justify-content: space-between;
       align-items: center;
       padding: 1.5rem;
-      border-bottom: 1px solid #e5e7eb;
+      background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+      border-radius: 1rem 1rem 0 0;
     }
 
     .modal-header h2 {
       font-size: 1.5rem;
       font-weight: 600;
-      color: #1f2937;
+      color: white;
       margin: 0;
     }
 
     .close-btn {
-      background: none;
+      background: rgba(255, 255, 255, 0.2);
       border: none;
+      border-radius: 8px;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       cursor: pointer;
-      color: #6b7280;
-      transition: color 0.2s;
-      padding: 0.25rem;
+      color: white;
+      transition: all 0.2s;
+      padding: 0;
     }
 
     .close-btn:hover {
-      color: #1f2937;
+      background: rgba(255, 255, 255, 0.3);
     }
 
     .modal-body {
@@ -251,8 +258,8 @@ import { ReseniaService, ReseniaRequest } from '../../domain/resenias/resenia.se
 
     .form-control:focus {
       outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      border-color: #1e293b;
+      box-shadow: 0 0 0 3px rgba(30, 41, 59, 0.1);
     }
 
     .error-message {
@@ -310,12 +317,12 @@ import { ReseniaService, ReseniaRequest } from '../../domain/resenias/resenia.se
     }
 
     .btn-primary {
-      background-color: #3b82f6;
+      background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
       color: white;
     }
 
     .btn-primary:hover:not(:disabled) {
-      background-color: #2563eb;
+      background: linear-gradient(135deg, #334155 0%, #1e293b 100%);
     }
 
     .btn:disabled {
