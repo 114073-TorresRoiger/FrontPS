@@ -469,13 +469,19 @@ export class ReseniaModalComponent {
   }
 
   enviarResenia(): void {
+    console.log('🚀 Iniciando envío de reseña...');
+    
     if (this.reseniaForm.invalid) {
+      console.log('❌ Formulario inválido:', this.reseniaForm.errors);
       Object.keys(this.reseniaForm.controls).forEach(key => {
-        this.reseniaForm.get(key)?.markAsTouched();
+        const control = this.reseniaForm.get(key);
+        console.log(`Campo ${key}:`, { value: control?.value, errors: control?.errors });
+        control?.markAsTouched();
       });
       return;
     }
 
+    console.log('✅ Formulario válido');
     this.isSubmitting.set(true);
     this.errorMessage.set(null);
 
@@ -486,21 +492,30 @@ export class ReseniaModalComponent {
       puntuacion: this.reseniaForm.value.puntuacion,
       comentario: this.reseniaForm.value.comentario
     };
-    console.log('Enviando reseña:', request);
+    console.log('📤 Enviando reseña al servidor:', request);
 
     this.reseniaService.puntuarResenia(request).subscribe({
-      next: () => {
+      next: (response) => {
+        console.log('✅ Reseña enviada exitosamente:', response);
         this.isSubmitting.set(false);
         this.successMessage.set(true);
+        console.log('📢 Emitiendo evento reseniaEnviada');
         this.reseniaEnviada.emit();
         
-        // Mostrar modal de éxito
+        console.log('🎉 Mostrando modal de éxito');
         this.showSuccessModal.set(true);
+        console.log('Estado showSuccessModal:', this.showSuccessModal());
       },
       error: (error: any) => {
-        console.error('Error al enviar reseña:', error);
+        console.error('❌ Error al enviar reseña:', error);
+        console.error('Detalles del error:', {
+          status: error.status,
+          statusText: error.statusText,
+          message: error.error?.message || error.message,
+          error: error.error
+        });
         this.isSubmitting.set(false);
-        this.errorMessage.set('Error al enviar la reseña. Por favor, intenta nuevamente.');
+        this.errorMessage.set(error.error?.message || 'Error al enviar la reseña. Por favor, intenta nuevamente.');
       }
     });
   }

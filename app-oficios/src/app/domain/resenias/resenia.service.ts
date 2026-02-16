@@ -2,6 +2,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 
 export interface ReseniaRequest {
@@ -29,6 +30,15 @@ export class ReseniaService {
   constructor(private http: HttpClient) {}
 
   puntuarResenia(request: ReseniaRequest): Observable<ReseniaResponse> {
-    return this.http.post<ReseniaResponse>(`${this.apiUrl}/puntuar/`, request);
+    const url = `${this.apiUrl}/puntuar/`;
+    console.log('🌐 ReseniaService - Enviando petición a:', url);
+    console.log('🌐 ReseniaService - Datos:', request);
+    
+    return this.http.post<ReseniaResponse>(url, request).pipe(
+      tap({
+        next: (response) => console.log('✅ ReseniaService - Respuesta exitosa:', response),
+        error: (error) => console.error('❌ ReseniaService - Error en petición:', error)
+      })
+    );
   }
 }
