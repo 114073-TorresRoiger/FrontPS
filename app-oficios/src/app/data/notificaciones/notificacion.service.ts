@@ -40,17 +40,24 @@ export class NotificacionService {
     return this.http.get<any[]>(`${this.API_URL}/api/v1/solicitudes/solicitud/${idProfesional}/PENDIENTE`)
       .pipe(
         map(solicitudes => {
+          // Cargar estado guardado de localStorage
+          const estadoGuardado = this.cargarEstadoLocal();
+          console.log('💾 Estado guardado (profesional):', estadoGuardado);
+          
           // Mapear las solicitudes pendientes a notificaciones
-          const notificaciones = solicitudes.map((solicitud) => ({
-            id: solicitud.idSolicitud,
-            tipo: 'NUEVA_SOLICITUD' as TipoNotificacion,
-            titulo: 'Nueva Solicitud Recibida',
-            mensaje: `${solicitud.nombreUsuario || 'Un cliente'} te ha enviado una solicitud`,
-            fecha: new Date(solicitud.fechasolicitud || solicitud.fechaSolicitud),
-            leida: false,
-            idRelacionado: solicitud.idSolicitud,
-            urlAccion: '/profesionales/dashboard?view=solicitudes'
-          }));
+          // Filtrando las que fueron eliminadas
+          const notificaciones = solicitudes
+            .filter(solicitud => !estadoGuardado.eliminadas.includes(`solicitud_${solicitud.idSolicitud}`))
+            .map((solicitud) => ({
+              id: solicitud.idSolicitud,
+              tipo: 'NUEVA_SOLICITUD' as TipoNotificacion,
+              titulo: 'Nueva Solicitud Recibida',
+              mensaje: `${solicitud.nombreUsuario || 'Un cliente'} te ha enviado una solicitud`,
+              fecha: new Date(solicitud.fechasolicitud || solicitud.fechaSolicitud),
+              leida: estadoGuardado.leidas.includes(`solicitud_${solicitud.idSolicitud}`),
+              idRelacionado: solicitud.idSolicitud,
+              urlAccion: '/profesionales/dashboard?view=solicitudes'
+            }));
           
           this.notificaciones.set(notificaciones);
           this.actualizarContadorNoLeidas();
