@@ -329,6 +329,20 @@
     }
   }
 
+  &.incluido {
+    border-color: #667eea;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
+    border-style: dashed;
+
+    .turno-hora {
+      color: #667eea;
+    }
+
+    .turno-hasta {
+      color: #764ba2;
+    }
+  }
+
   &.disabled {
     opacity: 0.5;
     cursor: not-allowed;

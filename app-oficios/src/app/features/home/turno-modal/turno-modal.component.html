@@ -89,6 +89,7 @@
               *ngFor="let turno of grupo.turnos"
               class="turno-card"
               [class.selected]="turnoSeleccionado() === turno"
+              [class.incluido]="esTurnoIncluidoEnSeleccion(turno) && turnoSeleccionado() !== turno"
               [class.pasado]="esTurnoPasado(turno)"
               (click)="!esTurnoPasado(turno) && seleccionarTurno(turno)"
               [disabled]="loading() || esTurnoPasado(turno)">

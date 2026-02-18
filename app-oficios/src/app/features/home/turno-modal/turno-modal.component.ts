@@ -220,4 +220,39 @@ export class TurnoModalComponent implements OnInit {
     
     return fechaHoraTurno <= ahora;
   }
+
+  /**
+   * Verifica si un turno está incluido en la selección actual.
+   * Si la duración es > 60 min, también se incluyen los bloques horarios consecutivos.
+   * - 30 min o 60 min: solo el turno seleccionado
+   * - 90 min (1.5 horas): turno seleccionado + 1 bloque siguiente
+   * - 120 min (2 horas): turno seleccionado + 1 bloque siguiente
+   */
+  esTurnoIncluidoEnSeleccion(turno: TurnoDisponible): boolean {
+    const seleccionado = this.turnoSeleccionado();
+    if (!seleccionado) return false;
+
+    // Si es el mismo turno seleccionado
+    if (turno === seleccionado) return true;
+
+    // Si la duración es <= 60 min, solo cuenta el turno principal
+    const duracionActual = this.duracion();
+    if (duracionActual <= 60) return false;
+
+    // Para duraciones > 60 min, verificar si el turno es consecutivo al seleccionado
+    // Solo si están en la misma fecha
+    if (turno.fecha !== seleccionado.fecha) return false;
+
+    // Calcular la hora de fin del turno seleccionado según la duración
+    const [horaInicioSel, minInicioSel] = seleccionado.horaInicio.split(':').map(Number);
+    const inicioSelMinutos = horaInicioSel * 60 + minInicioSel;
+    const finSelMinutos = inicioSelMinutos + duracionActual;
+
+    // Hora de inicio del turno a verificar
+    const [horaInicioTurno, minInicioTurno] = turno.horaInicio.split(':').map(Number);
+    const inicioTurnoMinutos = horaInicioTurno * 60 + minInicioTurno;
+
+    // El turno está incluido si su hora de inicio cae dentro del rango de la reserva
+    return inicioTurnoMinutos >= inicioSelMinutos && inicioTurnoMinutos < finSelMinutos;
+  }
 }
