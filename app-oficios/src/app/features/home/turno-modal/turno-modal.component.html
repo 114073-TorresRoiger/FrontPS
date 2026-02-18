@@ -89,8 +89,9 @@
               *ngFor="let turno of grupo.turnos"
               class="turno-card"
               [class.selected]="turnoSeleccionado() === turno"
-              (click)="seleccionarTurno(turno)"
-              [disabled]="loading()">
+              [class.pasado]="esTurnoPasado(turno)"
+              (click)="!esTurnoPasado(turno) && seleccionarTurno(turno)"
+              [disabled]="loading() || esTurnoPasado(turno)">
               <span class="turno-hora">{{ formatearHora(turno.horaInicio) }}</span>
               <span class="turno-hasta">{{ formatearHora(turno.horaFin) }}</span>
             </button>

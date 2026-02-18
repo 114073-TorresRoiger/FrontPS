@@ -205,4 +205,19 @@ export class TurnoModalComponent implements OnInit {
       this.close.emit();
     }
   }
+
+  /**
+   * Verifica si un turno ya pasó comparando fecha y hora con el momento actual.
+   * Un turno está pasado si su hora de inicio ya ocurrió.
+   */
+  esTurnoPasado(turno: TurnoDisponible): boolean {
+    const ahora = new Date();
+    
+    // Construir fecha/hora del turno
+    const [year, month, day] = turno.fecha.split('-').map(Number);
+    const [hour, minute] = turno.horaInicio.split(':').map(Number);
+    const fechaHoraTurno = new Date(year, month - 1, day, hour, minute);
+    
+    return fechaHoraTurno <= ahora;
+  }
 }

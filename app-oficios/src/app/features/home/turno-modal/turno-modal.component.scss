@@ -335,6 +335,26 @@
     background: #f3f4f6;
   }
 
+  &.pasado {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #f3f4f6;
+    border-color: #d1d5db;
+    
+    &:hover {
+      transform: none;
+      box-shadow: none;
+      border-color: #d1d5db;
+      background: #f3f4f6;
+    }
+
+    .turno-hora,
+    .turno-hasta {
+      color: #9ca3af;
+      text-decoration: line-through;
+    }
+  }
+
   .turno-hora {
     font-size: 18px;
     font-weight: 700;
