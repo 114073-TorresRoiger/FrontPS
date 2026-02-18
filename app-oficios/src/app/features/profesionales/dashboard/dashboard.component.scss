@@ -363,12 +363,15 @@
   min-width: 200px;
   padding: 0.5rem 0;
   margin: 0.25rem 0 0;
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.15);
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  opacity: 1 !important;
+  border: 1px solid #e0e0e0;
   border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
   animation: slideDown 0.2s ease;
   display: none;
+  backdrop-filter: none;
 
   &.show {
     display: block;
@@ -397,7 +400,8 @@
   align-items: center;
   width: 100%;
   padding: 0.75rem 1rem;
-  background: transparent;
+  background: #ffffff;
+  background-color: #ffffff;
   border: none;
   font-size: 0.875rem;
   color: #212529;
@@ -407,6 +411,7 @@
 
   &:hover:not(.disabled) {
     background: #f8f9fa;
+    background-color: #f8f9fa;
     color: #667eea;
   }
 
