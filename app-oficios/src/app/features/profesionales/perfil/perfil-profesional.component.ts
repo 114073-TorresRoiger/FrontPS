@@ -2,7 +2,7 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule, ArrowLeft, Star, Phone, DollarSign, Calendar, Clock, MapPin, Award, Image, Mail, Upload, X, Plus, Flag, CheckCircle, MessageCircle } from 'lucide-angular';
+import { LucideAngularModule, ArrowLeft, Star, Phone, DollarSign, Calendar, Clock, MapPin, Award, Image, Mail, Upload, X, Plus, Flag, CheckCircle, MessageCircle, User } from 'lucide-angular';
 import { GetPerfilProfesionalUseCase } from '../../../domain/profesionales/use-cases/get-perfil-profesional.usecase';
 import { PerfilProfesional, FotoGaleria } from '../../../domain/profesionales/models/perfil-profesional.model';
 import { AuthService } from '../../../domain/auth/auth.service';
@@ -45,6 +45,7 @@ export class PerfilProfesionalComponent implements OnInit {
   readonly Flag = Flag;
   readonly CheckCircle = CheckCircle;
   readonly MessageCircle = MessageCircle;
+  readonly User = User;
 
   profesional: PerfilProfesional | null = null;
   loading = true;
