@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -10,11 +10,12 @@ import { FotoGaleriaService } from '../../../domain/galeria/foto-galeria.service
 import { FirebaseStorageService } from '../../../core/services/firebase-storage.service';
 import { NotificacionService } from '../../../data/notificaciones/notificacion.service';
 import { ReporteProfesional } from '../../../domain/notificaciones/notificacion.model';
+import { TurnoModalComponent } from '../../home/turno-modal/turno-modal.component';
 
 @Component({
   selector: 'app-perfil-profesional',
   standalone: true,
-  imports: [CommonModule, LucideAngularModule, FormsModule],
+  imports: [CommonModule, LucideAngularModule, FormsModule, TurnoModalComponent],
   templateUrl: './perfil-profesional.component.html',
   styleUrl: './perfil-profesional.component.scss'
 })
@@ -22,7 +23,7 @@ export class PerfilProfesionalComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly getPerfilUseCase = inject(GetPerfilProfesionalUseCase);
-  private readonly authService = inject(AuthService);
+  readonly authService = inject(AuthService);
   private readonly fotoGaleriaService = inject(FotoGaleriaService);
   private readonly firebaseStorage = inject(FirebaseStorageService);
   private readonly notificacionService = inject(NotificacionService);
@@ -63,6 +64,9 @@ export class PerfilProfesionalComponent implements OnInit {
   sendingReport = false;
   reportError: string | null = null;
   showSuccessModal = false;
+
+  // Turno modal
+  showTurnoModal = signal(false);
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -315,11 +319,16 @@ export class PerfilProfesionalComponent implements OnInit {
       return;
     }
     
-    // Navegar al chat con el ID del profesional como query parameter
-    this.router.navigate(['/chat'], { 
-      queryParams: { 
-        profesionalId: this.profesional.idProfesional 
-      } 
-    });
+    // Abrir el modal de turno
+    this.showTurnoModal.set(true);
+  }
+
+  closeTurnoModal(): void {
+    this.showTurnoModal.set(false);
+  }
+
+  onTurnoConfirmado(response: any): void {
+    console.log('Turno confirmado:', response);
+    this.closeTurnoModal();
   }
 }
