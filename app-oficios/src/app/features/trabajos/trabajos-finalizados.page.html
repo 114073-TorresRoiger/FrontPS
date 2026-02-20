@@ -231,6 +231,6 @@
   [idProfesional]="selectedTrabajoForResenia()!.idProfesional || 0"
   [idTrabajo]="selectedTrabajoForResenia()!.trabajo.idTrabajo"
   [nombreProfesional]="selectedTrabajoForResenia()!.trabajo.profesional"
-  (cerrar)="cerrarModalResenia()"
+  (close)="cerrarModalResenia()"
   (reseniaEnviada)="onReseniaEnviada()"
 ></app-resenia-modal>
